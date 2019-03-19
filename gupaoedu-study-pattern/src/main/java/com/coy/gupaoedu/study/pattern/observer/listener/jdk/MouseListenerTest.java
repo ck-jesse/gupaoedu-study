@@ -3,7 +3,7 @@ package com.coy.gupaoedu.study.pattern.observer.listener.jdk;
 /**
  * 基于JDK实现：事件-监听机制
  * 包含三个角色：事件-事件源-监听器
- * 观察者模式的一种
+ * 观察者模式的一种，源-收听者(Listener)模式
  *
  * @author chenck
  * @date 2019/3/19 14:19
