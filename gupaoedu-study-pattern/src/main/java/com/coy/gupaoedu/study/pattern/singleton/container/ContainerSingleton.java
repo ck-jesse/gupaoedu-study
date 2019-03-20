@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于容器来实现单例模式
+ * 工厂模式+单例模式
+ * 注：设计模式往往是混合在一起使用的，要特别注意！！！
  * <p>
  * 有很多框架是基于该方式来实现的，比如spring，所以有很高的实用价值
  *
