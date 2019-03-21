@@ -27,6 +27,8 @@ public class Test {
         Response response = new Response();
         response.setResponse("Response");
 
+        // 手动模拟 Java Web 中的过滤器 Filter
+
         // 设置处理链
         FilterChain chain = new FilterChain();
         chain.addFilter(new HTMLFilter()).addFilter(new SensitiveFilter())
