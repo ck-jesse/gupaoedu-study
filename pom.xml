@@ -13,6 +13,7 @@
 
     <modules>
         <module>gupaoedu-study-pattern</module>
+        <module>gupaoedu-study-spring</module>
     </modules>
 
     <parent>
