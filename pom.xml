@@ -14,6 +14,7 @@
     <modules>
         <module>gupaoedu-study-pattern</module>
         <module>gupaoedu-study-spring</module>
+        <module>study-data-structure</module>
     </modules>
 
     <parent>
