@@ -15,6 +15,11 @@
         <module>gupaoedu-study-pattern</module>
         <module>gupaoedu-study-spring</module>
         <module>study-data-structure</module>
+        <module>study-jvm</module>
+        <module>study-tomcat</module>
+        <module>study-netty</module>
+        <module>study-mybatis</module>
+        <module>study-concurrency</module>
     </modules>
 
     <parent>
