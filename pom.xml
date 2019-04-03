@@ -34,6 +34,21 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Spring IO Platform项目的本质就是一个pom文件，它记录了Spring项目和其它第三方库对应的版本信息。 -->
+            <!-- 在构建项目时，经常会使用到第三方库，一般大家都是根据经验或直接选择较新的版本，随意性较大。
+                 随着业务复杂度的增加，集成的第三方库会越来越多，依赖关系也会越来越复杂。
+                 除非做过完整的测试，保证集成第三方库的版本不会出问题，且后续集成或升级都不会出问题，否则就有可能存在较大的隐性风险（版本冲突）。
+                 Spring IO Platform就能很好地帮助我们解决这些问题。
+                 开发人员在添加第三方库时，不需要关心版本号，Spring IO Platform会帮助我们提供一个最优的版本，而且该版本是经过严格测试的，可以更好地兼容其它的组件。
+                 同时，你也可以根据自己的需要来升级或降级依赖版本。
+             -->
+            <dependency>
+                <groupId>io.spring.platform</groupId>
+                <artifactId>platform-bom</artifactId>
+                <version>Cairo-SR7</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>com.alibaba</groupId>
