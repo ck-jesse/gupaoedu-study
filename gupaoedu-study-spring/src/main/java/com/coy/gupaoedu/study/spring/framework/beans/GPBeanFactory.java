@@ -8,10 +8,11 @@ package com.coy.gupaoedu.study.spring.framework.beans;
  */
 public interface GPBeanFactory {
 
-
     Object getBean(String beanName);
 
     <T> T getBean(Class<T> beanClazz);
 
     GPBeanDefinition getBeanDefinition(String beanName);
+
+    void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition);
 }

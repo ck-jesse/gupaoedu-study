@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author chenck
  * @date 2019/4/10 21:43
  */
-public class GPDefaultListableBeanFactory implements GPBeanFactory{
+public class GPDefaultListableBeanFactory implements GPBeanFactory {
 
     // Map<BeanName, GPBeanDefinition>
     private final Map<String, GPBeanDefinition> beanDefinitionMap = new ConcurrentHashMap(256);

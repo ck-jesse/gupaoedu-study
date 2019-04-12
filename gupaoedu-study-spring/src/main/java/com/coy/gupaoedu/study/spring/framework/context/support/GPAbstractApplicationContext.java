@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.context.support;
 
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinitionReader;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.support.GPDefaultListableBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.context.GPApplicationContext;
@@ -38,6 +39,11 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
         return this.getBeanFactory().getBeanDefinition(beanName);
     }
 
+    @Override
+    public void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition) {
+
+    }
+
     //=====================================
     // Implements of GPApplicationContext
     //=====================================
@@ -49,6 +55,7 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     @Override
     public void refresh() {
         // 1、定位，定位配置文件
+        GPBeanDefinitionReader gpBeanDefinitionReader = new GPBeanDefinitionReader();
 
         // 2、加载配置文件，扫描相关的类，把他们封装为BeanDefinition
 
