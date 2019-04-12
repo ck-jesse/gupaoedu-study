@@ -106,4 +106,10 @@ public class BinaryTreeTest {
         System.out.println(JSON.toJSONString(binaryTree));
     }
 
+    @Test
+    public void deleteRootTest() {
+        binaryTree.delete(binaryTree.getRoot().getKey());
+        System.out.println(JSON.toJSONString(binaryTree));
+    }
+
 }
