@@ -4,7 +4,13 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanWrapper;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.BeanException;
+import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPBeanPostProcessor;
+import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
+import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPController;
+import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
+import com.sun.istack.internal.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,21 +20,23 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author chenck
  * @date 2019/4/10 21:43
  */
-public class GPDefaultListableBeanFactory implements GPBeanFactory {
+public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry implements GPBeanFactory {
 
     /**
      * Map of bean definition objects, keyed by bean name
-     * Map<BeanName, GPBeanDefinition>
+     * Bean定义集合 Map<BeanName, GPBeanDefinition>
      */
     private final Map<String, GPBeanDefinition> beanDefinitionMap = new ConcurrentHashMap(256);
 
     /**
      * List of bean definition names, in registration order
+     * beanName集合
      */
     private volatile List<String> beanDefinitionNames = new ArrayList<String>(256);
 
     /**
      * Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper
+     * 通用的IOC容器
      */
     private final Map<String, GPBeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<String, GPBeanWrapper>(16);
 
@@ -47,20 +55,100 @@ public class GPDefaultListableBeanFactory implements GPBeanFactory {
      * 真正实现向IOC容器获取Bean的功能，也是触发依赖注入功能的地方
      */
     protected <T> T doGetBean(String beanName, Class<T> beanClazz, Object[] args, boolean typeCheckOnly) {
+
+        // 获取BeanDefinition
         GPBeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
+
+        // TODO 此处暂时先简单处理
+        // 获取单利bean
+        Object singletonInstance = super.getSingleton(beanName);
+        if (null != singletonInstance) {
+            return (T) singletonInstance;
+        }
+
+        if (beanDefinition.isSingleton()) {
+            //createBean();
+        } else if (beanDefinition.isPrototype()) {
+            //createBean();
+        } else {
+
+        }
+
+        // createBean的内容如下：
         // 初始化bean实例
-        Object instance = instanceBean(beanName, beanDefinition);
+        GPBeanWrapper beanWrapper = instantiateBean(beanName, beanDefinition);
+        Object beanInstance = beanWrapper.getWrappedInstance();
 
-        GPBeanWrapper beanWrapper = new GPBeanWrapper(instance);
+        //这个逻辑还不严谨，自己可以去参考Spring源码
+        //工厂模式 + 策略模式
+        GPBeanPostProcessor postProcessor = new GPBeanPostProcessor();
 
-        // 将bean存放到IOC容器中
+        postProcessor.postProcessBeforeInitialization(beanInstance, beanName);
+
+        // 将beanWrapper存放到IOC容器中
         this.factoryBeanInstanceCache.put(beanName, beanWrapper);
 
         // 注入
-        return null;
+        populateBean(beanName, beanDefinition, beanWrapper);
+
+        return (T) this.factoryBeanInstanceCache.get(beanName).getWrappedInstance();
     }
 
-    private Object instanceBean(String beanName, GPBeanDefinition beanDefinition) {
+    // 创建Bean实例对象
+    //protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
+    // 真正创建Bean的方法
+    //protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
+
+    protected void populateBean(String beanName, GPBeanDefinition bd, @Nullable GPBeanWrapper bw) {
+        if (null == bw) {
+            return;
+        }
+        // BeanPostProcessor
+
+        Object instance = bw.getWrappedInstance();
+
+        Class<?> clazz = bw.getWrappedClass();
+        //判断只有加了注解的类，才执行依赖注入
+        if (!(clazz.isAnnotationPresent(GPController.class) || clazz.isAnnotationPresent(GPService.class))) {
+            return;
+        }
+
+        //获得所有的fields
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (!field.isAnnotationPresent(GPAutowired.class)) {
+                continue;
+            }
+            GPAutowired autowired = field.getAnnotation(GPAutowired.class);
+
+            String autowiredBeanName = autowired.value().trim();
+            if ("".equals(autowiredBeanName)) {
+                autowiredBeanName = field.getType().getName();
+            }
+
+            //强制访问
+            field.setAccessible(true);
+            try {
+                //为什么会为NULL，先留个坑
+                if (this.factoryBeanInstanceCache.get(autowiredBeanName) == null) {
+                    continue;
+                }
+//                if(instance == null){
+//                    continue;
+//                }
+                field.set(instance, this.factoryBeanInstanceCache.get(autowiredBeanName).getWrappedInstance());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     * Instantiate the given bean using its default constructor
+     * 使用默认的无参构造方法实例化Bean对象
+     */
+    private GPBeanWrapper instantiateBean(String beanName, GPBeanDefinition beanDefinition) {
         return null;
     }
 

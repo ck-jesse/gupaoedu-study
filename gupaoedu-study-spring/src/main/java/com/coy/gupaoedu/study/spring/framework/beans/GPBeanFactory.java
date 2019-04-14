@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.beans;
 
 /**
- * bean工厂：作为容器存放
+ * bean工厂：管理容器中存放的bean的工厂
  *
  * @author chenck
  * @date 2019/4/10 21:26
@@ -44,4 +44,5 @@ public interface GPBeanFactory {
      * Ensure that all non-lazy-init singletons are instantiated, also considering
      */
     void preInstantiateSingletons();
+
 }

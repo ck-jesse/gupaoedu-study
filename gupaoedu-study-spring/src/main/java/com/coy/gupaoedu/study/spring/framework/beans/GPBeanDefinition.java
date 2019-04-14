@@ -63,4 +63,11 @@ public class GPBeanDefinition {
     public boolean isSingleton() {
         return SCOPE_SINGLETON.equals(scope) || SCOPE_DEFAULT.equals(scope);
     }
+
+    /**
+     * 判断是否是
+     */
+    public boolean isPrototype() {
+        return SCOPE_PROTOTYPE.equals(scope);
+    }
 }
