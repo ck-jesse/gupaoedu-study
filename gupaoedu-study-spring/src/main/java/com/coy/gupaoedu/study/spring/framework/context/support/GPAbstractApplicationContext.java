@@ -6,6 +6,8 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.support.GPDefaultListableBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.context.GPApplicationContext;
 
+import java.util.List;
+
 /**
  * 包装器模式：针对GPBeanFactory进行包装
  * 也可以理解为是一种静态代理模式，很类似
@@ -40,8 +42,23 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     }
 
     @Override
-    public void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition) {
+    public String[] getBeanDefinitionNames() {
+        return this.getBeanFactory().getBeanDefinitionNames();
+    }
 
+    @Override
+    public int getBeanDefinitionCount() {
+        return this.getBeanFactory().getBeanDefinitionCount();
+    }
+
+    @Override
+    public void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition) {
+        this.getBeanFactory().registerBeanDefinition(beanName, beanDefinition);
+    }
+
+    @Override
+    public void preInstantiateSingletons() {
+        this.getBeanFactory().preInstantiateSingletons();
     }
 
     //=====================================
@@ -58,10 +75,15 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
         GPBeanDefinitionReader gpBeanDefinitionReader = new GPBeanDefinitionReader();
 
         // 2、加载配置文件，扫描相关的类，把他们封装为BeanDefinition
+        List<GPBeanDefinition> beanDefinitions = gpBeanDefinitionReader.loadBeanDefinitions();
 
-        // 3、注册，将加载的类注册到IOC容器
+        // 3、注册，将加载的类信息注册到IOC容器
+        for (GPBeanDefinition bd : beanDefinitions) {
+            registerBeanDefinition(bd.getFactoryBeanName(), bd);
+        }
 
-        // 4、依赖注入，把不是延迟加载的类，提前进行初始化（DI注入）
+        // 4、依赖注入，初始化单利bean（DI注入）
+        preInstantiateSingletons();
 
     }
 }

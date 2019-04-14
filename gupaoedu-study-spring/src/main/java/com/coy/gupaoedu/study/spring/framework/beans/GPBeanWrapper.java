@@ -6,11 +6,17 @@ package com.coy.gupaoedu.study.spring.framework.beans;
  */
 public class GPBeanWrapper {
 
-    public Object getWrappedInstance(){
-        return null;
+    Object wrappedObject;
+
+    public GPBeanWrapper(Object object) {
+        wrappedObject = object;
     }
 
-    public Class<?> getWrappedClass(){
-        return null;
+    public Object getWrappedInstance() {
+        return this.wrappedObject;
+    }
+
+    public Class<?> getWrappedClass() {
+        return getWrappedInstance().getClass();
     }
 }

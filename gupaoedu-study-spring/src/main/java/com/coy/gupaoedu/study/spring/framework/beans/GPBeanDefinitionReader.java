@@ -89,10 +89,13 @@ public class GPBeanDefinitionReader {
         try {
             GPBeanDefinition beanDefinition = new GPBeanDefinition();
             Class clazz = Class.forName(className);
+            // 注意对接口进行处理
             if (!clazz.isInterface()) {
 
             }
-            // 注意对接口进行处理
+            beanDefinition.setBeanClass(clazz);
+            beanDefinition.setBeanClassName(className);
+            beanDefinition.setFactoryBeanName(clazz.getName());
             return beanDefinition;
 
         } catch (ClassNotFoundException e) {
