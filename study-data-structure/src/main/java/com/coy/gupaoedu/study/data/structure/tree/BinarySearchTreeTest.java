@@ -8,9 +8,9 @@ import org.junit.Test;
  * @author chenck
  * @date 2019/4/12 10:38
  */
-public class BinaryTreeTest {
+public class BinarySearchTreeTest {
 
-    static BinaryTree<Integer, String> binaryTree = new BinaryTree<Integer, String>();
+    static BinarySearchTree<Integer, String> binaryTree = new BinarySearchTree<Integer, String>();
 
     @Before
     public void putTest() {
