@@ -1,5 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.beans.support;
 
+import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.SingletonBeanRegistry;
 
 import java.util.LinkedHashSet;
@@ -47,28 +48,33 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         }
     }
 
+    /**
+     * Return the (raw) singleton object registered under the given name
+     */
     @Override
     public Object getSingleton(String beanName) {
-        return getSingleton(beanName, true);
+        Object singletonObject = this.singletonObjects.get(beanName);
+        return singletonObject;
     }
 
     /**
      * Return the (raw) singleton object registered under the given name
      */
-    protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-        if (this.singletonObjects.containsKey(beanName)) {
-            return this.singletonObjects.get(beanName);
+    public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
+        synchronized (this.singletonObjects) {
+            Object singletonObject = this.singletonObjects.get(beanName);
+            if (null == singletonObject) {
+                try {
+                    // 内部有调用创建bean的方法
+                    singletonObject = singletonFactory.getObject();
+                    // 将单例对象添加到缓存中
+                    addSingleton(beanName, singletonObject);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return singletonObject;
         }
-        Object singletonObject = null;
-        try {
-            Class<?> clazz = Class.forName(beanName);
-            singletonObject = clazz.newInstance();
-            registerSingleton(beanName, singletonObject);
-            registerSingleton(clazz.getSimpleName(), singletonObject);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return singletonObject;
     }
 
     @Override
@@ -93,5 +99,15 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     @Override
     public final Object getSingletonMutex() {
         return this.singletonObjects;
+    }
+
+    /**
+     * Remove a registered singleton of the given name,
+     */
+    protected void removeSingleton(String beanName) {
+        synchronized (this.singletonObjects) {
+            this.singletonObjects.remove(beanName);
+            this.registeredSingletons.remove(beanName);
+        }
     }
 }

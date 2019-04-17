@@ -56,6 +56,10 @@ public class GPBeanDefinition {
      * 0表示自动注入
      */
     private int autowireMode = 0;
+    /**
+     * 初始化方法
+     */
+    private String initMethodName;
 
     /**
      * 判断是否是单利
@@ -69,5 +73,20 @@ public class GPBeanDefinition {
      */
     public boolean isPrototype() {
         return SCOPE_PROTOTYPE.equals(scope);
+    }
+
+    /**
+     *
+     */
+    public Class<?> getBeanClazz() throws IllegalStateException {
+        Object beanClassObject = this.beanClass;
+        if (beanClassObject == null) {
+            throw new IllegalStateException("No bean class specified on bean definition");
+        }
+        if (!(beanClassObject instanceof Class)) {
+            throw new IllegalStateException(
+                    "Bean class name [" + beanClassObject + "] has not been resolved into an actual Class");
+        }
+        return (Class<?>) beanClassObject;
     }
 }

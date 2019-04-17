@@ -1,10 +1,12 @@
-package com.coy.gupaoedu.study.spring.framework.aop;
+package com.coy.gupaoedu.study.spring.framework.aop.framework;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 /**
+ * CGLIB代理
+ *
  * @author chenck
  * @date 2019/4/14 21:55
  */

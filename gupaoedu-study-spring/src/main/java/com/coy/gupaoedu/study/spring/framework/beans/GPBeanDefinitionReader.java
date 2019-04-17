@@ -84,8 +84,10 @@ public class GPBeanDefinitionReader {
         return beanDefinitions;
     }
 
+    /**
+     * TODO
+     */
     private GPBeanDefinition doCreateBeanDefinition(String className) {
-
         try {
             GPBeanDefinition beanDefinition = new GPBeanDefinition();
             Class clazz = Class.forName(className);

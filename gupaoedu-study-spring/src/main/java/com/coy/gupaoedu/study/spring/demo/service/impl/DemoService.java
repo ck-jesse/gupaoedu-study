@@ -9,8 +9,16 @@ import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
 @GPService
 public class DemoService implements IDemoService {
 
-	public String get(String name) {
-		return "My name is " + name;
-	}
+    private String init;
 
+    @Override
+    public String get(String name) {
+        return "My name is " + name;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        init = "通过GPInitializingBean来实现实例化后的初始化";
+        System.out.println(init);
+    }
 }

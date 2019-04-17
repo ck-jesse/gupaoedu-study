@@ -4,17 +4,17 @@ package com.coy.gupaoedu.study.spring.framework.beans.exception;
  * @author chenck
  * @date 2019/4/13 21:11
  */
-public class BeanException extends RuntimeException {
+public class GPBeansException extends RuntimeException {
 
-    public BeanException() {
+    public GPBeansException() {
         super();
     }
 
-    public BeanException(String message) {
+    public GPBeansException(String message) {
         super(message);
     }
 
-    public BeanException(String message, Throwable cause) {
+    public GPBeansException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -1,15 +1,24 @@
 package com.coy.gupaoedu.study.spring.framework.beans.factory.config;
 
 /**
+ * bean后置处理器
+ *
  * @author chenck
  * @date 2019/4/14 21:27
  */
-public class GPBeanPostProcessor {
-    public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        return bean;
-    }
+public interface GPBeanPostProcessor {
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) {
-        return bean;
-    }
+    /**
+     * Apply this BeanPostProcessor to the given new bean instance <i>before</i> any bean
+     * initialization callbacks
+     * 为在Bean的初始化前提供回调入口
+     */
+    public Object postProcessBeforeInitialization(Object bean, String beanName);
+
+    /**
+     * Apply this BeanPostProcessor to the given new bean instance <i>after</i> any bean
+     * initialization callbacks
+     * 为在Bean的初始化之后提供回调入口
+     */
+    public Object postProcessAfterInitialization(Object bean, String beanName);
 }

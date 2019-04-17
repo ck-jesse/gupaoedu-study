@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.spring.framework.context.support;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinitionReader;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.support.GPDefaultListableBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.context.GPApplicationContext;
 
@@ -63,6 +64,11 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     }
 
     @Override
+    public boolean containsBeanDefinition(String beanName) {
+        return this.getBeanFactory().containsBeanDefinition(beanName);
+    }
+
+    @Override
     public void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition) {
         this.getBeanFactory().registerBeanDefinition(beanName, beanDefinition);
     }
@@ -70,6 +76,21 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     @Override
     public void preInstantiateSingletons() {
         this.getBeanFactory().preInstantiateSingletons();
+    }
+
+    @Override
+    public void addBeanPostProcessor(GPBeanPostProcessor beanPostProcessor) {
+        this.getBeanFactory().addBeanPostProcessor(beanPostProcessor);
+    }
+
+    @Override
+    public int getBeanPostProcessorCount() {
+        return this.getBeanFactory().getBeanPostProcessorCount();
+    }
+
+    @Override
+    public Object createBean(String beanName, GPBeanDefinition mbd, Object[] args) {
+        return this.getBeanFactory().createBean(beanName, mbd, args);
     }
 
     //=====================================
@@ -93,6 +114,11 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
             registerBeanDefinition(bd.getFactoryBeanName(), bd);
         }
         // 到这里为止，容器初始化完毕
+
+        // TODO
+        // 为BeanFactory注册BeanPostProcessor后置处理器，用于监听容器触发的事件
+        // 注：后置处理器中包含：aop的AdvisorAdapter注册器
+        // registerBeanPostProcessors(beanFactory);
 
         // 4、初始化单利bean，并完成对应依赖注入（DI注入）
         preInstantiateSingletons();
