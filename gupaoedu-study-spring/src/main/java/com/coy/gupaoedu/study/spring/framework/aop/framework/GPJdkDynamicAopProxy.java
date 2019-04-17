@@ -80,7 +80,7 @@ public class GPJdkDynamicAopProxy implements GPAopProxy, InvocationHandler, Seri
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        // equals和hashcode方法的处理
+        // 目标对象为实现equals和hashcode方法的处理
         if (!this.equalsDefined && ReflectionUtils.isEqualsMethod(method)) {
             // The target does not implement the equals(Object) method itself.
             return equals(args[0]);
@@ -88,6 +88,11 @@ public class GPJdkDynamicAopProxy implements GPAopProxy, InvocationHandler, Seri
         if (!this.hashCodeDefined && ReflectionUtils.isHashCodeMethod(method)) {
             // The target does not implement the hashCode() method itself.
             return hashCode();
+        }
+        // Advised接口或者其父接口中定义的方法,直接反射调用,不应用通知
+        if (method.getDeclaringClass().isInterface() && method.getDeclaringClass().isAssignableFrom(GPAdvised.class)) {
+            method.setAccessible(true);
+            return method.invoke(this.advised, args);
         }
 
         Class<?> targetClass = this.advised.getTargetClass();
