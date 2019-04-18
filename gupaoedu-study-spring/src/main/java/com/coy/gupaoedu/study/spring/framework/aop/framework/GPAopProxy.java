@@ -1,6 +1,5 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework;
 
-import com.sun.istack.internal.Nullable;
 
 /**
  * @author chenck
@@ -29,5 +28,5 @@ public interface GPAopProxy {
      *                    (or {@code null} for the low-level proxy facility's default)
      * @return the new proxy object (never {@code null})
      */
-    Object getProxy(@Nullable ClassLoader classLoader);
+    Object getProxy( ClassLoader classLoader);
 }

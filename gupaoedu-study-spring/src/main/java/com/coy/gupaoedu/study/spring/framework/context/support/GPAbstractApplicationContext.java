@@ -49,6 +49,11 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     }
 
     @Override
+    public boolean containsBean(String name) {
+        return this.getBeanFactory().containsBean(name);
+    }
+
+    @Override
     public GPBeanDefinition getBeanDefinition(String beanName) {
         return this.getBeanFactory().getBeanDefinition(beanName);
     }
@@ -71,6 +76,15 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     @Override
     public void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition) {
         this.getBeanFactory().registerBeanDefinition(beanName, beanDefinition);
+    }
+
+    /**
+     * 往容器中注册BeanDefinition
+     */
+    protected void registerBeanDefinition(List<GPBeanDefinition> beanDefinitions) {
+        for (GPBeanDefinition bd : beanDefinitions) {
+            registerBeanDefinition(bd.getFactoryBeanName(), bd);
+        }
     }
 
     @Override
@@ -110,17 +124,16 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
         List<GPBeanDefinition> beanDefinitions = beanDefinitionReader.loadBeanDefinitions();
 
         // 3、注册，将加载的类配置信息注册到IOC容器
-        for (GPBeanDefinition bd : beanDefinitions) {
-            registerBeanDefinition(bd.getFactoryBeanName(), bd);
-        }
+        registerBeanDefinition(beanDefinitions);
         // 到这里为止，容器初始化完毕
 
         // TODO
+        // 初始化所有的BeanPostProcessor
         // 为BeanFactory注册BeanPostProcessor后置处理器，用于监听容器触发的事件
         // 注：后置处理器中包含：aop的AdvisorAdapter注册器
         // registerBeanPostProcessors(beanFactory);
 
-        // 4、初始化单利bean，并完成对应依赖注入（DI注入）
+        // 5、初始化单利bean，并完成对应依赖注入（DI注入）
         preInstantiateSingletons();
     }
 }

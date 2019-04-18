@@ -28,7 +28,7 @@ public class GPDefaultAdvisorChainFactory implements Serializable {
      * 获取拦截器链
      */
     public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
-            GPAdvised config, Method method, @Nullable Class<?> targetClass) {
+            GPAdvised config, Method method,  Class<?> targetClass) {
 
         // 拦截器列表（要保证元素的有序性）
         List<Object> interceptorList = new ArrayList<>(config.getAdvisors().length);

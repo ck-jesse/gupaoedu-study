@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.spring.framework.beans.support;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanWrapper;
+import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPInitializingBean;
 import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
@@ -13,7 +14,6 @@ import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPController;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
-import com.sun.istack.internal.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -144,6 +144,14 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         return (T) this.getBean(beanClazz.getName());
     }
 
+    @Override
+    public boolean containsBean(String name) {
+        if (containsSingleton(name) || containsBeanDefinition(name)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Return an instance, which may be shared or independent, of the specified bean
      * 真正实现向IOC容器获取Bean的功能，也是触发依赖注入功能的地方
@@ -232,7 +240,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
     /**
      * 实例化前的解析
-     * 如果Bean配置了初始化前和初始化后的处理器(BeanPostProcessor)，则试图创建一个Bean的代理对象并返回
+     * 如果Bean配置了实例化前和初始化后的处理器(BeanPostProcessor)，则试图创建一个Bean的代理对象并返回
      */
     protected Object resolveBeforeInstantiation(String beanName, GPBeanDefinition bd) {
         Object bean = null;
@@ -240,7 +248,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         if (null != bd.getBeanClass()) {
             bean = applyBeanPostProcessorsBeforeInstantiation(bd.getBeanClazz(), beanName);
         }
-        // 实例化后的后置处理器
+        // 初始化后的后置处理器
         if (null != bean) {
             bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
         }
@@ -265,7 +273,24 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     /**
-     * 实例化后的后置处理器处理
+     * 初始化前的后置处理器处理
+     */
+    protected Object applyBeanPostProcessorsBeforeInitialization(Object bean, String beanName) {
+        Object result = bean;
+        // 遍历容器为所创建的Bean添加的所有BeanPostProcessor后置处理器
+        for (GPBeanPostProcessor beanProcessor : getBeanPostProcessors()) {
+            // 调用Bean实例所有的后置处理中的初始化前处理方法，为Bean实例对象在 初始化之前做一些自定义的处理操作
+            Object current = beanProcessor.postProcessBeforeInitialization(result, beanName);
+            if (current == null) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    /**
+     * 初始化后的后置处理器处理
      */
     protected Object applyBeanPostProcessorsAfterInitialization(Object bean, String beanName) {
         Object result = bean;
@@ -294,6 +319,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             // 此处暂时好像没有用，因为没有地方往Map中put值
             instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
         }
+        // 创建bean实例并包装
         if (instanceWrapper == null) {
             instanceWrapper = createBeanInstance(beanName, bd, args);
         }
@@ -309,11 +335,23 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
         // 将bean注册为一次性的
         try {
-            // registerDisposableBeanIfNecessary(beanName, bean, bd);
+            registerDisposableBeanIfNecessary(beanName, bean, bd);
         } catch (Exception ex) {
             throw new GPBeansException("Error creating bean with name '" + beanName + "' : Invalid destruction signature", ex);
         }
         return exposedObject;
+    }
+
+    /**
+     * 将给定的bean添加到此工厂的一次性bean列表中
+     */
+    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, GPBeanDefinition bd) {
+        if (bd.isSingleton()) {
+            if (bean instanceof GPDisposableBean || StringUtils.hasLength(bd.getDestroyMethodName())) {
+                // 注册销毁bean
+                registerDisposableBean(beanName, new GPDisposableBeanAdapter(bean, beanName, bd));
+            }
+        }
     }
 
     /**
@@ -344,7 +382,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
      * 对Bean实例对象的属性进行赋值，所谓的DI依赖注入
      * 见：org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#populateBean(...)
      */
-    protected void populateBean(String beanName, GPBeanDefinition bd, @Nullable GPBeanWrapper bw) {
+    protected void populateBean(String beanName, GPBeanDefinition bd, GPBeanWrapper bw) {
         if (null == bw) {
             return;
         }
@@ -370,7 +408,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             }
 
             // 判断是否存在bean的单例对象或者bean的定义（即IOC容器里面是否包含有指定名称对应的bean定义）
-            if (containsSingleton(autowiredBeanName) || containsBeanDefinition(autowiredBeanName)) {
+            if (containsBean(autowiredBeanName)) {
 
                 // 调用getBean方法从IOC容器获取指定名称的Bean实例
                 Object bean = getBean(autowiredBeanName);
@@ -388,22 +426,24 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     /**
      * Initialize the given bean instance, applying factory callbacks
      * as well as init methods and bean post processors
-     * 初始容器创建的Bean实例对象，为其添加BeanPostProcessor后置处理器
+     * <p>
+     * 初始化Bean实例对象，在初始化方法前后为其执行对应的BeanPostProcessor后置处理器
      */
-    protected Object initializeBean(final String beanName, final Object bean, @Nullable GPBeanDefinition bd) throws Exception {
+    protected Object initializeBean(final String beanName, final Object bean, GPBeanDefinition bd) throws Exception {
         Object wrappedBean = bean;
         // TODO 需提前初始化所有的BeanPostProcessor
-        // 对BeanPostProcessor后置处理器的postProcessBeforeInitialization回调方法的调用，为Bean实例初始化前做一些处理
+        // Bean实例初始化之前做一些处理(BeanPostProcessor.postProcessBeforeInitialization())
         if (null == bd) {
-            // wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+            wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
         }
 
+        // Bean实例初始化
         // 调用Bean实例对象的初始化方法，这个初始化方法是在Spring Bean定义配置文件中通过init-method属性指定的
         invokeInitMethods(beanName, wrappedBean, bd);
 
-        // 对BeanPostProcessor后置处理器的postProcessAfterInitialization 回调方法的调用，为Bean实例初始化之后做一些处理
+        // Bean实例初始化之后做一些处理(BeanPostProcessor.postProcessAfterInitialization())
         if (null == bd) {
-            // wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+            wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         }
         return wrappedBean;
     }

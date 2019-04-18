@@ -11,6 +11,16 @@ import java.lang.reflect.Method;
  * @date 2019/4/14 21:55
  */
 public class GPCglibAopProxy implements GPAopProxy, InvocationHandler, Serializable {
+
+    /**
+     * Config used to configure this proxy
+     */
+    private final GPAdvisedSupport advised;
+
+    public GPCglibAopProxy(GPAdvisedSupport advisedSupport) {
+        this.advised = advisedSupport;
+    }
+
     @Override
     public Object getProxy() {
         return null;

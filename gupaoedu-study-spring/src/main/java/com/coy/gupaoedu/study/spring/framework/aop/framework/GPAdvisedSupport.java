@@ -1,10 +1,9 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
-import com.coy.gupaoedu.study.spring.framework.aop.support.GPDefaultPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.support.GPDefaultPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
-import com.sun.istack.internal.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ public class GPAdvisedSupport extends GPProxyConfig implements GPAdvised {
     /**
      * Interfaces to be implemented by the proxy. Held in List to keep the order
      * of registration, to create JDK proxy with specified order of interfaces.
+     * 目标对象的接口集
      */
     private List<Class<?>> interfaces = new ArrayList<>();
 
@@ -246,7 +246,7 @@ public class GPAdvisedSupport extends GPProxyConfig implements GPAdvised {
      * @param targetClass 目标对象class
      * @return MethodInterceptors拦截器列表
      */
-    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method,  Class<?> targetClass) {
         MethodCacheKey cacheKey = new MethodCacheKey(method);
         List<Object> cached = this.methodCache.get(cacheKey);
         if (cached == null) {

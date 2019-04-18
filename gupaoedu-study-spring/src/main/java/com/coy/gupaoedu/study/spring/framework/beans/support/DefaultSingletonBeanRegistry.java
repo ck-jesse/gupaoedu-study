@@ -1,8 +1,10 @@
 package com.coy.gupaoedu.study.spring.framework.beans.support;
 
+import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
 import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.SingletonBeanRegistry;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -22,8 +24,15 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     /**
      * Set of registered singletons, containing the bean names in registration order
+     * 注册的单例集合，包含按注册顺序排列的bean名称
      */
     private final Set<String> registeredSingletons = new LinkedHashSet<String>(256);
+
+    /**
+     * Disposable bean instances: bean name --> disposable instance
+     * 可释放的实例集合
+     */
+    private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
 
     @Override
     public void registerSingleton(String beanName, Object singletonObject) {
@@ -99,6 +108,15 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     @Override
     public final Object getSingletonMutex() {
         return this.singletonObjects;
+    }
+
+    /**
+     * 将给定的bean添加到此注册表中的一次性bean列表中
+     */
+    public void registerDisposableBean(String beanName, GPDisposableBean bean) {
+        synchronized (this.disposableBeans) {
+            this.disposableBeans.put(beanName, bean);
+        }
     }
 
     /**

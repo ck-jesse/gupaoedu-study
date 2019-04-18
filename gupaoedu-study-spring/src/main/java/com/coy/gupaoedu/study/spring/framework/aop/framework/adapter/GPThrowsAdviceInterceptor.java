@@ -107,7 +107,6 @@ public class GPThrowsAdviceInterceptor implements GPMethodInterceptor, GPAfterAd
      * @param exception the exception thrown
      * @return a handler for the given exception type
      */
-    @Nullable
     private Method getExceptionHandler(Throwable exception) {
         Class<?> exceptionClass = exception.getClass();
         if (logger.isTraceEnabled()) {

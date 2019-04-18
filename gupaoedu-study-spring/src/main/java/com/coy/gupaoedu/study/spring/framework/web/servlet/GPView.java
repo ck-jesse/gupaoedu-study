@@ -12,6 +12,6 @@ import java.util.Map;
  */
 public interface GPView {
 
-    void render(@Nullable Map<String, ?> model,
+    void render( Map<String, ?> model,
                 HttpServletRequest request, HttpServletResponse response) throws Exception;
 }

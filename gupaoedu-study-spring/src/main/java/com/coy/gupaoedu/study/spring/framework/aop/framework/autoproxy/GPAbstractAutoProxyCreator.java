@@ -1,14 +1,26 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy;
 
+import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
+import com.coy.gupaoedu.study.spring.framework.aop.GPPointcut;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyFactory;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyProcessorSupport;
+import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPDefaultAdvisorAdapterRegistry;
+import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPGlobalAdvisorAdapterRegistry;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPFactoryBean;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,13 +33,28 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implements GPInstantiationAwareBeanPostProcessor, GPBeanFactoryAware {
 
+
+    protected final Log logger = LogFactory.getLog(GPAbstractAutoProxyCreator.class);
+
     private GPBeanFactory beanFactory;
 
+    /**
+     * Default is global AdvisorAdapterRegistry
+     */
+    private GPDefaultAdvisorAdapterRegistry advisorAdapterRegistry = GPGlobalAdvisorAdapterRegistry.getInstance();
     /**
      * 早期的代理引用
      */
     private final Set<Object> earlyProxyReferences = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
+    /**
+     * 代理对象的class类型
+     */
+    private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<>(16);
+
+    /**
+     * 标记bean是否需要被代理 true表示需要被代理 false表示不需要被代理
+     */
     private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<>(256);
 
     @Override
@@ -47,6 +74,7 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     /**
      * Create a proxy with the configured interceptors if the bean is
      * identified as one to proxy by the subclass.
+     * 为在Bean的初始化之后提供回调入口，如果目标对象bean符合配置的拦截器，则创建一个代理
      *
      * @see #getAdvicesAndAdvisorsForBean
      */
@@ -62,17 +90,16 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     }
 
     /**
-     * TODO
      * 如果给定的bean符合被代理的条件，就将其包装起来
      */
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        /*if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
+        if (StringUtils.hasLength(beanName)) {
             return bean;
         }
         if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
             return bean;
         }
-        if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
+        if (isInfrastructureClass(bean.getClass())) {
             this.advisedBeans.put(cacheKey, Boolean.FALSE);
             return bean;
         }
@@ -83,10 +110,11 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
         if (specificInterceptors != null) {
             this.advisedBeans.put(cacheKey, Boolean.TRUE);
-            Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+            // 创建代理
+            Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, bean);
             this.proxyTypes.put(cacheKey, proxy.getClass());
             return proxy;
-        }*/
+        }
 
         this.advisedBeans.put(cacheKey, Boolean.FALSE);
         return bean;
@@ -113,34 +141,111 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws GPBeansException {
         Object cacheKey = getCacheKey(beanClass, beanName);
 
-        /*if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+        if (!StringUtils.hasLength(beanName)) {
             if (this.advisedBeans.containsKey(cacheKey)) {
                 return null;
             }
-            if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+            if (isInfrastructureClass(beanClass)) {
                 this.advisedBeans.put(cacheKey, Boolean.FALSE);
                 return null;
             }
         }
-
         // Create proxy here if we have a custom TargetSource.
         // Suppresses unnecessary default instantiation of the target bean:
         // The TargetSource will handle target instances in a custom fashion.
-        TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
-        if (targetSource != null) {
-            if (StringUtils.hasLength(beanName)) {
-                this.targetSourcedBeans.add(beanName);
-            }
+        if (this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
             // AOP处理：如果有advice，则创建代理
-            // 获取bean匹配的advice
-            Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
-            Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
+            // 获取bean匹配的advice拦截器
+            Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, null);
+            Object proxy = createProxy(beanClass, beanName, specificInterceptors, null);
             this.proxyTypes.put(cacheKey, proxy.getClass());
             return proxy;
-        }*/
+        }
 
         return null;
     }
+
+    /**
+     * Create an AOP proxy for the given bean
+     * 创建指定bean的aop代理
+     */
+    protected Object createProxy(Class<?> beanClass, String beanName, Object[] specificInterceptors, Object target) {
+        // 确定指定bean的顾问Advisor
+        GPAdvisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+
+        // AOP代理工厂
+        GPProxyFactory proxyFactory = new GPProxyFactory();
+        proxyFactory.setProxyTargetClass(this.isProxyTargetClass());
+        proxyFactory.addAdvisors(advisors);
+        proxyFactory.setTarget(target);
+        if (!proxyFactory.isProxyTargetClass()) {
+            // 确定指定bean是否应使用其目标类而不是其接口进行代理
+            if (shouldProxyTargetClass(beanClass, beanName)) {
+                // 对类进行代理，也就是使用cglib代理
+                proxyFactory.setProxyTargetClass(true);
+            } else {
+                // 对接口进行代理，也就是使用JDK动态代理
+                evaluateProxyInterfaces(beanClass, proxyFactory);
+            }
+        }
+        return proxyFactory.getProxy(getProxyClassLoader());
+    }
+
+    /**
+     * 确定指定bean是否应使用其目标类而不是其接口进行代理
+     */
+    protected boolean shouldProxyTargetClass(Class<?> beanClass, String beanName) {
+        if (this.beanFactory.containsBeanDefinition(beanName)) {
+            GPBeanDefinition bd = this.beanFactory.getBeanDefinition(beanName);
+            return Boolean.TRUE.equals(bd.isProxyTargetClass());
+        }
+        return false;
+    }
+
+    /**
+     * 确定指定bean的顾问Advisor
+     */
+    protected GPAdvisor[] buildAdvisors(String beanName, Object[] specificInterceptors) {
+        List<Object> allInterceptors = new ArrayList<>();
+        // TODO 通用拦截器处理 没看明白值是在哪里设置的？
+        //GPAdvisor[] commonInterceptors = resolveInterceptorNames();
+        GPAdvisor[] commonInterceptors = new GPAdvisor[0];
+
+        if (specificInterceptors != null) {
+            allInterceptors.addAll(Arrays.asList(specificInterceptors));
+            if (commonInterceptors.length > 0) {
+                allInterceptors.addAll(Arrays.asList(commonInterceptors));
+            }
+        }
+        if (logger.isDebugEnabled()) {
+            int nrOfCommonInterceptors = commonInterceptors.length;
+            int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
+            logger.debug("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
+                    " common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
+        }
+
+        GPAdvisor[] advisors = new GPAdvisor[allInterceptors.size()];
+        for (int i = 0; i < allInterceptors.size(); i++) {
+            advisors[i] = this.advisorAdapterRegistry.wrap(allInterceptors.get(i));
+        }
+        return advisors;
+    }
+
+    /**
+     * Return whether the given bean class represents an infrastructure class
+     * that should never be proxied.
+     * 判断是否是代理的基础结构类
+     */
+    protected boolean isInfrastructureClass(Class<?> beanClass) {
+        boolean retVal = GPAdvice.class.isAssignableFrom(beanClass) ||
+                GPPointcut.class.isAssignableFrom(beanClass) ||
+                GPAdvisor.class.isAssignableFrom(beanClass);
+        if (retVal) {
+            logger.trace("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
+        }
+        return retVal;
+    }
+
 
     @Override
     public boolean postProcessAfterInstantiation(Object bean, String beanName) throws GPBeansException {

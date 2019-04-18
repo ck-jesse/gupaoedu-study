@@ -70,6 +70,11 @@ public interface GPBeanFactory {
     <T> T getBean(Class<T> beanClazz);
 
     /**
+     * 提供对bean的检索，看看是否在IOC容器有这个名字的bean
+     */
+    boolean containsBean(String name);
+
+    /**
      * Central method of this class: creates a bean instance
      * 创建一个指定Bean实例对象
      */

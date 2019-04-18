@@ -57,9 +57,20 @@ public class GPBeanDefinition {
      */
     private int autowireMode = 0;
     /**
-     * 初始化方法
+     * 初始化方法名
      */
     private String initMethodName;
+    /**
+     * 销毁方法名
+     */
+    private String destroyMethodName;
+
+    /**
+     * 是否是直接代理目标类，而不只是代理特定接口
+     * true 表示代理类，使用cglib代理
+     * false 表示代理接口，使用JDK代理
+     */
+    private boolean proxyTargetClass = false;
 
     /**
      * 判断是否是单利

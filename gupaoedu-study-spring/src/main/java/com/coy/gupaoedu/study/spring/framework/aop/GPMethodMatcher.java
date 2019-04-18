@@ -25,7 +25,7 @@ public interface GPMethodMatcher {
      *                    the candidate class must be taken to be the method's declaring class)
      * @return whether or not this method matches statically
      */
-    boolean matches(Method method, @Nullable Class<?> targetClass);
+    boolean matches(Method method,  Class<?> targetClass);
 
     /**
      * Is this MethodMatcher dynamic, that is, must a final call be made on the
@@ -45,7 +45,7 @@ public interface GPMethodMatcher {
      * Check whether there a runtime (dynamic) match for this method,
      * which must have matched statically.
      */
-    boolean matches(Method method, @Nullable Class<?> targetClass, Object... args);
+    boolean matches(Method method,  Class<?> targetClass, Object... args);
 
 
     /**

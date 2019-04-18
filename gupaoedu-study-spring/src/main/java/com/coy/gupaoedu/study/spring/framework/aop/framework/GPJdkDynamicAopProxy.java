@@ -50,8 +50,22 @@ public class GPJdkDynamicAopProxy implements GPAopProxy, InvocationHandler, Seri
 
     @Override
     public Object getProxy(ClassLoader classLoader) {
-        Class<?>[] proxiedInterfaces = this.advised.getTargetClass().getInterfaces();
+        Class<?>[] proxiedInterfaces = this.advised.getProxiedInterfaces();
+        // 无指定接口时，检查目标对象类是否是接口
+        if (proxiedInterfaces.length == 0) {
+            Class<?> targetClass = advised.getTargetClass();
+            if (targetClass != null) {
+                if (targetClass.isInterface()) {
+                    advised.setInterfaces(targetClass);
+                } else if (Proxy.isProxyClass(targetClass)) {
+                    advised.setInterfaces(targetClass.getInterfaces());
+                }
+                proxiedInterfaces = advised.getProxiedInterfaces();
+            }
+        }
+        // 判断代理接口中是否有定义equals和hashcode方法
         findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
+        // 创建代理实例
         return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
     }
 
