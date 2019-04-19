@@ -31,7 +31,6 @@ public class GPBeanDefinition {
      */
     public static final String SCOPE_PROTOTYPE = "prototype";
 
-
     /**
      * bean名称
      */
@@ -48,6 +47,10 @@ public class GPBeanDefinition {
      * 作用域
      */
     private String scope = "";
+    /**
+     * 抽象类标志
+     */
+    private boolean abstractFlag = false;
     /**
      * 延迟加载
      */
@@ -84,6 +87,13 @@ public class GPBeanDefinition {
      */
     public boolean isPrototype() {
         return SCOPE_PROTOTYPE.equals(scope);
+    }
+
+    /**
+     * Return whether this definition specifies a bean class.
+     */
+    public boolean hasBeanClass() {
+        return (this.beanClass instanceof Class);
     }
 
     /**

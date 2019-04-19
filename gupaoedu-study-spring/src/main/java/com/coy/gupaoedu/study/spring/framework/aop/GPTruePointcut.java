@@ -1,7 +1,5 @@
 package com.coy.gupaoedu.study.spring.framework.aop;
 
-import jdk.nashorn.api.scripting.ClassFilter;
-
 import java.io.Serializable;
 
 /**
@@ -18,6 +16,11 @@ public class GPTruePointcut implements GPPointcut, Serializable {
      * Enforce Singleton pattern.
      */
     private GPTruePointcut() {
+    }
+
+    @Override
+    public GPClassFilter getClassFilter() {
+        return GPClassFilter.TRUE;
     }
 
     @Override

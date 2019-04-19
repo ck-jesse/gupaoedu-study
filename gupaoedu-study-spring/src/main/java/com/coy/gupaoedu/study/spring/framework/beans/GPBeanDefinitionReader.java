@@ -1,77 +1,89 @@
 package com.coy.gupaoedu.study.spring.framework.beans;
 
+import com.coy.gupaoedu.study.spring.framework.context.PropertiesUtils;
+
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 
 /**
+ * Bean定义的读取器
+ *
  * @author chenck
  * @date 2019/4/10 21:59
  */
 public class GPBeanDefinitionReader {
 
-    //保存application.properties配置文件中的内容
-    private Properties config = new Properties();
+    /**
+     * prefix for all matching resources from the class path
+     */
+    public static final String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
 
-    //保存扫描的所有的类名
+    public static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+
+    /**
+     * The package separator character: '.'
+     */
+    public static final String PACKAGE_SEPARATOR = ".";
+    /**
+     * The path separator character: '/'
+     */
+    public static final String PATH_SEPARATOR = "/";
+    /**
+     * The ".class" file suffix
+     */
+    public static final String CLASS_FILE_SUFFIX = ".class";
+
+    /**
+     * 保存扫描的所有的类名
+     */
     private List<String> classNames = new ArrayList<String>();
 
-    public GPBeanDefinitionReader(String... contextConfigLocation) {
-
-        doLoadConfig(contextConfigLocation);
-
-        doScanner(config.getProperty("scanPackage"));
-
+    public GPBeanDefinitionReader() {
+        doScanner(PropertiesUtils.getScanPackage());
     }
 
-    private void doLoadConfig(String... contextConfigLocation) {
-        //直接从类路径下找到Spring主配置文件所在的路径
-        //并且将其读取出来放到Properties对象中
-        //相对于scanPackage=com.gupaoedu.demo 从文件中保存到了内存中
-        InputStream fis = this.getClass().getClassLoader().getResourceAsStream(contextConfigLocation[0]);
-        try {
-            config.load(fis);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (null != fis) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    //扫描出相关的类
+    /**
+     * 扫描出相关的类
+     */
     private void doScanner(String scanPackage) {
-        //scanPackage = com.gupaoedu.demo ，存储的是包路径
-        //转换为文件路径，实际上就是把.替换为/就OK了
-        //classpath
-        URL url = this.getClass().getClassLoader().getResource("/" + scanPackage.replaceAll("\\.", "/"));
-        File classPath = new File(url.getFile());
-        for (File file : classPath.listFiles()) {
-            if (file.isDirectory()) {
-                doScanner(scanPackage + "." + file.getName());
-            } else {
-                if (!file.getName().endsWith(".class")) {
-                    continue;
+        try {
+            // 获取package path
+            String packageSearchPath = resolveBasePackage(scanPackage);
+            Enumeration<URL> resourceUrls = Thread.currentThread().getContextClassLoader().getResources(packageSearchPath);
+            while (resourceUrls.hasMoreElements()) {
+                URL url = resourceUrls.nextElement();
+                File classPath = new File(url.getFile());
+                for (File file : classPath.listFiles()) {
+                    if (file.isDirectory()) {
+                        doScanner(scanPackage + PACKAGE_SEPARATOR + file.getName());
+                        continue;
+                    }
+                    if (!file.getName().endsWith(CLASS_FILE_SUFFIX)) {
+                        continue;
+                    }
+                    String className = (scanPackage + PACKAGE_SEPARATOR + file.getName().replace(CLASS_FILE_SUFFIX, ""));
+                    classNames.add(className);
                 }
-                String className = (scanPackage + "." + file.getName().replace(".class", ""));
-                classNames.add(className);
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
-    public Properties getConfig() {
-        return this.config;
+    /**
+     * 将package转换为path
+     */
+    protected String resolveBasePackage(String basePackage) {
+        return basePackage.replaceAll("\\.", "/");
     }
 
+    /**
+     * 加载bean定义
+     */
     public List<GPBeanDefinition> loadBeanDefinitions() {
         List<GPBeanDefinition> beanDefinitions = new ArrayList<GPBeanDefinition>();
         for (String className : classNames) {
@@ -85,16 +97,18 @@ public class GPBeanDefinitionReader {
     }
 
     /**
-     * TODO
+     *
      */
     private GPBeanDefinition doCreateBeanDefinition(String className) {
         try {
-            GPBeanDefinition beanDefinition = new GPBeanDefinition();
             Class clazz = Class.forName(className);
             // 注意对接口进行处理
-            if (!clazz.isInterface()) {
-
+            if (clazz.isInterface()) {
+                return null;
             }
+            GPBeanDefinition beanDefinition = new GPBeanDefinition();
+            boolean isAbstract = Modifier.isAbstract(clazz.getModifiers());
+            beanDefinition.setAbstractFlag(isAbstract);
             beanDefinition.setBeanClass(clazz);
             beanDefinition.setBeanClassName(className);
             beanDefinition.setFactoryBeanName(clazz.getName());

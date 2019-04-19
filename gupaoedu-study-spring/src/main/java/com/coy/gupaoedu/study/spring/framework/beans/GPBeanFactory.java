@@ -40,6 +40,18 @@ public interface GPBeanFactory {
     void registerBeanDefinition(String beanName, GPBeanDefinition beanDefinition);
 
     /**
+     * 获取与指定Class类型匹配的bean的名称
+     */
+    String[] getBeanNamesForType(Class<?> type);
+
+    /**
+     * 获取与指定Class类型匹配的bean的名称
+     *
+     * @param includeNonSingletons 是否包含非单例
+     */
+    String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons);
+
+    /**
      * Ensure that all non-lazy-init singletons are instantiated, also considering
      */
     void preInstantiateSingletons();
@@ -70,6 +82,11 @@ public interface GPBeanFactory {
     <T> T getBean(Class<T> beanClazz);
 
     /**
+     * 根据bean的名字和Class类型来得到bean实例，增加了类型安全验证机制。
+     */
+    <T> T getBean(String beanName, Class<T> requiredType);
+
+    /**
      * 提供对bean的检索，看看是否在IOC容器有这个名字的bean
      */
     boolean containsBean(String name);
@@ -80,4 +97,8 @@ public interface GPBeanFactory {
      */
     Object createBean(String beanName, GPBeanDefinition mbd, Object[] args);
 
+    /**
+     * 检查具有给定名称的bean是否与指定类型匹配
+     */
+    boolean isTypeMatch(String beanName, Class<?> typeToMatch);
 }
