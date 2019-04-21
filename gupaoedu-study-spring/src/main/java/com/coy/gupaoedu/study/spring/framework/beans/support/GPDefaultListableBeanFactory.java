@@ -393,6 +393,8 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         Object bean = instanceWrapper.getWrappedInstance();
 
         // TODO 要考虑循环引用的问题
+        // 用缓存机制来解决循环依赖的问题，当A引用B，B引用A时，当A注入时，发现B未创建，那么将B未创建这种情况给记录下来，然后再创建B时，进行注入到A即可
+        // BeanWarpper
 
         // 将Bean实例对象封装，并且Bean定义中配置的属性值赋值给实例对象
         populateBean(beanName, bd, instanceWrapper);
