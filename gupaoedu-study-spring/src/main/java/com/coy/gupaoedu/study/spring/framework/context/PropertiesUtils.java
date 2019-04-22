@@ -57,9 +57,10 @@ public class PropertiesUtils {
     }
 
     /**
-     * 启动aop代理 true表示启动 false表示不启动
+     * 启动切面aop代理 true表示启动 false表示不启动
      */
-    public static String getAspectjAutoproxy() {
-        return config.getProperty("aspectj-autoproxy");
+    public static boolean getAspectjAutoproxy() {
+        String aspectjAutoproxy = config.getProperty("aspectj-autoproxy", "false");
+        return "true".equalsIgnoreCase(aspectjAutoproxy);
     }
 }

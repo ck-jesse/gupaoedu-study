@@ -186,6 +186,9 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     protected void registerBeanPostProcessors() {
         // 获取实现了BeanPostProcessor的所有类
         String[] postProcessorNames = this.getBeanNamesForType(GPBeanPostProcessor.class, true);
+        if (null == postProcessorNames || postProcessorNames.length == 0) {
+            return;
+        }
 
         // 区分不同的优先级
         List<GPBeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
@@ -193,6 +196,7 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
         List<GPBeanPostProcessor> nonOrderedPostProcessors = new ArrayList<>();
 
         for (String ppName : postProcessorNames) {
+            // 此处会去创建bean
             GPBeanPostProcessor pp = beanFactory.getBean(ppName, GPBeanPostProcessor.class);
             if (beanFactory.isTypeMatch(ppName, GPPriorityOrdered.class)) {
                 priorityOrderedPostProcessors.add(pp);

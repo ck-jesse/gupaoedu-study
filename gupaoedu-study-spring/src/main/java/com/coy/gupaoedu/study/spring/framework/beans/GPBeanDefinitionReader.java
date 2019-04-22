@@ -1,5 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.beans;
 
+import com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy.GPAbstractAutoProxyCreator;
 import com.coy.gupaoedu.study.spring.framework.context.PropertiesUtils;
 
 import java.io.File;
@@ -36,6 +37,11 @@ public class GPBeanDefinitionReader {
      * The ".class" file suffix
      */
     public static final String CLASS_FILE_SUFFIX = ".class";
+
+    /**
+     * The bean name of the internally managed auto-proxy creator.
+     */
+    public static final String AUTO_PROXY_CREATOR_BEAN_NAME = "org.springframework.aop.config.internalAutoProxyCreator";
 
     /**
      * 保存扫描的所有的类名
@@ -86,11 +92,20 @@ public class GPBeanDefinitionReader {
      */
     public List<GPBeanDefinition> loadBeanDefinitions() {
         List<GPBeanDefinition> beanDefinitions = new ArrayList<GPBeanDefinition>();
+
+        // 普通bean定义的处理
         for (String className : classNames) {
             GPBeanDefinition beanDefinition = doCreateBeanDefinition(className);
             if (null == beanDefinition) {
                 continue;
             }
+            beanDefinitions.add(beanDefinition);
+        }
+        // aspectj-autoproxy AOP代理bean定义的处理
+        if (PropertiesUtils.getAspectjAutoproxy()) {
+            GPBeanDefinition beanDefinition = new GPBeanDefinition();
+            beanDefinition.setFactoryBeanName(AUTO_PROXY_CREATOR_BEAN_NAME);
+            beanDefinition.setBeanClass(GPAbstractAutoProxyCreator.class);
             beanDefinitions.add(beanDefinition);
         }
         return beanDefinitions;

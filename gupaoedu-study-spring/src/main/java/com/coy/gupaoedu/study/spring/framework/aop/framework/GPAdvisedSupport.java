@@ -29,6 +29,11 @@ public class GPAdvisedSupport extends GPProxyConfig implements GPAdvised {
     private Object target;
 
     /**
+     * target的class
+     */
+    Class<?> targetClass;
+
+    /**
      * Advisor 顾问链工厂
      */
     GPDefaultAdvisorChainFactory advisorChainFactory = new GPDefaultAdvisorChainFactory();
@@ -79,17 +84,37 @@ public class GPAdvisedSupport extends GPProxyConfig implements GPAdvised {
         this.target = target;
     }
 
+    public void setTargetClass(Class<?> targetClass) {
+        this.targetClass = targetClass;
+    }
+
     /**
      * 获取目标对象的Class对象
      */
     @Override
     public Class<?> getTargetClass() {
-        return (this.target != null ? this.target.getClass() : null);
+        if (null != this.targetClass) {
+            return this.targetClass;
+        }
+        if (null != this.target) {
+            return this.target.getClass();
+        }
+        return null;
     }
 
     @Override
     public Class<?>[] getProxiedInterfaces() {
         return this.interfaces.toArray(new Class<?>[this.interfaces.size()]);
+    }
+
+    @Override
+    public boolean isInterfaceProxied(Class<?> intf) {
+        for (Class<?> proxyIntf : this.interfaces) {
+            if (intf.isAssignableFrom(proxyIntf)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -246,7 +271,7 @@ public class GPAdvisedSupport extends GPProxyConfig implements GPAdvised {
      * @param targetClass 目标对象class
      * @return MethodInterceptors拦截器列表
      */
-    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method,  Class<?> targetClass) {
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
         MethodCacheKey cacheKey = new MethodCacheKey(method);
         List<Object> cached = this.methodCache.get(cacheKey);
         if (cached == null) {

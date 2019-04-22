@@ -16,10 +16,12 @@
 
 package com.coy.gupaoedu.study.spring.framework.core.util;
 
+import com.coy.gupaoedu.study.spring.framework.aop.framework.GPAdvised;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPAdvisedSupport;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 /**
@@ -31,6 +33,47 @@ import java.util.Arrays;
  */
 public abstract class AopProxyUtils {
 
+    public static Class<?>[] completeProxiedInterfaces(GPAdvisedSupport advised) {
+        return completeProxiedInterfaces(advised, false);
+    }
+
+    /**
+     * Determine the complete set of interfaces to proxy for the given AOP configuration.
+     * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
+     * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
+     * {@link org.springframework.aop.SpringProxy} marker interface.
+     *
+     * @param advised the proxy config
+     * @return the complete set of interfaces to proxy
+     */
+    public static Class<?>[] completeProxiedInterfaces(GPAdvisedSupport advised, boolean decoratingProxy) {
+        Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
+        if (specifiedInterfaces.length == 0) {
+            // No user-specified interfaces: check whether target class is an interface.
+            Class<?> targetClass = advised.getTargetClass();
+            if (targetClass != null) {
+                if (targetClass.isInterface()) {
+                    advised.setInterfaces(targetClass);
+                } else if (Proxy.isProxyClass(targetClass)) {
+                    advised.setInterfaces(targetClass.getInterfaces());
+                }
+                specifiedInterfaces = advised.getProxiedInterfaces();
+            }
+        }
+        boolean addAdvised = !advised.isInterfaceProxied(GPAdvised.class);
+        int nonUserIfcCount = 0;
+        if (addAdvised) {
+            nonUserIfcCount++;
+        }
+        Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
+        System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
+        int index = specifiedInterfaces.length;
+        if (addAdvised) {
+            proxiedInterfaces[index] = GPAdvised.class;
+            index++;
+        }
+        return proxiedInterfaces;
+    }
 
     /**
      * Check equality of the proxies behind the given AdvisedSupport objects.
@@ -67,7 +110,7 @@ public abstract class AopProxyUtils {
      * @return a cloned argument array, or the original if no adaptation is needed
      * @since 4.2.3
      */
-    static Object[] adaptArgumentsIfNecessary(Method method, Object[] arguments) {
+    public static Object[] adaptArgumentsIfNecessary(Method method, Object[] arguments) {
         if (ObjectUtils.isEmpty(arguments)) {
             return new Object[0];
         }

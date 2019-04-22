@@ -1,7 +1,10 @@
 package com.coy.gupaoedu.study.spring.framework.beans.support;
 
+import com.coy.gupaoedu.study.spring.framework.beans.GPAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanNameAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanWrapper;
 import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPInitializingBean;
@@ -500,7 +503,9 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
      */
     protected Object initializeBean(final String beanName, final Object bean, GPBeanDefinition bd) throws Exception {
         Object wrappedBean = bean;
-        // TODO 需提前初始化所有的BeanPostProcessor
+        // 为Bean实例对象包装相关属性，如名称，类加载器，所属容器等信息
+        invokeAwareMethods(beanName, bean);
+
         // Bean实例初始化之前做一些处理(BeanPostProcessor.postProcessBeforeInitialization())
         if (null == bd) {
             wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
@@ -515,6 +520,21 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         }
         return wrappedBean;
+    }
+
+    /**
+     * 执行实现了GPAware包装接口的子类进行：如bean名称、bean工厂
+     */
+    protected void invokeAwareMethods(String beanName, Object bean) {
+        if (bean instanceof GPAware) {
+            // 注：因为此处对BeanNameAware和BeanFactoryAware的字段进行了字段赋值，那么在进行DI依赖注入时，需要过滤掉这两个方法对应的属性
+            if (bean instanceof GPBeanNameAware) {
+                ((GPBeanNameAware) bean).setBeanName(beanName);
+            }
+            if (bean instanceof GPBeanFactoryAware) {
+                ((GPBeanFactoryAware) bean).setBeanFactory(this);
+            }
+        }
     }
 
     /**

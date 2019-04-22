@@ -17,4 +17,5 @@ public class SpringTest {
         IDemoService demoService = context.getBean(DemoService.class);
         System.out.println(demoService.get("perfect"));
     }
+
 }

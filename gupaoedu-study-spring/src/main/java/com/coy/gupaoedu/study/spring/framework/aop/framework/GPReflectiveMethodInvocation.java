@@ -135,8 +135,7 @@ public class GPReflectiveMethodInvocation implements GPProxyMethodInvocation {
                 return proceed();
             }
         } else {
-            // It's an interceptor, so we just invoke it: The pointcut will have
-            // been evaluated statically before this object was constructed.
+            // It's an interceptor, so we just invoke it: The pointcut will have been evaluated statically before this object was constructed.
             return ((GPMethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
         }
     }

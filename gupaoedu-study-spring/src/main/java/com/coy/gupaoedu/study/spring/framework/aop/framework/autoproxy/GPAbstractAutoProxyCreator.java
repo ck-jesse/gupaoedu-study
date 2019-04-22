@@ -47,6 +47,8 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
      */
     private final Set<Object> earlyProxyReferences = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
+    private final Set<String> targetSourcedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+
     /**
      * 代理对象的class类型
      */
@@ -60,6 +62,8 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     @Override
     public void setBeanFactory(GPBeanFactory beanFactory) throws GPBeansException {
         this.beanFactory = beanFactory;
+        // TODO 初始化Advisor的查找工具类
+
     }
 
     public GPBeanFactory getBeanFactory() {
@@ -145,15 +149,22 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
             if (this.advisedBeans.containsKey(cacheKey)) {
                 return null;
             }
-            if (isInfrastructureClass(beanClass)) {
+            if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
                 this.advisedBeans.put(cacheKey, Boolean.FALSE);
                 return null;
             }
         }
+
+        return null;
         // Create proxy here if we have a custom TargetSource.
         // Suppresses unnecessary default instantiation of the target bean:
         // The TargetSource will handle target instances in a custom fashion.
+        /*
+        TODO 此方法中暂时先直接返回null，让其先创建实例，然后在postProcessAfterInitialization中来对目标对象进行代理对象的创建
         if (this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
+            if (StringUtils.hasLength(beanName)) {
+                //this.targetSourcedBeans.add(beanName);
+            }
             // AOP处理：如果有advice，则创建代理
             // 获取bean匹配的advice拦截器
             Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, null);
@@ -161,8 +172,14 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
             this.proxyTypes.put(cacheKey, proxy.getClass());
             return proxy;
         }
+        return null;*/
+    }
 
-        return null;
+    /**
+     *
+     */
+    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        return false;
     }
 
     /**
@@ -178,6 +195,8 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         proxyFactory.setProxyTargetClass(this.isProxyTargetClass());
         proxyFactory.addAdvisors(advisors);
         proxyFactory.setTarget(target);
+        proxyFactory.setTargetClass(beanClass);
+
         if (!proxyFactory.isProxyTargetClass()) {
             // 确定指定bean是否应使用其目标类而不是其接口进行代理
             if (shouldProxyTargetClass(beanClass, beanName)) {

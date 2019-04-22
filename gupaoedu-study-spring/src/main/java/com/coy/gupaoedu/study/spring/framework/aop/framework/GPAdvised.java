@@ -36,6 +36,12 @@ public interface GPAdvised {
     Class<?>[] getProxiedInterfaces();
 
     /**
+     * Determine whether the given interface is proxied.
+     * @param intf the interface to check
+     */
+    boolean isInterfaceProxied(Class<?> intf);
+
+    /**
      * Return the advisors applying to this proxy
      */
     GPAdvisor[] getAdvisors();
