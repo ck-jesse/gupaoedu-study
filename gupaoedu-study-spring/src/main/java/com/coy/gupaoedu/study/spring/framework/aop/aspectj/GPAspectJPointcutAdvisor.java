@@ -1,6 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
-import com.coy.gupaoedu.study.spring.framework.aop.GPPointcut;
+import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.aop.GPPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;

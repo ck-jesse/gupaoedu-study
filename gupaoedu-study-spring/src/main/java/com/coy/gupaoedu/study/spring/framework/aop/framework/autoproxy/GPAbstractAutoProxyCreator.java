@@ -1,7 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
-import com.coy.gupaoedu.study.spring.framework.aop.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJAdvisorFactory;
 import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJPointcutAdvisor;
@@ -9,12 +8,14 @@ import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyFactory;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyProcessorSupport;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPDefaultAdvisorAdapterRegistry;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPGlobalAdvisorAdapterRegistry;
+import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPFactoryBean;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
+import com.coy.gupaoedu.study.spring.framework.core.GPOrderComparator;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
 import org.apache.commons.logging.Log;
@@ -210,21 +211,6 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     }
 
     /**
-     * 查找所有符合条件的Advisor bean
-     */
-    protected List<GPAdvisor> findCandidateAdvisors() {
-        // Add all the Spring advisors found according to superclass rules.
-        List<GPAdvisor> advisors = beanFactoryAdvisorRetrievalHelper.findAdvisorBeans();
-        // Build Advisors for all AspectJ aspects in the bean factory.
-        if (this.aspectJAdvisorFactory != null) {
-            advisors.addAll(this.aspectJAdvisorFactory.buildAspectJAdvisors());
-        }
-        return advisors;
-    }
-
-
-
-    /**
      * Create an AOP proxy for the given bean
      * 创建指定bean的aop代理
      */
@@ -317,10 +303,39 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
      * 获取代理目标对象的advices 和 advisors
      */
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, Object target) throws GPBeansException {
-        // TODO
-
-        return null;
+        List<GPAdvisor> advisors = findEligibleAdvisors(beanClass, beanName);
+        if (advisors.isEmpty()) {
+            return null;
+        }
+        return advisors.toArray();
     }
+
+    /**
+     *
+     */
+    protected List<GPAdvisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+        List<GPAdvisor> candidateAdvisors = findCandidateAdvisors();
+        List<GPAdvisor> eligibleAdvisors = AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
+        if (!eligibleAdvisors.isEmpty()) {
+            // 排序
+            Collections.sort(eligibleAdvisors, GPOrderComparator.INSTANCE);
+        }
+        return eligibleAdvisors;
+    }
+
+    /**
+     * 查找所有符合条件的Advisor bean
+     */
+    protected List<GPAdvisor> findCandidateAdvisors() {
+        // Add all the Spring advisors found according to superclass rules.
+        List<GPAdvisor> advisors = beanFactoryAdvisorRetrievalHelper.findAdvisorBeans();
+        // Build Advisors for all AspectJ aspects in the bean factory.
+        if (this.aspectJAdvisorFactory != null) {
+            advisors.addAll(this.aspectJAdvisorFactory.buildAspectJAdvisors());
+        }
+        return advisors;
+    }
+
 
     @Override
     public int getOrder() {

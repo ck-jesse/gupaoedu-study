@@ -1,7 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
-import com.coy.gupaoedu.study.spring.framework.aop.GPPointcut;
-import com.coy.gupaoedu.study.spring.framework.aop.framework.AopConfigException;
+import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 
 import java.io.Serializable;
 

@@ -100,10 +100,12 @@ public class GPAspectJAdvisorFactory {
                         }
                         // We must be careful not to instantiate beans eagerly as in this case they
                         // would be cached by the Spring container but would not have been weaved.
+                        // 从beanFactory中获取bean的class
                         Class<?> beanType = this.beanFactory.getType(beanName);
                         if (beanType == null) {
                             continue;
                         }
+                        // 判断该bean是不是有定义Aspect注解，如果有，则看做一个切面
                         if (this.isAspect(beanType)) {
                             aspectNames.add(beanName);
 //                            AspectMetadata amd = new AspectMetadata(beanType, beanName);
@@ -150,6 +152,16 @@ public class GPAspectJAdvisorFactory {
             }
         }
         return advisors;
+    }
+
+    /**
+     * 将切面AspectJ中的方法构建为Advisor
+     * 注：spring的此处实现过于复杂，仅参考
+     */
+    public List<GPAdvisor> myBuildAspectJAdvisors() {
+
+//        PropertiesUtils
+        return null;
     }
 
 

@@ -63,4 +63,5 @@ public class PropertiesUtils {
         String aspectjAutoproxy = config.getProperty("aspectj-autoproxy", "false");
         return "true".equalsIgnoreCase(aspectjAutoproxy);
     }
+
 }
