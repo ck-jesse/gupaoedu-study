@@ -98,7 +98,22 @@ public interface GPBeanFactory {
     Object createBean(String beanName, GPBeanDefinition mbd, Object[] args);
 
     /**
+     * 根据bean名字得到bean实例，并同时判断这个bean是不是单例
+     */
+    boolean isSingleton(String beanName);
+
+    /**
+     * 根据bean名字得到bean实例，并同时判断这个bean是不是单例
+     */
+    boolean isPrototype(String beanName);
+
+    /**
      * 检查具有给定名称的bean是否与指定类型匹配
      */
     boolean isTypeMatch(String beanName, Class<?> typeToMatch);
+
+    /**
+     * 得到bean实例的Class类型
+     */
+    Class<?> getType(String beanName);
 }

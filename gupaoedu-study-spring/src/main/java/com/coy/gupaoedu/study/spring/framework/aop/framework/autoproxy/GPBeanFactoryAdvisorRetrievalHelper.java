@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import com.sun.istack.internal.Nullable;
 import org.apache.commons.logging.Log;
@@ -39,6 +40,7 @@ public class GPBeanFactoryAdvisorRetrievalHelper {
 
     /**
      * 在当前bean工厂中查找所有符合条件的Advisor bean
+     * <p>
      * Find all eligible Advisor beans in the current bean factory,
      * ignoring FactoryBeans and excluding beans that are currently in creation.
      *
@@ -52,8 +54,9 @@ public class GPBeanFactoryAdvisorRetrievalHelper {
             if (advisorNames == null) {
                 // Do not initialize FactoryBeans here: We need to leave all regular beans
                 // uninitialized to let the auto-proxy creator apply to them!
-//                advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
-//                        this.beanFactory, GPAdvisor.class, true, false);
+                //advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+                //        this.beanFactory, GPAdvisor.class, true, false);
+                advisorNames = this.beanFactory.getBeanNamesForType(GPAdvisor.class, true);
                 this.cachedAdvisorBeanNames = advisorNames;
             }
         }
@@ -64,31 +67,11 @@ public class GPBeanFactoryAdvisorRetrievalHelper {
         List<GPAdvisor> advisors = new LinkedList<>();
         for (String name : advisorNames) {
             if (isEligibleBean(name)) {
-                /*if (this.beanFactory.isCurrentlyInCreation(name)) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Skipping currently created advisor '" + name + "'");
-                    }
-                } else {
-                    try {
-                        advisors.add(this.beanFactory.getBean(name, GPAdvisor.class));
-                    } catch (GPBeanCreationException ex) {
-                        Throwable rootCause = ex.getMostSpecificCause();
-                        if (rootCause instanceof GPBeanCurrentlyInCreationException) {
-                            GPBeanCreationException bce = (GPBeanCreationException) rootCause;
-                            String bceBeanName = bce.getBeanName();
-                            if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("Skipping advisor '" + name +
-                                            "' with dependency on currently created bean: " + ex.getMessage());
-                                }
-                                // Ignore: indicates a reference back to the bean we're trying to advise.
-                                // We want to find advisors other than the currently created bean itself.
-                                continue;
-                            }
-                        }
-                        throw ex;
-                    }
-                }*/
+                try {
+                    advisors.add(this.beanFactory.getBean(name, GPAdvisor.class));
+                } catch (GPBeansException ex) {
+                    throw ex;
+                }
             }
         }
         return advisors;

@@ -141,8 +141,23 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
     }
 
     @Override
+    public boolean isSingleton(String beanName) {
+        return this.getBeanFactory().isSingleton(beanName);
+    }
+
+    @Override
+    public boolean isPrototype(String beanName) {
+        return this.getBeanFactory().isPrototype(beanName);
+    }
+
+    @Override
     public boolean isTypeMatch(String beanName, Class<?> typeToMatch) {
         return this.getBeanFactory().isTypeMatch(beanName, typeToMatch);
+    }
+
+    @Override
+    public Class<?> getType(String beanName) {
+        return this.getBeanFactory().getType(beanName);
     }
 
     //=====================================

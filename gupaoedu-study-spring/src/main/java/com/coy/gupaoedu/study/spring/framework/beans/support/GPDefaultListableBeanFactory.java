@@ -288,6 +288,29 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     @Override
+    public boolean isSingleton(String beanName) {
+        Object beanInstance = getSingleton(beanName);
+        if (beanInstance != null) {
+            return true;
+        }
+
+        GPBeanDefinition mbd = getBeanDefinition(beanName);
+        if (mbd.isSingleton()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isPrototype(String beanName) {
+        GPBeanDefinition mbd = getBeanDefinition(beanName);
+        if (mbd.isPrototype()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isTypeMatch(String beanName, Class<?> typeToMatch) {
         Assert.notNull(typeToMatch, "Class typeToMatch must not be null");
         // 检查注册的单例
@@ -306,6 +329,20 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         // 单例不存在时，则检查bean定义
         GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
         return typeToMatch.isAssignableFrom(bd.getBeanClazz());
+    }
+
+    @Override
+    public Class<?> getType(String beanName) {
+        Object beanInstance = getSingleton(beanName);
+        if (null != beanInstance) {
+            return beanInstance.getClass();
+        }
+
+        GPBeanDefinition mbd = getBeanDefinition(beanName);
+        if (null != mbd) {
+            return mbd.getBeanClazz();
+        }
+        return null;
     }
 
     /**

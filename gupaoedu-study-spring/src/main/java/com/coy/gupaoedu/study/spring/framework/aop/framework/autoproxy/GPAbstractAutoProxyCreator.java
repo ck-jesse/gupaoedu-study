@@ -3,6 +3,8 @@ package com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy;
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJAdvisorFactory;
+import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyFactory;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyProcessorSupport;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPDefaultAdvisorAdapterRegistry;
@@ -13,6 +15,7 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPFactoryBean;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
+import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,12 +34,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author chenck
  * @date 2019/4/16 20:01
  */
-public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implements GPInstantiationAwareBeanPostProcessor, GPBeanFactoryAware {
+public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implements GPInstantiationAwareBeanPostProcessor, GPBeanFactoryAware, GPOrdered {
 
 
     protected final Log logger = LogFactory.getLog(GPAbstractAutoProxyCreator.class);
 
     private GPBeanFactory beanFactory;
+    private GPBeanFactoryAdvisorRetrievalHelper beanFactoryAdvisorRetrievalHelper;
+
+    private GPAspectJAdvisorFactory aspectJAdvisorFactory;
 
     /**
      * Default is global AdvisorAdapterRegistry
@@ -62,8 +68,19 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     @Override
     public void setBeanFactory(GPBeanFactory beanFactory) throws GPBeansException {
         this.beanFactory = beanFactory;
-        // TODO 初始化Advisor的查找工具类
+        // 初始化
+        initBeanFactory();
+    }
 
+    /**
+     * 初始化
+     */
+    protected void initBeanFactory() {
+        // 初始化Advisor的查找工具类
+        beanFactoryAdvisorRetrievalHelper = new GPBeanFactoryAdvisorRetrievalHelper(beanFactory);
+        if (this.aspectJAdvisorFactory == null) {
+            this.aspectJAdvisorFactory = new GPAspectJAdvisorFactory(beanFactory);
+        }
     }
 
     public GPBeanFactory getBeanFactory() {
@@ -103,7 +120,7 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
             return bean;
         }
-        if (isInfrastructureClass(bean.getClass())) {
+        if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
             this.advisedBeans.put(cacheKey, Boolean.FALSE);
             return bean;
         }
@@ -149,6 +166,7 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
             if (this.advisedBeans.containsKey(cacheKey)) {
                 return null;
             }
+            // 判断是否是代理的基础类 或者 是否应该跳过
             if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
                 this.advisedBeans.put(cacheKey, Boolean.FALSE);
                 return null;
@@ -176,11 +194,35 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     }
 
     /**
-     *
+     * 是否应该跳过（当Advisor未加载，则初始化）
      */
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        // 查找所有符合条件的Advisor bean
+        List<GPAdvisor> candidateAdvisors = findCandidateAdvisors();
+        for (GPAdvisor advisor : candidateAdvisors) {
+            if (advisor instanceof GPAspectJPointcutAdvisor) {
+//                if (((GPAspectJPointcutAdvisor) advisor.getAdvice()).getAspectName().equals(beanName)) {
+//                    return true;
+//                }
+            }
+        }
         return false;
     }
+
+    /**
+     * 查找所有符合条件的Advisor bean
+     */
+    protected List<GPAdvisor> findCandidateAdvisors() {
+        // Add all the Spring advisors found according to superclass rules.
+        List<GPAdvisor> advisors = beanFactoryAdvisorRetrievalHelper.findAdvisorBeans();
+        // Build Advisors for all AspectJ aspects in the bean factory.
+        if (this.aspectJAdvisorFactory != null) {
+            advisors.addAll(this.aspectJAdvisorFactory.buildAspectJAdvisors());
+        }
+        return advisors;
+    }
+
+
 
     /**
      * Create an AOP proxy for the given bean
@@ -279,4 +321,10 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
 
         return null;
     }
+
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+
 }
