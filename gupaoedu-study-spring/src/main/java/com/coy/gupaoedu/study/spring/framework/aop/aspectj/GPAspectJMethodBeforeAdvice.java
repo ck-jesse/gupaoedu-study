@@ -1,0 +1,18 @@
+package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
+
+import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+
+/**
+ * @author chenck
+ * @date 2019/4/24 17:34
+ */
+public class GPAspectJMethodBeforeAdvice extends GPAbstractAspectJAdvice implements GPMethodBeforeAdvice, Serializable {
+
+    public GPAspectJMethodBeforeAdvice(Method aspectJAdviceMethod, GPPointcut pointcut, GPBeanFactory beanFactory) {
+        super(aspectJAdviceMethod, pointcut, beanFactory);
+    }
+}

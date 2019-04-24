@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.support.GPDefaultPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 

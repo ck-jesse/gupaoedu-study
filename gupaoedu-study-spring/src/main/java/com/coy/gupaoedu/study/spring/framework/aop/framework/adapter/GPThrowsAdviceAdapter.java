@@ -18,8 +18,9 @@ package com.coy.gupaoedu.study.spring.framework.aop.framework.adapter;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPThrowsAdvice;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPThrowsAdviceInterceptor;
 
 import java.io.Serializable;
 

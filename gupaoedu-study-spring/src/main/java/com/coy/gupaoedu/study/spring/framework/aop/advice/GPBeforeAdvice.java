@@ -1,6 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.advice;
 
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 
 /**
  * 前置通知

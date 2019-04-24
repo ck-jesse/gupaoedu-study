@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.coy.gupaoedu.study.spring.framework.aop.framework.adapter;
+package com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept;
 
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPAfterAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPAfterReturningAdvice;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 
 import java.io.Serializable;

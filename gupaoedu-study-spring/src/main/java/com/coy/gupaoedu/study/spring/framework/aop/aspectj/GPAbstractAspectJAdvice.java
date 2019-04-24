@@ -1,7 +1,8 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
 import com.coy.gupaoedu.study.spring.framework.aop.AopInvocationException;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
@@ -9,6 +10,7 @@ import com.coy.gupaoedu.study.spring.framework.core.util.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
 
 /**
  * @author chenck
@@ -26,14 +28,14 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
 
     protected transient Method aspectJAdviceMethod;
 
-    private final GPAspectJExpressionPointcut pointcut;
+    private final GPPointcut pointcut;
 
     /**
      * The name of the aspect
      */
     private String aspectName = "";
 
-    public GPAbstractAspectJAdvice(Method aspectJAdviceMethod, GPAspectJExpressionPointcut pointcut, GPBeanFactory beanFactory) {
+    public GPAbstractAspectJAdvice(Method aspectJAdviceMethod, GPPointcut pointcut, GPBeanFactory beanFactory) {
         Assert.notNull(aspectJAdviceMethod, "Advice method must not be null");
         this.declaringClass = aspectJAdviceMethod.getDeclaringClass();
         this.methodName = aspectJAdviceMethod.getName();
@@ -51,40 +53,39 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
         return this.aspectName;
     }
 
-    /**
-     * Return the AspectJ expression pointcut.
-     */
-    public final GPAspectJExpressionPointcut getPointcut() {
+    @Override
+    public int getOrder() {
+        Class<?> type = this.beanFactory.getType(this.aspectName);
+        if (type != null) {
+            if (GPOrdered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.aspectName)) {
+                return ((GPOrdered) this.beanFactory.getBean(this.aspectName)).getOrder();
+            }
+        }
+        return GPOrdered.LOWEST_PRECEDENCE;
+    }
+
+    public final GPPointcut getPointcut() {
         return this.pointcut;
     }
 
-    /*public final GPPointcut buildSafePointcut() {
-        GPPointcut pc = getPointcut();
-        GPMethodMatcher safeMethodMatcher = MethodMatchers.intersection(
-                new AdviceExcludingMethodMatcher(this.aspectJAdviceMethod), pc.getMethodMatcher());
-        return new ComposablePointcut(pc.getClassFilter(), safeMethodMatcher);
-    }
-
-
-    *//**
+    /**
      * Invoke the advice method.
-     *
-     * @param jpMatch     the JoinPointMatch that matched this execution join point
-     * @param returnValue the return value from the method execution (may be null)
-     * @param ex          the exception thrown by the method execution (may be null)
-     * @return the invocation result
-     * @throws Throwable in case of invocation failure
-     *//*
-    protected Object invokeAdviceMethod(GPJoinPointMatch jpMatch, Object returnValue, Throwable ex) throws Throwable {
-        return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, ex));
-    }
+     */
+    protected Object invokeAdviceMethod(GPJoinPoint joinPoint, Object returnValue, Throwable ex) throws Throwable {
+        Class<?>[] paramTypes = this.aspectJAdviceMethod.getParameterTypes();
 
-    *//**
-     * As above, but in this case we are given the join point.
-     *//*
-    protected Object invokeAdviceMethod(GPJoinPoint jp, GPJoinPointMatch jpMatch, Object returnValue, Throwable t) throws Throwable {
-        return invokeAdviceMethodWithGivenArgs(argBinding(jp, jpMatch, returnValue, t));
-    }*/
+        Object[] args = new Object[paramTypes.length];
+        for (int i = 0; i < paramTypes.length; i++) {
+            if (paramTypes[i] == GPJoinPoint.class) {
+                args[i] = joinPoint;
+            } else if (paramTypes[i] == Throwable.class) {
+                args[i] = ex;
+            } else if (paramTypes[i] == Object.class) {
+                args[i] = returnValue;
+            }
+        }
+        return invokeAdviceMethodWithGivenArgs(args);
+    }
 
     protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
         Object[] actualArgs = args;
@@ -93,11 +94,14 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
         }
         try {
             ReflectionUtils.makeAccessible(this.aspectJAdviceMethod);
-            return this.aspectJAdviceMethod.invoke(this.beanFactory.getBean(declaringClass), actualArgs);
+            Object target = this.beanFactory.getBean(declaringClass);
+            if (null == target) {
+                target = declaringClass.newInstance();
+            }
+            return this.aspectJAdviceMethod.invoke(target, actualArgs);
         } catch (IllegalArgumentException ex) {
             throw new AopInvocationException("Mismatch on arguments to advice method [" +
-                    this.aspectJAdviceMethod + "]; pointcut expression [" +
-                    this.pointcut.getExpression() + "]", ex);
+                    this.aspectJAdviceMethod + "]; pointcut expression [ xxx ]", ex);
         } catch (InvocationTargetException ex) {
             throw ex.getTargetException();
         }

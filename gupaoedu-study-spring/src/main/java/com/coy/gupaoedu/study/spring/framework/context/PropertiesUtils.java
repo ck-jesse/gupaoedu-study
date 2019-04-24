@@ -64,4 +64,47 @@ public class PropertiesUtils {
         return "true".equalsIgnoreCase(aspectjAutoproxy);
     }
 
+    // --------aspect配置------------------
+
+    /**
+     * 切面表达式
+     */
+    public static String getAspectPointcut() {
+        return config.getProperty("aspectPointcut");
+    }
+
+    /**
+     * 切面类
+     */
+    public static String getAspectClass() {
+        return config.getProperty("aspectClass");
+    }
+
+    /**
+     * 切面前置通知
+     */
+    public static String getAspectBefore() {
+        return config.getProperty("aspectBefore");
+    }
+
+    /**
+     * 切面后置通知
+     */
+    public static String getAspectAfter() {
+        return config.getProperty("aspectAfter");
+    }
+
+    /**
+     * 切面异常通知
+     */
+    public static String getAspectAfterThrow() {
+        return config.getProperty("aspectAfterThrow");
+    }
+
+    /**
+     * 切面异常类型
+     */
+    public static String getAspectAfterThrowingName() {
+        return config.getProperty("aspectAfterThrowingName");
+    }
 }

@@ -5,7 +5,7 @@ import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPClassFilter
 import java.util.regex.Pattern;
 
 /**
- * 正则表达式匹配类
+ * 正则表达式类匹配
  *
  * @author chenck
  * @date 2019/4/23 21:02

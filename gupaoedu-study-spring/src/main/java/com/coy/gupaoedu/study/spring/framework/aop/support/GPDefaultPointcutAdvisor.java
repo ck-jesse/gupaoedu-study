@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.aop.support;
 
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 
 import java.io.Serializable;
 

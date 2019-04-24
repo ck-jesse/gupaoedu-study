@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 
 /**
  * 该接口由持有AOP代理工厂配置的类实现。

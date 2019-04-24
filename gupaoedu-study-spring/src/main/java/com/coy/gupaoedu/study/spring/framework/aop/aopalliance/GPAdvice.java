@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop;
+package com.coy.gupaoedu.study.spring.framework.aop.aopalliance;
 
 /**
  * 用于标记接口为Advice

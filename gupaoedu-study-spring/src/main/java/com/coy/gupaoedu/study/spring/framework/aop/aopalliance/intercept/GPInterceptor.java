@@ -1,6 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept;
 
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 
 /**
  * This interface represents a generic interceptor

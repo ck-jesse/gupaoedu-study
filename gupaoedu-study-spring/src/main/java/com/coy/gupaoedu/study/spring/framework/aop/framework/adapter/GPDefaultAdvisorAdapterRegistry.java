@@ -2,7 +2,7 @@ package com.coy.gupaoedu.study.spring.framework.aop.framework.adapter;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.support.GPDefaultPointcutAdvisor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.aop.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
 
 import java.io.Serializable;
@@ -44,10 +44,12 @@ public class GPDefaultAdvisorAdapterRegistry implements Serializable {
         GPAdvice advice = (GPAdvice) adviceObject;
         if (advice instanceof GPMethodInterceptor) {
             // So well-known it doesn't even need an adapter.
+            // 如果是
             return new GPDefaultPointcutAdvisor(advice);
         }
         for (GPAdvisorAdapter adapter : this.adapters) {
             // Check that it is supported.
+            //
             if (adapter.supportsAdvice(advice)) {
                 return new GPDefaultPointcutAdvisor(advice);
             }
