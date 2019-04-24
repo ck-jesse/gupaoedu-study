@@ -1,5 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
+import com.coy.gupaoedu.study.spring.framework.aop.advice.GPAfterAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.advice.GPAfterReturningAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 
@@ -14,5 +16,10 @@ public class GPAspectJAfterReturningAdvice extends GPAbstractAspectJAdvice imple
 
     public GPAspectJAfterReturningAdvice(Method aspectJAdviceMethod, GPPointcut pointcut, GPBeanFactory beanFactory) {
         super(aspectJAdviceMethod, pointcut, beanFactory);
+    }
+
+    @Override
+    public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+
     }
 }

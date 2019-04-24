@@ -7,12 +7,14 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import com.coy.gupaoedu.study.spring.framework.core.util.ReflectionUtils;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
 
 /**
+ * 抽象AspectJ切面通知
+ *
  * @author chenck
  * @date 2019/4/23 16:58
  */
@@ -71,12 +73,12 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
     /**
      * Invoke the advice method.
      */
-    protected Object invokeAdviceMethod(GPJoinPoint joinPoint, Object returnValue, Throwable ex) throws Throwable {
+    protected Object invokeAdviceMethod(GPJoinpoint joinPoint, Object returnValue, Throwable ex) throws Throwable {
         Class<?>[] paramTypes = this.aspectJAdviceMethod.getParameterTypes();
 
         Object[] args = new Object[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
-            if (paramTypes[i] == GPJoinPoint.class) {
+            if (paramTypes[i] == GPJoinpoint.class) {
                 args[i] = joinPoint;
             } else if (paramTypes[i] == Throwable.class) {
                 args[i] = ex;

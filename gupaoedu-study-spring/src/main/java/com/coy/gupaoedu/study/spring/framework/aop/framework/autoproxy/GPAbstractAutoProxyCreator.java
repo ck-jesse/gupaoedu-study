@@ -1,13 +1,16 @@
 package com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
+import com.coy.gupaoedu.study.spring.framework.aop.GPPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAbstractAspectJAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJAdvisorFactory;
 import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyFactory;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.GPProxyProcessorSupport;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPDefaultAdvisorAdapterRegistry;
 import com.coy.gupaoedu.study.spring.framework.aop.framework.adapter.GPGlobalAdvisorAdapterRegistry;
+import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPMethodMatcher;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanDefinition;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
@@ -17,13 +20,17 @@ import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrderComparator;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
+import com.coy.gupaoedu.study.spring.framework.core.util.ClassUtils;
+import com.coy.gupaoedu.study.spring.framework.core.util.ReflectionUtils;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,9 +122,9 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
      * 如果给定的bean符合被代理的条件，就将其包装起来
      */
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        if (StringUtils.hasLength(beanName)) {
-            return bean;
-        }
+        // if (StringUtils.hasLength(beanName)) {
+        //     return bean;
+        // }
         if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
             return bean;
         }
@@ -202,9 +209,9 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         List<GPAdvisor> candidateAdvisors = findCandidateAdvisors();
         for (GPAdvisor advisor : candidateAdvisors) {
             if (advisor instanceof GPAspectJPointcutAdvisor) {
-//                if (((GPAspectJPointcutAdvisor) advisor.getAdvice()).getAspectName().equals(beanName)) {
-//                    return true;
-//                }
+                if (((GPAbstractAspectJAdvice) advisor.getAdvice()).getAspectName().equals(beanName)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -293,7 +300,6 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         return retVal;
     }
 
-
     @Override
     public boolean postProcessAfterInstantiation(Object bean, String beanName) throws GPBeansException {
         return true;
@@ -317,12 +323,53 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         // 查找候选Advisor
         List<GPAdvisor> candidateAdvisors = findCandidateAdvisors();
         // 查找合格的Advisor
-        List<GPAdvisor> eligibleAdvisors = AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
+        // List<GPAdvisor> eligibleAdvisors = AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
+        List<GPAdvisor> eligibleAdvisors = new ArrayList<>();
+        for (GPAdvisor candidate : candidateAdvisors) {
+            if (canApply(candidate, beanClass)) {
+                eligibleAdvisors.add(candidate);
+            }
+        }
+
         if (!eligibleAdvisors.isEmpty()) {
             // 将合格的Advisor排序
             Collections.sort(eligibleAdvisors, GPOrderComparator.INSTANCE);
         }
         return eligibleAdvisors;
+    }
+
+    /**
+     * 检查是否可以应用该Advisor
+     */
+    private boolean canApply(GPAdvisor advisor, Class<?> beanClass) {
+        if (advisor instanceof GPPointcutAdvisor) {
+            GPPointcutAdvisor pointcutAdvisor = (GPPointcutAdvisor) advisor;
+            GPPointcut pointcut = pointcutAdvisor.getPointcut();
+            // class匹配
+            if (!pointcut.getClassFilter().matches(beanClass)) {
+                return false;
+            }
+            // method匹配
+            GPMethodMatcher methodMatcher = pointcut.getMethodMatcher();
+            if (methodMatcher == GPMethodMatcher.TRUE) {
+                return true;
+            }
+            // 获取beanClass实现的所有接口
+            Set<Class<?>> classes = new LinkedHashSet<>(ClassUtils.getAllInterfacesForClassAsSet(beanClass));
+            classes.add(beanClass);
+            for (Class<?> clazz : classes) {
+                Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
+                for (Method method : methods) {
+                    if (methodMatcher.matches(method, beanClass)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } else {
+            // It doesn't have a pointcut so we assume it applies.
+            return true;
+        }
     }
 
     /**
@@ -334,7 +381,7 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         // Build Advisors for all AspectJ aspects in the bean factory.
         if (this.aspectJAdvisorFactory != null) {
             // 构建AspectJ切面对应的Advisors
-            advisors.addAll(this.aspectJAdvisorFactory.buildAspectJAdvisors());
+            advisors.addAll(this.aspectJAdvisorFactory.myBuildAspectJAdvisors());
         }
         return advisors;
     }

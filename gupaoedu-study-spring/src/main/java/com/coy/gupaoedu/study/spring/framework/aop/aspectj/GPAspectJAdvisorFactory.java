@@ -1,9 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPAfterReturningAdviceInterceptor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
-import com.coy.gupaoedu.study.spring.framework.aop.support.GPDefaultPointcutAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.pattern.GPTypePatternMatchingPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
@@ -166,7 +163,6 @@ public class GPAspectJAdvisorFactory {
      * 注：spring的此处实现过于复杂，仅参考
      */
     public List<GPAdvisor> myBuildAspectJAdvisors() {
-
         String aspectPointcut = PropertiesUtils.getAspectPointcut();
         String aspectClass = PropertiesUtils.getAspectClass();
 
@@ -178,6 +174,10 @@ public class GPAspectJAdvisorFactory {
                 .replaceAll("\\)", "\\\\)");
         // Pattern aspectPointcutPattern = Pattern.compile(aspectPointcut);
         try {
+            // TODO 此处先判断是否已经存在，若存在则直接返回，后续改造为支持多个Aspect时，再做调整
+            if (advisorsCache.containsKey(aspectClass)) {
+                return advisorsCache.get(aspectClass);
+            }
             // aspect切面类
             Class aspectClazz = Class.forName(aspectClass);
 
@@ -187,11 +187,12 @@ public class GPAspectJAdvisorFactory {
             // 缓存Aspect切面类的Advisor
             advisorsCache.put(aspectClass, advisorList);
 
-
+            // TODO 目前只定义了一个aspectClass所以此处直接返回
+            return advisorList;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     /**
@@ -201,6 +202,7 @@ public class GPAspectJAdvisorFactory {
         List<GPAdvisor> advisorList = new ArrayList<>();
         // 将aspect切面类中的Method进行包装
         for (Method method : aspectClazz.getMethods()) {
+            // 将method包装为顾问Advisor
             GPAdvisor advisor = getAdvisor(method, aspectClazz, aspectPointcut);
             if (advisor != null) {
                 advisorList.add(advisor);
@@ -210,34 +212,37 @@ public class GPAspectJAdvisorFactory {
     }
 
     /**
-     *
+     * 将method包装为顾问Advisor
      */
     public GPAdvisor getAdvisor(Method candidateAdviceMethod, Class aspectClazz, String aspectPointcut) {
         String aspectBefore = PropertiesUtils.getAspectBefore();
         String aspectAfter = PropertiesUtils.getAspectAfter();
         String aspectAfterThrow = PropertiesUtils.getAspectAfterThrow();
 
-        // 查找method是否为合格的切面方法（也就是与配置文件中配置的方法名相同的方法）
-        String methodName = candidateAdviceMethod.getName();
-        GPMethodInterceptor methodInterceptor = null;
-        if (methodName.equals(aspectBefore)) {
-
-            methodInterceptor = new GPAfterReturningAdviceInterceptor();
-        }
-        if (methodName.equals(aspectAfter)) {
-
-        }
-        if (methodName.equals(aspectAfterThrow)) {
-            String aspectAfterThrowingName = PropertiesUtils.getAspectAfterThrowingName();
-
-        }
         // 创建切入点，用于对目标方法进行匹配，看目标方法是否合格
         GPPointcut pointcut = new GPTypePatternMatchingPointcut(aspectPointcut);
 
+        // 查找method是否为合格的切面方法（也就是与配置文件中配置的方法名相同的方法）
+        String methodName = candidateAdviceMethod.getName();
+        GPAbstractAspectJAdvice advice = null;
+        if (methodName.equals(aspectBefore)) {
+            advice = new GPAspectJMethodBeforeAdvice(candidateAdviceMethod, pointcut, this.beanFactory);
+        }
+        if (methodName.equals(aspectAfter)) {
+            advice = new GPAspectJAfterReturningAdvice(candidateAdviceMethod, pointcut, this.beanFactory);
+        }
+        if (methodName.equals(aspectAfterThrow)) {
+            advice = new GPAspectJAfterThrowingAdvice(candidateAdviceMethod, pointcut, this.beanFactory);
+            String aspectAfterThrowingName = PropertiesUtils.getAspectAfterThrowingName();
+            ((GPAspectJAfterThrowingAdvice) advice).setThrowingName(aspectAfterThrowingName);
+        }
+        if (null == advice) {
+            return null;
+        }
+        advice.setAspectName(aspectClazz.getName());
         // 切入点和通知的顾问（相当于代理）
-        GPAspectJPointcutAdvisor aspectJAdvisor = new GPAspectJPointcutAdvisor();
-        GPDefaultPointcutAdvisor advisor = new GPDefaultPointcutAdvisor(pointcut, methodInterceptor);
-        return advisor;
+        GPAspectJPointcutAdvisor aspectJAdvisor = new GPAspectJPointcutAdvisor(advice);
+        return aspectJAdvisor;
     }
 
 

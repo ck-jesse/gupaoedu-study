@@ -112,13 +112,14 @@ public class GPBeanDefinitionReader {
     }
 
     /**
-     *
+     * 创建BeanDefinition
      */
     private GPBeanDefinition doCreateBeanDefinition(String className) {
         try {
             Class clazz = Class.forName(className);
             // 注意对接口进行处理
             if (clazz.isInterface()) {
+                System.out.println("接口，不创建它的BeanDefinition，interface=" + className);
                 return null;
             }
             GPBeanDefinition beanDefinition = new GPBeanDefinition();

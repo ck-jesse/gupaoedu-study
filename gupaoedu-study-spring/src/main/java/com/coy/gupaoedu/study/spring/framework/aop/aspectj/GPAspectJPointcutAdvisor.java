@@ -7,7 +7,7 @@ import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 
 /**
- * AspectJ
+ * AspectJ顾问
  *
  * @author chenck
  * @date 2019/4/23 16:55
@@ -15,7 +15,7 @@ import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 public class GPAspectJPointcutAdvisor implements GPPointcutAdvisor, GPOrdered {
 
     /**
-     *
+     * 切面AspectJ通知
      */
     private final GPAbstractAspectJAdvice advice;
 

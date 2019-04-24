@@ -1,5 +1,6 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
+import com.coy.gupaoedu.study.spring.framework.aop.advice.GPMethodBeforeAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 
@@ -14,5 +15,10 @@ public class GPAspectJMethodBeforeAdvice extends GPAbstractAspectJAdvice impleme
 
     public GPAspectJMethodBeforeAdvice(Method aspectJAdviceMethod, GPPointcut pointcut, GPBeanFactory beanFactory) {
         super(aspectJAdviceMethod, pointcut, beanFactory);
+    }
+
+    @Override
+    public void before(Method method, Object[] args, Object target) throws Throwable {
+
     }
 }

@@ -328,6 +328,9 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
         // 单例不存在时，则检查bean定义
         GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
+        if (bd.isSingleton()) {
+
+        }
         return typeToMatch.isAssignableFrom(bd.getBeanClazz());
     }
 
@@ -427,7 +430,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
         }
         // 创建bean实例并包装
-        if (instanceWrapper == null) {
+        if (null == instanceWrapper) {
             instanceWrapper = createBeanInstance(beanName, bd, args);
         }
         Object bean = instanceWrapper.getWrappedInstance();
@@ -517,6 +520,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             }
 
             // 判断是否存在bean的单例对象或者bean的定义（即IOC容器里面是否包含有指定名称对应的bean定义）
+            // TODO 此处对于接口暂不支持
             if (containsBean(autowiredBeanName)) {
 
                 // 调用getBean方法从IOC容器获取指定名称的Bean实例
@@ -544,18 +548,14 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         invokeAwareMethods(beanName, bean);
 
         // Bean实例初始化之前做一些处理(BeanPostProcessor.postProcessBeforeInitialization())
-        if (null == bd) {
-            wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
-        }
+        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 
         // Bean实例初始化
         // 调用Bean实例对象的初始化方法，这个初始化方法是在Spring Bean定义配置文件中通过init-method属性指定的
         invokeInitMethods(beanName, wrappedBean, bd);
 
         // Bean实例初始化之后做一些处理(BeanPostProcessor.postProcessAfterInitialization())
-        if (null == bd) {
-            wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
-        }
+        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         return wrappedBean;
     }
 
