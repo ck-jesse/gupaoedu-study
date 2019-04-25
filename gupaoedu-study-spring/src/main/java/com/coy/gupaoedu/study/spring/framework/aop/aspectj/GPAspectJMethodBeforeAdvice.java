@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPMethodBeforeAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 
@@ -19,6 +20,13 @@ public class GPAspectJMethodBeforeAdvice extends GPAbstractAspectJAdvice impleme
 
     @Override
     public void before(Method method, Object[] args, Object target) throws Throwable {
+        super.invokeAdviceMethod(super.getInvocation(), null, null);
+    }
 
+    @Override
+    public Object invoke(GPMethodInvocation invocation) throws Throwable {
+        super.setInvocation(invocation);
+        this.before(invocation.getMethod(), invocation.getArguments(), invocation.getThis());
+        return invocation.proceed();
     }
 }

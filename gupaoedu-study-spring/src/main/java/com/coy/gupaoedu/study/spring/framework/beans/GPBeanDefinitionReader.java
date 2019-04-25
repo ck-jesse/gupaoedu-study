@@ -117,11 +117,13 @@ public class GPBeanDefinitionReader {
     private GPBeanDefinition doCreateBeanDefinition(String className) {
         try {
             Class clazz = Class.forName(className);
-            // 注意对接口进行处理
+            // 排除接口和抽象类
+            // 注：spring是通过ClassMetadata来存放class信息的，其中通过org.springframework.core.type.StandardClassMetadata.isConcrete()排除掉接口和抽象类
             if (clazz.isInterface()) {
-                System.out.println("接口，不创建它的BeanDefinition，interface=" + className);
+                System.out.println("不创建Interface的BeanDefinition，interface=" + className);
                 return null;
             }
+
             GPBeanDefinition beanDefinition = new GPBeanDefinition();
             boolean isAbstract = Modifier.isAbstract(clazz.getModifiers());
             beanDefinition.setAbstractFlag(isAbstract);

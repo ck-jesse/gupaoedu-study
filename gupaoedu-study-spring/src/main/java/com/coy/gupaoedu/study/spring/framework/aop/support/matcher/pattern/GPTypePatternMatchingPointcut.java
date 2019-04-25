@@ -18,7 +18,12 @@ public class GPTypePatternMatchingPointcut implements GPPointcut {
 
     public GPTypePatternMatchingPointcut(String typePattern) {
         if (typePattern != null) {
-            this.classFilter = new GPTypePatternClassFilter(typePattern);
+            // 获取class的正则表达式
+            String classPointCutRegex = typePattern.substring(0, typePattern.lastIndexOf("\\(") - 4);
+            if (classPointCutRegex.indexOf(" +") != -1) {
+                classPointCutRegex = classPointCutRegex.substring(classPointCutRegex.lastIndexOf(" +") + 2);
+            }
+            this.classFilter = new GPTypePatternClassFilter(classPointCutRegex);
         } else {
             this.classFilter = GPClassFilter.TRUE;
         }

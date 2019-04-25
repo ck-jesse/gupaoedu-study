@@ -26,9 +26,10 @@ public class GPDefaultAdvisorAdapterRegistry implements Serializable {
      * Create a new DefaultAdvisorAdapterRegistry, registering well-known adapters.
      */
     public GPDefaultAdvisorAdapterRegistry() {
-        registerAdvisorAdapter(new GPMethodBeforeAdviceAdapter());
-        registerAdvisorAdapter(new GPAfterReturningAdviceAdapter());
-        registerAdvisorAdapter(new GPThrowsAdviceAdapter());
+        // 所有的Adapter废弃掉，感觉是过多的设计了
+        //registerAdvisorAdapter(new GPMethodBeforeAdviceAdapter());
+        //registerAdvisorAdapter(new GPAfterReturningAdviceAdapter());
+        //registerAdvisorAdapter(new GPThrowsAdviceAdapter());
     }
 
     /**
@@ -38,6 +39,7 @@ public class GPDefaultAdvisorAdapterRegistry implements Serializable {
         if (adviceObject instanceof GPAdvisor) {
             return (GPAdvisor) adviceObject;
         }
+        // 注：因为在创建aop的规则时创建的都是GPAspectJPointcutAdvisor所以后面的代码暂时不会执行到
         if (!(adviceObject instanceof GPAdvice)) {
             throw new UnknownAdviceTypeException(adviceObject);
         }

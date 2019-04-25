@@ -35,7 +35,11 @@ public class GPTypePatternMethodMatcher implements GPMethodMatcher {
 
     @Override
     public boolean matches(Method method, Class<?> targetClass) {
-        return this.pattern.matcher(method.getName()).matches();
+        String methodString = method.toString();
+        if (methodString.contains("throws")) {
+            methodString = methodString.substring(0, methodString.lastIndexOf("throws")).trim();
+        }
+        return this.pattern.matcher(methodString).matches();
     }
 
     @Override

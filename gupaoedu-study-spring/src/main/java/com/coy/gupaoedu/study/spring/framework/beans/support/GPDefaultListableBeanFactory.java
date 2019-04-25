@@ -10,6 +10,7 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPInitializingBean;
 import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
+import com.coy.gupaoedu.study.spring.framework.beans.exception.GPNoSuchBeanDefinitionException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPScope;
@@ -22,6 +23,7 @@ import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -328,9 +330,6 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
         // 单例不存在时，则检查bean定义
         GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
-        if (bd.isSingleton()) {
-
-        }
         return typeToMatch.isAssignableFrom(bd.getBeanClazz());
     }
 
@@ -476,6 +475,9 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             if (beanClass.isInterface()) {
                 throw new GPBeansException("Failed to instantiate [" + beanClass.getName() + "]: Specified class is an interface");
             }
+            if (Modifier.isAbstract(beanClass.getModifiers())) {
+                throw new GPBeansException("Failed to instantiate [" + beanClass.getName() + "]: Specified class is an abstract class");
+            }
             Constructor<?> constructorToUse = beanClass.getDeclaredConstructor();
             constructorToUse.setAccessible(true);
             // 通过反射机制调用”构造方法.newInstance(arg)”来进行实例化
@@ -506,33 +508,67 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             return;
         }
 
-        // 获得所有的fields
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (!field.isAnnotationPresent(GPAutowired.class)) {
-                continue;
-            }
-            GPAutowired autowired = field.getAnnotation(GPAutowired.class);
-
-            String autowiredBeanName = autowired.value().trim();
-            if ("".equals(autowiredBeanName)) {
-                autowiredBeanName = field.getType().getName();
-            }
-
-            // 判断是否存在bean的单例对象或者bean的定义（即IOC容器里面是否包含有指定名称对应的bean定义）
-            // TODO 此处对于接口暂不支持
-            if (containsBean(autowiredBeanName)) {
-
-                // 调用getBean方法从IOC容器获取指定名称的Bean实例
-                Object bean = getBean(autowiredBeanName);
-                try {
-                    // 强制访问
-                    field.setAccessible(true);
-                    field.set(instance, bean);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+        try {
+            // 获得所有的fields
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                if (!field.isAnnotationPresent(GPAutowired.class)) {
+                    continue;
                 }
+                GPAutowired autowired = field.getAnnotation(GPAutowired.class);
+
+                String autowiredBeanName = autowired.value().trim();
+                if ("".equals(autowiredBeanName)) {
+                    autowiredBeanName = field.getType().getName();
+                }
+
+                // 根据名称对属性进行自动依赖注入
+                if (autowireByName(instance, field, autowiredBeanName)) {
+                    continue;
+                }
+
+                // 根据类型对属性进行自动依赖注入
+                autowireByType(instance, field);
             }
+        } catch (Exception ex) {
+            throw new GPBeansException("Instantiation of bean=" + beanName + " failed", ex);
+        }
+    }
+
+    /**
+     * 根据名称对属性进行自动依赖注入
+     */
+    protected boolean autowireByName(Object instance, Field field, String autowiredBeanName) throws IllegalAccessException {
+        // 判断是否存在bean的单例对象或者bean的定义（即IOC容器里面是否包含有指定名称对应的bean定义）
+        if (containsBean(autowiredBeanName)) {
+            // 调用getBean方法从IOC容器获取指定名称的Bean实例
+            Object beanInstance = getBean(autowiredBeanName);
+            // 强制访问
+            field.setAccessible(true);
+            field.set(instance, beanInstance);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 根据类型对属性进行自动依赖注入
+     */
+    protected void autowireByType(Object instance, Field field) throws IllegalAccessException {
+        if (Object.class != field.getType()) {
+            // 根据字段的class类型获取候选bean名称
+            String[] candidateNames = getBeanNamesForType(field.getType(), true);
+            if (null == candidateNames || candidateNames.length == 0) {
+                throw new GPNoSuchBeanDefinitionException(field.getType(),
+                        "expected at least 1 bean which qualifies as autowire candidate.");
+            }
+            if (candidateNames.length > 1) {
+                throw new GPBeansException("more than one bean found among candidates.");
+            }
+            Object beanInstance = getBean(candidateNames[0]);
+            // 强制访问
+            field.setAccessible(true);
+            field.set(instance, beanInstance);
         }
     }
 

@@ -166,23 +166,20 @@ public class GPAspectJAdvisorFactory {
         String aspectPointcut = PropertiesUtils.getAspectPointcut();
         String aspectClass = PropertiesUtils.getAspectClass();
 
-        // 将表达式处理为正则支持的表达式
-        aspectPointcut = aspectPointcut
-                .replaceAll("\\.", "\\\\.")
-                .replaceAll("\\\\.\\*", ".*")
-                .replaceAll("\\(", "\\\\(")
-                .replaceAll("\\)", "\\\\)");
-        // Pattern aspectPointcutPattern = Pattern.compile(aspectPointcut);
+        // TODO 此处先判断是否已经存在，若存在则直接返回，后续改造为支持多个Aspect时，再做调整
+        if (advisorsCache.containsKey(aspectClass)) {
+            return advisorsCache.get(aspectClass);
+        }
         try {
-            // TODO 此处先判断是否已经存在，若存在则直接返回，后续改造为支持多个Aspect时，再做调整
-            if (advisorsCache.containsKey(aspectClass)) {
-                return advisorsCache.get(aspectClass);
-            }
+            // 将pointcut表达式转换为正则表达式
+            // 注：默认配置aspectPointcut表达式为全的表达式，所以可以理解为针对method的表达式
+            String aspectPointcutRegx = convertToRegx(aspectPointcut);
+
             // aspect切面类
             Class aspectClazz = Class.forName(aspectClass);
 
             // 将Aspect切面类中的Method包装为Advisor
-            List<GPAdvisor> advisorList = getAspectAdvisors(aspectClazz, aspectPointcut);
+            List<GPAdvisor> advisorList = getAspectAdvisors(aspectClazz, aspectPointcutRegx);
 
             // 缓存Aspect切面类的Advisor
             advisorsCache.put(aspectClass, advisorList);
@@ -196,14 +193,36 @@ public class GPAspectJAdvisorFactory {
     }
 
     /**
+     * 将pointcut表达式转换为正则表达式
+     */
+    public String convertToRegx(String aspectPointcut) {
+        String aspectPointcutRegx = aspectPointcut
+                .replaceAll("\\.", "\\\\.")
+                .replaceAll("\\\\.\\*", ".*")
+                .replaceAll("\\(", "\\\\(")
+                .replaceAll("\\)", "\\\\)").trim();
+        // 以public开头表达式的处理
+        // 因为对于接口的方法为： public abstract java.lang.String com.coy.gupaoedu.study.spring.demo.service.IDemoService.get(java.lang.String)
+        if (aspectPointcutRegx.startsWith("public")) {
+            aspectPointcutRegx = aspectPointcutRegx.replaceAll("public\\s+\\*\\s+", "public +[\\\\w\\\\s.*]* +");
+        }
+        // 以*开头表达式的处理
+        if (aspectPointcutRegx.startsWith("*")) {
+            aspectPointcutRegx = aspectPointcutRegx.replaceAll("\\*\\s+", "[\\\\w\\\\s]* +");
+        }
+        return aspectPointcutRegx;
+    }
+
+    /**
      * 将Aspect切面类中的Method包装为Advisor，没一个方法都是一个Advisor
      */
-    public List<GPAdvisor> getAspectAdvisors(Class aspectClazz, String aspectPointcut) {
+    public List<GPAdvisor> getAspectAdvisors(Class aspectClazz, String aspectPointcutRegx) {
+
         List<GPAdvisor> advisorList = new ArrayList<>();
         // 将aspect切面类中的Method进行包装
         for (Method method : aspectClazz.getMethods()) {
             // 将method包装为顾问Advisor
-            GPAdvisor advisor = getAdvisor(method, aspectClazz, aspectPointcut);
+            GPAdvisor advisor = getAdvisor(method, aspectClazz, aspectPointcutRegx);
             if (advisor != null) {
                 advisorList.add(advisor);
             }
@@ -214,13 +233,13 @@ public class GPAspectJAdvisorFactory {
     /**
      * 将method包装为顾问Advisor
      */
-    public GPAdvisor getAdvisor(Method candidateAdviceMethod, Class aspectClazz, String aspectPointcut) {
+    public GPAdvisor getAdvisor(Method candidateAdviceMethod, Class aspectClazz, String aspectPointcutRegx) {
         String aspectBefore = PropertiesUtils.getAspectBefore();
         String aspectAfter = PropertiesUtils.getAspectAfter();
         String aspectAfterThrow = PropertiesUtils.getAspectAfterThrow();
 
         // 创建切入点，用于对目标方法进行匹配，看目标方法是否合格
-        GPPointcut pointcut = new GPTypePatternMatchingPointcut(aspectPointcut);
+        GPPointcut pointcut = new GPTypePatternMatchingPointcut(aspectPointcutRegx);
 
         // 查找method是否为合格的切面方法（也就是与配置文件中配置的方法名相同的方法）
         String methodName = candidateAdviceMethod.getName();
@@ -232,9 +251,8 @@ public class GPAspectJAdvisorFactory {
             advice = new GPAspectJAfterReturningAdvice(candidateAdviceMethod, pointcut, this.beanFactory);
         }
         if (methodName.equals(aspectAfterThrow)) {
-            advice = new GPAspectJAfterThrowingAdvice(candidateAdviceMethod, pointcut, this.beanFactory);
             String aspectAfterThrowingName = PropertiesUtils.getAspectAfterThrowingName();
-            ((GPAspectJAfterThrowingAdvice) advice).setThrowingName(aspectAfterThrowingName);
+            advice = new GPAspectJAfterThrowingAdvice(candidateAdviceMethod, pointcut, this.beanFactory, aspectAfterThrowingName);
         }
         if (null == advice) {
             return null;

@@ -2,12 +2,14 @@ package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
 import com.coy.gupaoedu.study.spring.framework.aop.AopInvocationException;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import com.coy.gupaoedu.study.spring.framework.core.util.ReflectionUtils;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,7 +20,7 @@ import java.lang.reflect.Method;
  * @author chenck
  * @date 2019/4/23 16:58
  */
-public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
+public abstract class GPAbstractAspectJAdvice implements GPMethodInterceptor, GPAdvice, GPOrdered {
 
     private final GPBeanFactory beanFactory;
 
@@ -31,6 +33,11 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
     protected transient Method aspectJAdviceMethod;
 
     private final GPPointcut pointcut;
+
+    /**
+     * 在织入时传入的（也就是MethodInterceptor.invoke()中的invocation）
+     */
+    private GPMethodInvocation invocation;
 
     /**
      * The name of the aspect
@@ -55,6 +62,14 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
         return this.aspectName;
     }
 
+    public GPMethodInvocation getInvocation() {
+        return invocation;
+    }
+
+    public void setInvocation(GPMethodInvocation invocation) {
+        this.invocation = invocation;
+    }
+
     @Override
     public int getOrder() {
         Class<?> type = this.beanFactory.getType(this.aspectName);
@@ -74,11 +89,22 @@ public abstract class GPAbstractAspectJAdvice implements GPAdvice, GPOrdered {
      * Invoke the advice method.
      */
     protected Object invokeAdviceMethod(GPJoinpoint joinPoint, Object returnValue, Throwable ex) throws Throwable {
-        Class<?>[] paramTypes = this.aspectJAdviceMethod.getParameterTypes();
-
+        Class[] paramTypes = this.aspectJAdviceMethod.getParameterTypes();
         Object[] args = new Object[paramTypes.length];
+
+        /*for (int i = 0; i < paramTypes.length; i++) {
+            if (paramTypes[i] instanceof GPJoinpoint) {
+                args[i] = joinPoint;
+            } else if (paramTypes[i] instanceof Throwable) {
+                args[i] = ex;
+            } else if (paramTypes[i] instanceof Object) {
+                args[i] = returnValue;
+            }
+        }*/
         for (int i = 0; i < paramTypes.length; i++) {
             if (paramTypes[i] == GPJoinpoint.class) {
+                args[i] = joinPoint;
+            } else if (paramTypes[i] == GPMethodInvocation.class) {
                 args[i] = joinPoint;
             } else if (paramTypes[i] == Throwable.class) {
                 args[i] = ex;

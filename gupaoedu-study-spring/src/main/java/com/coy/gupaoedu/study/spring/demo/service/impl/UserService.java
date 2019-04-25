@@ -1,12 +1,14 @@
-package com.coy.gupaoedu.study.spring.demo.mvc.action;
+package com.coy.gupaoedu.study.spring.demo.service.impl;
 
 import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
 
-
+/**
+ * 用于测试基于类的CGLIB代理
+ */
 @GPService
-public class TwoAction {
+public class UserService {
 
     @GPAutowired
     private IDemoService demoService;

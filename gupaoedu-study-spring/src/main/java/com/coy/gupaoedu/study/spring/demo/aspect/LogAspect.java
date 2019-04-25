@@ -21,11 +21,17 @@ public class LogAspect {
         log.info("Invoker Before Method!!!" +
                 "\nTargetObject:" + joinPoint.getThis() +
                 "\nArgs:" + Arrays.toString(joinPoint.getArguments()));
+        System.out.println("Invoker Before Method!!!" +
+                "\nTargetObject:" + joinPoint.getThis() +
+                "\nArgs:" + Arrays.toString(joinPoint.getArguments()));
     }
 
     //在调用一个方法之后，执行after方法
     public void after(GPMethodInvocation joinPoint) {
         log.info("Invoker After Method!!!" +
+                "\nTargetObject:" + joinPoint.getThis() +
+                "\nArgs:" + Arrays.toString(joinPoint.getArguments()));
+        System.out.println("Invoker After Method!!!" +
                 "\nTargetObject:" + joinPoint.getThis() +
                 "\nArgs:" + Arrays.toString(joinPoint.getArguments()));
         long startTime = (Long) joinPoint.getUserAttribute("startTime_" + joinPoint.getMethod().getName());
@@ -35,6 +41,10 @@ public class LogAspect {
 
     public void afterThrowing(GPMethodInvocation joinPoint, Throwable ex) {
         log.info("出现异常" +
+                "\nTargetObject:" + joinPoint.getThis() +
+                "\nArgs:" + Arrays.toString(joinPoint.getArguments()) +
+                "\nThrows:" + ex.getMessage());
+        System.out.println("出现异常" +
                 "\nTargetObject:" + joinPoint.getThis() +
                 "\nArgs:" + Arrays.toString(joinPoint.getArguments()) +
                 "\nThrows:" + ex.getMessage());

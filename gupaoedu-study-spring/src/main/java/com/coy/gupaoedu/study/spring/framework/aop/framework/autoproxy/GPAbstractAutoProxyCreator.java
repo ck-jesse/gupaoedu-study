@@ -376,7 +376,7 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
      * 查找所有候选Advisor bean
      */
     protected List<GPAdvisor> findCandidateAdvisors() {
-        // Add all the Spring advisors found according to superclass rules.
+        // 此步骤目前好像没有加载到任何的Advisor，应该在什么地方给设置进去然后再获取 Add all the Spring advisors found according to superclass rules.
         List<GPAdvisor> advisors = beanFactoryAdvisorRetrievalHelper.findAdvisorBeans();
         // Build Advisors for all AspectJ aspects in the bean factory.
         if (this.aspectJAdvisorFactory != null) {
