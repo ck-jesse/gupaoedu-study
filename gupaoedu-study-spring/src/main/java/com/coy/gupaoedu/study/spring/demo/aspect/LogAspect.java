@@ -24,6 +24,7 @@ public class LogAspect {
         System.out.println("Invoker Before Method!!!" +
                 "\nTargetObject:" + joinPoint.getThis() +
                 "\nArgs:" + Arrays.toString(joinPoint.getArguments()));
+        System.out.println();
     }
 
     //在调用一个方法之后，执行after方法
@@ -37,6 +38,7 @@ public class LogAspect {
         long startTime = (Long) joinPoint.getUserAttribute("startTime_" + joinPoint.getMethod().getName());
         long endTime = System.currentTimeMillis();
         System.out.println("use time :" + (endTime - startTime));
+        System.out.println();
     }
 
     public void afterThrowing(GPMethodInvocation joinPoint, Throwable ex) {

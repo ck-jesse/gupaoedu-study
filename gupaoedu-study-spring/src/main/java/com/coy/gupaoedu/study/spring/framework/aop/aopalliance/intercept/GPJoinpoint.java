@@ -20,6 +20,7 @@ public interface GPJoinpoint {
     Object proceed() throws Throwable;
 
     /**
+     * 获取目标对象
      * Return the object that holds the current joinpoint's static part.
      * <p>For instance, the target object for an invocation.
      *
