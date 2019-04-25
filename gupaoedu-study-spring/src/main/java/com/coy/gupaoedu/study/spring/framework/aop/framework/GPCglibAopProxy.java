@@ -94,7 +94,8 @@ public class GPCglibAopProxy implements GPAopProxy, Serializable {
                 retVal = methodProxy.invoke(target, argsToUse);
             } else {
                 // We need to create a method invocation...
-                retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
+                CglibMethodInvocation invocation = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy);
+                retVal = invocation.proceed();
             }
             retVal = processReturnType(proxy, target, method, retVal);
             return retVal;
@@ -126,10 +127,8 @@ public class GPCglibAopProxy implements GPAopProxy, Serializable {
 
         private final boolean publicMethod;
 
-        public CglibMethodInvocation(Object proxy, @Nullable Object target, Method method,
-                                     Object[] arguments, @Nullable Class<?> targetClass,
+        public CglibMethodInvocation(Object proxy, @Nullable Object target, Method method, Object[] arguments, @Nullable Class<?> targetClass,
                                      List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
-
             super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
             this.methodProxy = methodProxy;
             this.publicMethod = Modifier.isPublic(method.getModifiers());
@@ -141,6 +140,7 @@ public class GPCglibAopProxy implements GPAopProxy, Serializable {
          */
         @Override
         protected Object invokeJoinpoint() throws Throwable {
+            // 对父类中方法的重写，如果方法是public的，那么直接执行，如果不是public的则设置method.setAccessible(true)，以便可以执行该方法
             if (this.publicMethod) {
                 return this.methodProxy.invoke(this.target, this.arguments);
             } else {
@@ -156,11 +156,8 @@ public class GPCglibAopProxy implements GPAopProxy, Serializable {
     @Nullable
     private static Object processReturnType(
             Object proxy, @Nullable Object target, Method method, @Nullable Object returnValue) {
-
         // Massage return value if necessary
         if (returnValue != null && returnValue == target) {
-            // Special case: it returned "this". Note that we can't help
-            // if the target sets a reference to itself in another returned object.
             returnValue = proxy;
         }
         Class<?> returnType = method.getReturnType();
