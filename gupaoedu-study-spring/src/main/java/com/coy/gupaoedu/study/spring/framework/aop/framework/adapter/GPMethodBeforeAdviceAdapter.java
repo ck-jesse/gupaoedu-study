@@ -19,7 +19,6 @@ package com.coy.gupaoedu.study.spring.framework.aop.framework.adapter;
 import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPMethodBeforeAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodBeforeAdviceInterceptor;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
 
 import java.io.Serializable;
@@ -30,6 +29,7 @@ import java.io.Serializable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@Deprecated
 @SuppressWarnings("serial")
 class GPMethodBeforeAdviceAdapter implements GPAdvisorAdapter, Serializable {
 

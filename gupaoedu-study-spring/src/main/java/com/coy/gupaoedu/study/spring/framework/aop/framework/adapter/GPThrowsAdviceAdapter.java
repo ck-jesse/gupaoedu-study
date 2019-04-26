@@ -20,7 +20,6 @@ import com.coy.gupaoedu.study.spring.framework.aop.GPAdvisor;
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPThrowsAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPThrowsAdviceInterceptor;
 
 import java.io.Serializable;
 
@@ -31,6 +30,7 @@ import java.io.Serializable;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@Deprecated
 @SuppressWarnings("serial")
 class GPThrowsAdviceAdapter implements GPAdvisorAdapter, Serializable {
 

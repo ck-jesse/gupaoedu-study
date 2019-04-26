@@ -148,7 +148,7 @@ public class GPReflectiveMethodInvocation implements GPProxyMethodInvocation {
      */
     protected Object invokeJoinpoint() throws Throwable {
         method.setAccessible(true);
-        return method.invoke(this.target, this.method, this.arguments);
+        return method.invoke(this.target, this.arguments);
     }
 
     @Override

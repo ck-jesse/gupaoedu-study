@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept;
+package com.coy.gupaoedu.study.spring.framework.aop.framework.adapter;
 
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPMethodBeforeAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 
 import java.io.Serializable;
@@ -28,6 +30,7 @@ import java.io.Serializable;
  *
  * @author Rod Johnson
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class GPMethodBeforeAdviceInterceptor implements GPMethodInterceptor, Serializable {
 
