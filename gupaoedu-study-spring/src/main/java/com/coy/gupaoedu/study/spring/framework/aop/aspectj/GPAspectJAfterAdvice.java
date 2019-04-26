@@ -21,7 +21,6 @@ public class GPAspectJAfterAdvice extends GPAbstractAspectJAdvice implements GPA
 
     @Override
     public Object invoke(GPMethodInvocation invocation) throws Throwable {
-        super.setInvocation(invocation);
         Object retValue = invocation.proceed();
         super.invokeAdviceMethod(invocation, retValue, null);
         return retValue;

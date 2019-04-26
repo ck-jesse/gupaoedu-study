@@ -2,9 +2,10 @@ package com.coy.gupaoedu.study.spring.framework.aop.aspectj;
 
 import com.coy.gupaoedu.study.spring.framework.aop.AopInvocationException;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.GPAdvice;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinPoint;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
+import com.coy.gupaoedu.study.spring.framework.aop.framework.GPReflectiveMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.aop.support.matcher.GPPointcut;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.core.GPOrdered;
@@ -35,11 +36,6 @@ public abstract class GPAbstractAspectJAdvice implements GPMethodInterceptor, GP
     private final GPPointcut pointcut;
 
     /**
-     * 在织入时传入的（也就是MethodInterceptor.invoke()中的invocation）
-     */
-    private GPMethodInvocation invocation;
-
-    /**
      * The name of the aspect
      */
     private String aspectName = "";
@@ -62,14 +58,6 @@ public abstract class GPAbstractAspectJAdvice implements GPMethodInterceptor, GP
         return this.aspectName;
     }
 
-    public GPMethodInvocation getInvocation() {
-        return invocation;
-    }
-
-    public void setInvocation(GPMethodInvocation invocation) {
-        this.invocation = invocation;
-    }
-
     @Override
     public int getOrder() {
         Class<?> type = this.beanFactory.getType(this.aspectName);
@@ -86,25 +74,18 @@ public abstract class GPAbstractAspectJAdvice implements GPMethodInterceptor, GP
     }
 
     /**
-     * Invoke the advice method.
+     * 执行advice method
      */
-    protected Object invokeAdviceMethod(GPJoinpoint joinPoint, Object returnValue, Throwable ex) throws Throwable {
+    protected Object invokeAdviceMethod(GPJoinPoint joinPoint, Object returnValue, Throwable ex) throws Throwable {
         Class[] paramTypes = this.aspectJAdviceMethod.getParameterTypes();
         Object[] args = new Object[paramTypes.length];
 
-        /*for (int i = 0; i < paramTypes.length; i++) {
-            if (paramTypes[i] instanceof GPJoinpoint) {
-                args[i] = joinPoint;
-            } else if (paramTypes[i] instanceof Throwable) {
-                args[i] = ex;
-            } else if (paramTypes[i] instanceof Object) {
-                args[i] = returnValue;
-            }
-        }*/
         for (int i = 0; i < paramTypes.length; i++) {
-            if (paramTypes[i] == GPJoinpoint.class) {
+            if (paramTypes[i] == GPJoinPoint.class) {
                 args[i] = joinPoint;
-            } else if (paramTypes[i] == GPMethodInvocation.class) {
+            }
+            // 此处暂时先直接判断类型
+            else if (paramTypes[i] == GPMethodInvocation.class) {
                 args[i] = joinPoint;
             } else if (paramTypes[i] == Throwable.class) {
                 args[i] = ex;
@@ -115,6 +96,9 @@ public abstract class GPAbstractAspectJAdvice implements GPMethodInterceptor, GP
         return invokeAdviceMethodWithGivenArgs(args);
     }
 
+    /**
+     * 执行advice method，并设置指定的参数
+     */
     protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
         Object[] actualArgs = args;
         if (this.aspectJAdviceMethod.getParameterCount() == 0) {
@@ -133,6 +117,31 @@ public abstract class GPAbstractAspectJAdvice implements GPMethodInterceptor, GP
         } catch (InvocationTargetException ex) {
             throw ex.getTargetException();
         }
+    }
+
+    /**
+     * Key used in ReflectiveMethodInvocation userAtributes map for the current joinpoint.
+     */
+    protected static final String JOIN_POINT_KEY = GPJoinPoint.class.getName();
+
+    /**
+     * 获取当前的JoinPoint连接点，也就是MethodInvocation
+     * <p>
+     * Lazily instantiate joinpoint for the current invocation.
+     * Requires MethodInvocation to be bound with ExposeInvocationInterceptor.
+     * <p>Do not use if access is available to the current ReflectiveMethodInvocation
+     * (in an around advice).
+     *
+     * @return current AspectJ joinpoint, or through an exception if we're not in a
+     * Spring AOP invocation.
+     */
+    public GPMethodInvocation currentJoinPoint() {
+        GPMethodInvocation mi = GPExposeInvocationInterceptor.currentInvocation();
+        if (!(mi instanceof GPReflectiveMethodInvocation)) {
+            throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+        }
+        GPReflectiveMethodInvocation pmi = (GPReflectiveMethodInvocation) mi;
+        return pmi;
     }
 
 }

@@ -320,10 +320,10 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
      * 查找合格的Advisor
      */
     protected List<GPAdvisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
-        // 查找候选Advisor
+        // 查找所有候选Advisor
         List<GPAdvisor> candidateAdvisors = findCandidateAdvisors();
+
         // 查找合格的Advisor
-        // List<GPAdvisor> eligibleAdvisors = AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
         List<GPAdvisor> eligibleAdvisors = new ArrayList<>();
         for (GPAdvisor candidate : candidateAdvisors) {
             if (canApply(candidate, beanClass)) {
@@ -331,11 +331,21 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
             }
         }
 
+        // 扩展 Advisors
+        extendAdvisors(eligibleAdvisors);
+
         if (!eligibleAdvisors.isEmpty()) {
             // 将合格的Advisor排序
             Collections.sort(eligibleAdvisors, GPOrderComparator.INSTANCE);
         }
         return eligibleAdvisors;
+    }
+
+    /**
+     * 扩展 Advisors（实际上是添加一个Invocation的Interceptor，用于将Invocation存放到ThreadLocal中，以便在各个拦截器都能获取到自己的Invocation）
+     */
+    private void extendAdvisors(List<GPAdvisor> candidateAdvisors) {
+        AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
     }
 
     /**
@@ -381,7 +391,7 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
         // Build Advisors for all AspectJ aspects in the bean factory.
         if (this.aspectJAdvisorFactory != null) {
             // 构建AspectJ切面对应的Advisors
-            advisors.addAll(this.aspectJAdvisorFactory.myBuildAspectJAdvisors());
+            advisors.addAll(this.aspectJAdvisorFactory.buildAspectJAdvisors());
         }
         return advisors;
     }

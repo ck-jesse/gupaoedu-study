@@ -50,12 +50,18 @@ public class GPDefaultAdvisorChainFactory implements Serializable {
                     GPMethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
                     // 方法是否匹配该切入点(不同的MethodMatcher可实现不同的匹配规则)
                     if (mm.matches(method, actualClass)) {
+
                         // 判断是否为MethodInterceptor
                         GPAdvice advice = advisor.getAdvice();
-                        if (advice instanceof GPMethodInterceptor) {
-                            interceptorList.add(advice);
-                        } else {
+                        if (!(advice instanceof GPMethodInterceptor)) {
                             throw new UnknownAdviceTypeException(advice);
+                        }
+                        if (mm.isRuntime()) {
+                            // Creating a new object instance in the getInterceptors() method
+                            // isn't a problem as we normally cache created chains.
+                            interceptorList.add(new GPInterceptorAndDynamicMethodMatcher((GPMethodInterceptor) advice, mm));
+                        } else {
+                            interceptorList.add(advice);
                         }
                     }
                 }

@@ -14,7 +14,9 @@ public class DemoService implements IDemoService {
 
     @Override
     public String get(String name) {
-        return "My name is " + name;
+        String result = "My name is " + name;
+        System.out.println(result + " " + init);
+        return result;
     }
 
     @Override

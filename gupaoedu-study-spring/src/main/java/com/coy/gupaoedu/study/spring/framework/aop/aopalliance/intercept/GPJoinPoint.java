@@ -6,7 +6,7 @@ import java.lang.reflect.AccessibleObject;
  * @author chenck
  * @date 2019/4/16 20:40
  */
-public interface GPJoinpoint {
+public interface GPJoinPoint {
 
     /**
      * 执行拦截器链式调用

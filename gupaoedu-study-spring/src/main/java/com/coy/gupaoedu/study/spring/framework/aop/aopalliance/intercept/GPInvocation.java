@@ -6,7 +6,7 @@ package com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept;
  * @author chenck
  * @date 2019/4/16 20:40
  */
-public interface GPInvocation extends GPJoinpoint {
+public interface GPInvocation extends GPJoinPoint {
     /**
      * Get the arguments as an array object.
      * It is possible to change element values within this
