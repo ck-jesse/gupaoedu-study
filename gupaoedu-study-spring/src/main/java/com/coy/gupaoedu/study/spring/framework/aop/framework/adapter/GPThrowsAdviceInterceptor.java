@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept;
+package com.coy.gupaoedu.study.spring.framework.aop.framework.adapter;
 
 import com.coy.gupaoedu.study.spring.framework.aop.advice.GPAfterAdvice;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInterceptor;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +50,7 @@ import java.util.Map;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@Deprecated
 public class GPThrowsAdviceInterceptor implements GPMethodInterceptor, GPAfterAdvice {
 
     private static final String AFTER_THROWING = "afterThrowing";

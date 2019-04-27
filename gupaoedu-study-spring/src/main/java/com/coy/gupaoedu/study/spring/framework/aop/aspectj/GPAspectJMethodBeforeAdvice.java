@@ -20,12 +20,11 @@ public class GPAspectJMethodBeforeAdvice extends GPAbstractAspectJAdvice impleme
 
     @Override
     public void before(Method method, Object[] args, Object target) throws Throwable {
-        super.invokeAdviceMethod(super.getInvocation(), null, null);
+        super.invokeAdviceMethod(super.currentJoinPoint(), null, null);
     }
 
     @Override
     public Object invoke(GPMethodInvocation invocation) throws Throwable {
-        super.setInvocation(invocation);
         this.before(invocation.getMethod(), invocation.getArguments(), invocation.getThis());
         return invocation.proceed();
     }

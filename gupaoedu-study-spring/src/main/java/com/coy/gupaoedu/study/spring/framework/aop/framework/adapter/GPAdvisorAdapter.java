@@ -8,6 +8,7 @@ import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMetho
  * @author chenck
  * @date 2019/4/17 15:53
  */
+@Deprecated
 public interface GPAdvisorAdapter {
     /**
      * Does this adapter understand this advice object? Is it valid to

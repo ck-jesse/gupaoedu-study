@@ -33,7 +33,6 @@ public class GPAspectJAfterThrowingAdvice extends GPAbstractAspectJAdvice implem
 
     @Override
     public Object invoke(GPMethodInvocation invocation) throws Throwable {
-        super.setInvocation(invocation);
         try {
             return invocation.proceed();
         } catch (Throwable e) {

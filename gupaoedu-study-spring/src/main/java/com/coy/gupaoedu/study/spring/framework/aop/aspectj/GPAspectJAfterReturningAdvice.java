@@ -20,12 +20,11 @@ public class GPAspectJAfterReturningAdvice extends GPAbstractAspectJAdvice imple
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-        super.invokeAdviceMethod(super.getInvocation(), returnValue, null);
+         super.invokeAdviceMethod(super.currentJoinPoint(), returnValue, null);
     }
 
     @Override
     public Object invoke(GPMethodInvocation invocation) throws Throwable {
-        super.setInvocation(invocation);
         Object retVal = invocation.proceed();
         this.afterReturning(retVal, invocation.getMethod(), invocation.getArguments(), invocation.getThis());
         return retVal;

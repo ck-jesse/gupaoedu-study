@@ -27,6 +27,7 @@ public class GPAspectJAdvisorFactory {
 
     private volatile List<String> aspectBeanNames;
 
+    // Map<beanName, 对应的拦截器链>
     private final Map<String, List<GPAdvisor>> advisorsCache = new ConcurrentHashMap<>();
 
 //    private final Map<String, MetadataAwareAspectInstanceFactory> aspectFactoryCache = new ConcurrentHashMap<>();
@@ -81,12 +82,8 @@ public class GPAspectJAdvisorFactory {
 
 
     /**
-     * 在当前bean工厂中查找带aspectj注释的方面bean
-     * 注：可简单实现为从配置文件加载对应的配置
-     * <p>
-     * Look for AspectJ-annotated aspect beans in the current bean factory,
-     * and return to a list of Spring AOP Advisors representing them.
-     * <p>Creates a Spring Advisor for each AspectJ advice method.
+     * 在当前bean工厂中查找带aspectj注释的切面bean，并将切面bean中的方法构建为Advisor
+     * 注：暂时简单实现为从配置文件加载对应的配置
      */
     public List<GPAdvisor> buildAspectJAdvisors() {
         List<String> aspectNames = this.aspectBeanNames;
@@ -95,6 +92,13 @@ public class GPAspectJAdvisorFactory {
             synchronized (this) {
                 aspectNames = this.aspectBeanNames;
                 if (aspectNames == null) {
+                    // TODO 目前只定义了一个aspectj配置，后续可改造为多个（建议基于注解的方式来实现，类似spring）
+                    String aspectPointcut = PropertiesUtils.getAspectPointcut();
+                    String aspectClass = PropertiesUtils.getAspectClass();
+                    // 将pointcut表达式转换为正则表达式
+                    // 注：默认配置aspectPointcut表达式为全的表达式，所以可以理解为针对method的表达式
+                    String aspectPointcutRegx = convertToRegx(aspectPointcut);
+
                     List<GPAdvisor> advisors = new LinkedList<>();
                     aspectNames = new LinkedList<>();
                     String[] beanNames = this.beanFactory.getBeanNamesForType(Object.class, true);
@@ -110,30 +114,13 @@ public class GPAspectJAdvisorFactory {
                             continue;
                         }
                         // 判断该bean是不是有定义Aspect注解，如果有，则看做一个切面
-                        if (this.isAspect(beanType)) {
+                        // if (this.isAspect(beanType)) {
+                        if (beanType.getName().equals(aspectClass)) {
                             aspectNames.add(beanName);
-//                            AspectMetadata amd = new AspectMetadata(beanType, beanName);
-//                            if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
-//                                MetadataAwareAspectInstanceFactory factory =
-//                                        new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
-//                                List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
-//                                if (this.beanFactory.isSingleton(beanName)) {
-//                                    this.advisorsCache.put(beanName, classAdvisors);
-//                                } else {
-//                                    this.aspectFactoryCache.put(beanName, factory);
-//                                }
-//                                advisors.addAll(classAdvisors);
-//                            } else {
-//                                // Per target or per this.
-//                                if (this.beanFactory.isSingleton(beanName)) {
-//                                    throw new IllegalArgumentException("Bean with name '" + beanName +
-//                                            "' is a singleton, but aspect instantiation model is not singleton");
-//                                }
-//                                MetadataAwareAspectInstanceFactory factory =
-//                                        new PrototypeAspectInstanceFactory(this.beanFactory, beanName);
-//                                this.aspectFactoryCache.put(beanName, factory);
-//                                advisors.addAll(this.advisorFactory.getAdvisors(factory));
-//                            }
+                            // 将Aspect切面类中的Method包装为Advisor
+                            List<GPAdvisor> classAdvisors = getAspectAdvisors(beanType, aspectPointcutRegx);
+                            this.advisorsCache.put(beanName, classAdvisors);
+                            advisors.addAll(classAdvisors);
                         }
                     }
                     this.aspectBeanNames = aspectNames;
@@ -150,46 +137,9 @@ public class GPAspectJAdvisorFactory {
             List<GPAdvisor> cachedAdvisors = this.advisorsCache.get(aspectName);
             if (cachedAdvisors != null) {
                 advisors.addAll(cachedAdvisors);
-            } else {
-//                MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
-//                advisors.addAll(this.advisorFactory.getAdvisors(factory));
             }
         }
         return advisors;
-    }
-
-    /**
-     * 将切面AspectJ中的方法构建为Advisor
-     * 注：spring的此处实现过于复杂，仅参考
-     */
-    public List<GPAdvisor> myBuildAspectJAdvisors() {
-        String aspectPointcut = PropertiesUtils.getAspectPointcut();
-        String aspectClass = PropertiesUtils.getAspectClass();
-
-        // TODO 此处先判断是否已经存在，若存在则直接返回，后续改造为支持多个Aspect时，再做调整
-        if (advisorsCache.containsKey(aspectClass)) {
-            return advisorsCache.get(aspectClass);
-        }
-        try {
-            // 将pointcut表达式转换为正则表达式
-            // 注：默认配置aspectPointcut表达式为全的表达式，所以可以理解为针对method的表达式
-            String aspectPointcutRegx = convertToRegx(aspectPointcut);
-
-            // aspect切面类
-            Class aspectClazz = Class.forName(aspectClass);
-
-            // 将Aspect切面类中的Method包装为Advisor
-            List<GPAdvisor> advisorList = getAspectAdvisors(aspectClazz, aspectPointcutRegx);
-
-            // 缓存Aspect切面类的Advisor
-            advisorsCache.put(aspectClass, advisorList);
-
-            // TODO 目前只定义了一个aspectClass所以此处直接返回
-            return advisorList;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     /**

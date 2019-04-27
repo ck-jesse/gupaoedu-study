@@ -1,11 +1,10 @@
 package com.coy.gupaoedu.study.spring;
 
 import com.coy.gupaoedu.study.spring.demo.aspect.LogAspect;
-import com.coy.gupaoedu.study.spring.demo.mvc.action.TwoAction;
 import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
 import com.coy.gupaoedu.study.spring.demo.service.impl.DemoService;
 import com.coy.gupaoedu.study.spring.demo.service.impl.UserService;
-import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinpoint;
+import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPJoinPoint;
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
 import com.coy.gupaoedu.study.spring.framework.context.GPApplicationContext;
 import com.coy.gupaoedu.study.spring.framework.context.support.GPAbstractApplicationContext;
@@ -38,7 +37,13 @@ public class SpringTest {
        答：1)根据字段类型获取所有的beanNames
 
        5、aop创建代理对象以后，代理中的属性为null，怎么讲目标对象的属性赋值给代理对象呢？
-       答：
+       答：代理对象中含有目标对象的引用，虽然创建代理对象后看到的属性为null，但是在实际调用代理对象的方法时，为null的属性可以从目标对象中拿到对应的属性值，这个不知道是怎么获取到并赋值的？
+
+       6、两个方法A和B被同一个拦截器拦截到，当A中调用B时，会B的拦截器执行完毕后，其中的Invocation已经赋值为了B的Invocation，所以在A重新拿到执行权限时，其获取到了InvocationB，所以出现了混乱
+       答：可以在拦截器链的第一个位置添加一个Invocation拦截器(结合ThreadLocal)，具体的逻辑如下：
+       1）从ThreadLocal中将旧的Invocation取出来，并记录下来
+       2）设置当前Invocation到ThreadLocal中，保证当前的拦截器能获取到自己的Invocation
+       3）当所有的拦截器执行完毕，将旧的Invocation设置到ThreadLocal中，保证外层的拦截器能获取到自己的Invocation
 
      */
 
@@ -49,8 +54,8 @@ public class SpringTest {
         IDemoService demoService = context.getBean(DemoService.class);
         System.out.println(demoService.get("demoService"));
 
-        TwoAction twoAction = context.getBean(TwoAction.class);
-        System.out.println(twoAction.getName("TwoAction"));
+//        TwoAction twoAction = context.getBean(TwoAction.class);
+//        System.out.println(twoAction.getName("TwoAction"));
 
         UserService userService = context.getBean(UserService.class);
         System.out.println(userService.getName("UserService"));
@@ -66,8 +71,8 @@ public class SpringTest {
         Object[] args = new Object[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
             System.out.println(paramTypes[i].getTypeName());
-            if (paramTypes[i] instanceof GPJoinpoint) {
-                System.out.println("instanceof GPJoinpoint");
+            if (paramTypes[i] instanceof GPJoinPoint) {
+                System.out.println("instanceof GPJoinPoint");
             } else if (paramTypes[i] instanceof GPMethodInvocation) {
                 System.out.println("instanceof GPMethodInvocation");
             } else if (paramTypes[i] instanceof Throwable) {
@@ -80,8 +85,8 @@ public class SpringTest {
         Class[] paramTypes1 = aspectJAdviceMethod.getParameterTypes();
         for (int i = 0; i < paramTypes1.length; i++) {
             System.out.println(paramTypes1[i].getTypeName());
-            if (paramTypes1[i] == GPJoinpoint.class) {
-                System.out.println("instanceof GPJoinpoint");
+            if (paramTypes1[i] == GPJoinPoint.class) {
+                System.out.println("instanceof GPJoinPoint");
             } else if (paramTypes1[i] == GPMethodInvocation.class) {
                 System.out.println("instanceof GPMethodInvocation");
             } else if (paramTypes1[i] == Throwable.class) {
