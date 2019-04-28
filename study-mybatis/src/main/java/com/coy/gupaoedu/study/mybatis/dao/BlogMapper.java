@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.mybatis.mapper;
+package com.coy.gupaoedu.study.mybatis.dao;
 
 import com.coy.gupaoedu.study.mybatis.model.Blog;
 

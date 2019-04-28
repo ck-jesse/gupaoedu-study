@@ -1,6 +1,6 @@
 package com.coy.gupaoedu.study.mybatis;
 
-import com.coy.gupaoedu.study.mybatis.mapper.BlogMapper;
+import com.coy.gupaoedu.study.mybatis.dao.BlogMapper;
 import com.coy.gupaoedu.study.mybatis.model.Blog;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
