@@ -27,6 +27,8 @@
         <setting name="localCacheScope" value="SESSION"/>
         <setting name="jdbcTypeForNull" value="OTHER"/>
         <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+        <!-- 指定 MyBatis 所用日志的具体实现，未指定时将自动查找。 SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
 
     <!-- 环境配置 -->

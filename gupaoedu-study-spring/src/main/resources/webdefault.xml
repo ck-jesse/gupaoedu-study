@@ -219,7 +219,7 @@
   <!--                       FATAL, ERROR, WARNING, INFORMATION, and DEBUG. -->
   <!--                       [WARNING]                                      -->
   <!--                                                                      -->
-  <!--   mappedfile          Should we generate static content with one     -->
+  <!--   mappedfile          Should we generator static content with one     -->
   <!--                       print statement per input line, to ease        -->
   <!--                       debugging?  [false]                            -->
   <!--                                                                      -->

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <!--  mysql数据源配置文件路径
+    <properties resource="config.properties"/>
+      -->
+
+    <context id="Mysql" targetRuntime="MyBatis3" defaultModelType="flat">
+        <!--beginningDelimiter和endingDelimiter的默认值为双引号(")，
+        在Mysql中不能这么写，所以还要将这两个默认值改为反单引号(`)-->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+        <property name="javaFileEncoding" value="UTF-8"/>
+
+        <!-- 格式化java代码 -->
+        <property name="javaFormatter" value="org.mybatis.generator.api.dom.DefaultJavaFormatter"/>
+        <!-- 格式化XML代码 -->
+        <property name="xmlFormatter" value="org.mybatis.generator.api.dom.DefaultXmlFormatter"/>
+
+        <!-- JavaBean 实现 序列化 接口 -->
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+
+        <!-- genenat entity时,生成toString -->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+
+        <commentGenerator type="com.coy.gupaoedu.study.mybatis.generator.MyCommentGenerator">
+            <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+            <property name="suppressAllComments" value="false"/>
+            <!--阻止生成的注释包含时间戳-->
+            <property name="suppressDate" value="true"/>
+            <!-- 在生成的实体类中附带表字段的注释  MBG1.3.3中新增的功能 -->
+            <property name="addRemarkComments" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://127.0.0.1:3306/test?useUnicode=true"
+                        userId="root" password="root">
+            <!-- 获取表的注释（针对mysql数据库） -->
+            <property name="useInformationSchema" value="true"></property>
+        </jdbcConnection>
+
+        <!-- 默认false，把JDBC DECIMAL 和 NUMERIC 类型解析为 Integer
+            true，把JDBC DECIMAL 和 NUMERIC 类型解析为java.math.BigDecimal -->
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!--  实体类生成路径  -->
+        <javaModelGenerator targetPackage="com.coy.gupaoedu.study.mybatis.generator" targetProject=".\src\main\java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!--  XML生成路径  -->
+        <sqlMapGenerator targetPackage="generator" targetProject=".\src\main\resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!--  接口生成路径 XMLMAPPER表示所有的方法都在XML中，接口调用依赖XML文件。  -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.coy.gupaoedu.study.mybatis.generator"
+                             targetProject=".\src\main\java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!-- 针对所有表进行生成 -->
+        <!--<table tableName="%">
+            &lt;!&ndash; 字段下划线的处理 true 表示不转驼峰 false(默认) 表示转为驼峰 &ndash;&gt;
+            <property name="useActualColumnNames" value="true"/>
+        </table>-->
+
+
+        <!--<table tableName="tb_credit_loan_user" domainObjectName="CreditLoanUser"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false">
+            &lt;!&ndash; true 表示不转驼峰 false(默认) 表示转为驼峰 &ndash;&gt;
+            <property name="useActualColumnNames" value="true"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>-->
+
+        <table tableName="blog" domainObjectName="Blog"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false">
+            <!--  true 表示不转驼峰, false 表示转为驼峰(默认)  -->
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+        </table>
+
+    </context>
+</generatorConfiguration>

@@ -7,5 +7,8 @@ import com.coy.gupaoedu.study.mybatis.model.Blog;
  * @date 2019/4/27 21:14
  */
 public interface BlogMapper {
+    /**
+     * 查询博客信息
+     */
     Blog selectBlog(int id);
 }
