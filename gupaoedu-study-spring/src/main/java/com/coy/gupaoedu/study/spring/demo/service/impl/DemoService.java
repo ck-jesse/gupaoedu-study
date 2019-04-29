@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring.demo.service.impl;
 
 import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
+import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
 
 /**
@@ -9,6 +10,12 @@ import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
  */
 @GPService
 public class DemoService implements IDemoService {
+
+    /**
+     * 循环依赖
+     */
+    @GPAutowired
+    private UserService userService;
 
     private String init;
 

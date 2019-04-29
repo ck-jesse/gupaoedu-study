@@ -38,8 +38,14 @@ public class SpringTest {
            2）设置当前Invocation到ThreadLocal中，保证当前的拦截器能获取到自己的Invocation
            3）当所有的拦截器执行完毕，将旧的Invocation设置到ThreadLocal中，保证外层的拦截器能获取到自己的Invocation
 
-       7、循环引用的问题，该怎么解决？
+       7、A依赖B，B依赖A的循环引用的问题，该怎么解决？？
        答：
+          1）在创建单例beanA子后，并在单例beanA的属性beanB注入之前，提前暴露该单例beanA的引用到容器中（提前暴露的单例bean容器），然后在给beanA注入beanB时发现beanB未创建，所以会去创建beanB，
+          2）在创建单例beanB后，也提前暴露beanB的引用，然后在给beanB注入beanA时，从提前暴露的单例bean容器中获取beanA的引用，以完成beanA的注入
+          注意：若提前暴露的单例bean符合某些aop的拦截规则，则也需要提前创建该单例bean的代理bean且需提前暴露（针对这种情况，在该单例bean初始化initializeBean后，则将该单例bean替换为提前暴露的代理bean，以保持bean一致）
+          特别注意：
+          1、循环依赖只支持单例bean，且循环依赖只支持属性注入的方式，对于构建函数的注入产生的循环依赖问题不支持
+          2、循环依赖不支持prototype类型的bean，因为prototype类型的bean在每次使用时都会创建新的bean，所以无法支持
      */
 
 

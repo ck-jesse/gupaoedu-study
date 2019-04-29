@@ -111,11 +111,25 @@ public class GPAbstractAutoProxyCreator extends GPProxyProcessorSupport implemen
     public Object postProcessAfterInitialization(Object bean, String beanName) {
         if (bean != null) {
             Object cacheKey = getCacheKey(bean.getClass(), beanName);
+            // 如果提前已经创建过了代理bean，则不重复创建（一般是因为被其他对象引用，需要依赖注入，所以提前创建了bean的代理对象）
             if (!this.earlyProxyReferences.contains(cacheKey)) {
                 return wrapIfNecessary(bean, beanName, cacheKey);
             }
         }
         return bean;
+    }
+
+    /**
+     * 因为依赖注入，导致需要提前获取bean的代理对象
+     */
+    @Override
+    public Object getEarlyBeanReference(Object bean, String beanName) throws GPBeansException {
+        Object cacheKey = getCacheKey(bean.getClass(), beanName);
+        // 记录提前创建了代理对象
+        if (!this.earlyProxyReferences.contains(cacheKey)) {
+            this.earlyProxyReferences.add(cacheKey);
+        }
+        return wrapIfNecessary(bean, beanName, cacheKey);
     }
 
     /**

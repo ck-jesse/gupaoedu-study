@@ -23,4 +23,11 @@ public interface GPInstantiationAwareBeanPostProcessor extends GPBeanPostProcess
     default boolean postProcessAfterInstantiation(Object bean, String beanName) throws GPBeansException {
         return true;
     }
+
+    /**
+     * 获取对指定bean的早期访问的引用
+     */
+    default Object getEarlyBeanReference(Object bean, String beanName) throws GPBeansException {
+        return bean;
+    }
 }

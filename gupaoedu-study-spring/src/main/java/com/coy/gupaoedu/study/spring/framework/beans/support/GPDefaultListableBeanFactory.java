@@ -9,31 +9,37 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPBeanWrapper;
 import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPInitializingBean;
 import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeanCurrentlyInCreationException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPNoSuchBeanDefinitionException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPScope;
+import com.coy.gupaoedu.study.spring.framework.core.NamedThreadLocal;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPController;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author chenck
  * @date 2019/4/10 21:43
  */
+@Slf4j
 public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry implements GPBeanFactory {
 
     /**
@@ -64,6 +70,11 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
      */
     private final Map<String, GPScope> scopes = new LinkedHashMap<>(8);
 
+    /**
+     * Names of beans that are currently in creation
+     * 用于记录当前线程是否正在创建prototype类型的bean
+     */
+    private final ThreadLocal<Object> prototypesCurrentlyInCreation = new NamedThreadLocal<>("Prototype beans currently in creation");
 
     @Override
     public GPBeanDefinition getBeanDefinition(String beanName) {
@@ -204,10 +215,25 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
      */
     protected <T> T doGetBean(final String beanName, Class<T> requiredType, final Object[] args, boolean typeCheckOnly) {
 
+        Object bean = null;
+        // 从容器中获取单例bean，若存在，则无需重复创建（此处可获取到已经创建但还未初始化完全的单例bean（若匹配aop规则，则会创建对应的代理对象并返回））
+        Object sharedInstance = getSingleton(beanName);
+        if (null != sharedInstance && args == null) {
+            bean = sharedInstance;
+            // 对创建的Bean实例对象进行类型检查
+            if (null != requiredType && !requiredType.isInstance(bean)) {
+                throw new GPBeansException("Failed to convert bean '" + beanName + "' to required type '" + requiredType.getTypeName() + "'");
+            }
+            return (T) bean;
+        }
+
+        // 判断缓存中是否存在正在创建的prototype bean，若存在，则表示存在循环引用的问题导致实例化对象十遍
+        if (isPrototypeCurrentlyInCreation(beanName)) {
+            throw new GPBeanCurrentlyInCreationException(beanName);
+        }
+
         // 获取BeanDefinition
         final GPBeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-
-        Object bean = null;
 
         // 创建单例模式Bean的实例对象
         if (beanDefinition.isSingleton()) {
@@ -229,8 +255,16 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         // IOC容器创建原型模式Bean实例对象
         else if (beanDefinition.isPrototype()) {
             // 原型模式(Prototype)是每次都会创建一个新的对象
-            // 创建指定Bean对象实例
-            Object prototypeInstance = createBean(beanName, beanDefinition, args);
+            Object prototypeInstance = null;
+            try {
+                // 回调beforePrototypeCreation方法，默认的功能是注册当前创建的原型对象
+                beforePrototypeCreation(beanName);
+                // 创建指定Bean对象实例
+                prototypeInstance = createBean(beanName, beanDefinition, args);
+            } finally {
+                // 回调afterPrototypeCreation方法，默认告诉IOC容器指定Bean的原型对象不再创建
+                afterPrototypeCreation(beanName);
+            }
             bean = prototypeInstance;
         }
         // 要创建的Bean既不是单例模式，也不是原型模式，则根据Bean定义资源中
@@ -291,7 +325,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public boolean isSingleton(String beanName) {
-        Object beanInstance = getSingleton(beanName);
+        Object beanInstance = getSingleton(beanName, false);
         if (beanInstance != null) {
             return true;
         }
@@ -316,7 +350,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     public boolean isTypeMatch(String beanName, Class<?> typeToMatch) {
         Assert.notNull(typeToMatch, "Class typeToMatch must not be null");
         // 检查注册的单例
-        Object beanInstance = getSingleton(beanName);
+        Object beanInstance = getSingleton(beanName, false);
         if (null != beanInstance) {
             if (typeToMatch.isInstance(beanInstance)) {
                 // Direct match for exposed instance?
@@ -335,7 +369,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public Class<?> getType(String beanName) {
-        Object beanInstance = getSingleton(beanName);
+        Object beanInstance = getSingleton(beanName, false);
         if (null != beanInstance) {
             return beanInstance.getClass();
         }
@@ -345,6 +379,64 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             return mbd.getBeanClazz();
         }
         return null;
+    }
+
+
+    /**
+     * 判断原型bean当前是否在创建中
+     * Return whether the specified prototype bean is currently in creation
+     * (within the current thread).
+     *
+     * @param beanName the name of the bean
+     */
+    protected boolean isPrototypeCurrentlyInCreation(String beanName) {
+        Object curVal = this.prototypesCurrentlyInCreation.get();
+        return (curVal != null &&
+                (curVal.equals(beanName) || (curVal instanceof Set && ((Set<?>) curVal).contains(beanName))));
+    }
+
+    /**
+     * 在创建原型bean之前回调。默认将原型bean注册到当前正在创建中的容器.
+     * Callback before prototype creation.
+     * <p>The default implementation register the prototype as currently in creation.
+     *
+     * @param beanName the name of the prototype about to be created
+     * @see #isPrototypeCurrentlyInCreation
+     */
+    protected void beforePrototypeCreation(String beanName) {
+        Object curVal = this.prototypesCurrentlyInCreation.get();
+        if (curVal == null) {
+            this.prototypesCurrentlyInCreation.set(beanName);
+        } else if (curVal instanceof String) {
+            Set<String> beanNameSet = new HashSet<>(2);
+            beanNameSet.add((String) curVal);
+            beanNameSet.add(beanName);
+            this.prototypesCurrentlyInCreation.set(beanNameSet);
+        } else {
+            Set<String> beanNameSet = (Set<String>) curVal;
+            beanNameSet.add(beanName);
+        }
+    }
+
+    /**
+     * 在创建原型bean之后回调。默认将原型bean从创建中的容器中移除.
+     * Callback after prototype creation.
+     * <p>The default implementation marks the prototype as not in creation anymore.
+     *
+     * @param beanName the name of the prototype that has been created
+     * @see #isPrototypeCurrentlyInCreation
+     */
+    protected void afterPrototypeCreation(String beanName) {
+        Object curVal = this.prototypesCurrentlyInCreation.get();
+        if (curVal instanceof String) {
+            this.prototypesCurrentlyInCreation.remove();
+        } else if (curVal instanceof Set) {
+            Set<String> beanNameSet = (Set<String>) curVal;
+            beanNameSet.remove(beanName);
+            if (beanNameSet.isEmpty()) {
+                this.prototypesCurrentlyInCreation.remove();
+            }
+        }
     }
 
     /**
@@ -430,19 +522,39 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         }
         // 创建bean实例并包装
         if (null == instanceWrapper) {
+            // 基于构造函数来实例化bean
             instanceWrapper = createBeanInstance(beanName, bd, args);
         }
         Object bean = instanceWrapper.getWrappedInstance();
 
-        // TODO 要考虑循环引用的问题
         // 用缓存机制来解决循环依赖的问题，当A引用B，B引用A时，当A注入时，发现B未创建，那么将B未创建这种情况给记录下来，然后再创建B时，进行注入到A即可
-        // BeanWarpper
+        // 向提前暴露容器中缓存单例Bean对象，以防循环引用
+        // 注意：因为bean是通过构造函数来进行实例化，所以针对构造函数的循环依赖没法解决
+        boolean earlySingletonExposure = (bd.isSingleton() && isSingletonCurrentlyInCreation(beanName));
+        if (earlySingletonExposure) {
+            log.debug("Eagerly caching bean '" + beanName + "' to allow for resolving potential circular references");
+            // 缓存单例bean的引用（以单例工厂为基础）
+            // 目的为提前暴露单例bean的引用，为了防止循环引用，以便尽早持有对象的引用
+            addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, bd, bean));
+        }
 
         // 将Bean实例对象封装，并且Bean定义中配置的属性值赋值给实例对象
         populateBean(beanName, bd, instanceWrapper);
 
         // 初始化bean实例
         Object exposedObject = initializeBean(beanName, bean, bd);
+
+        if (earlySingletonExposure) {
+            // 先从单例bean容器singletonObjects中获取bean，不存在，再从bean提前暴露容器earlySingletonObjects中获取bean，还不存在，则从提前暴露的单例bean工厂singletonFactories获取bean
+            Object earlySingletonReference = getSingleton(beanName, false);
+            if (earlySingletonReference != null) {
+                // 根据名称获取的已注册的Bean和正在实例化的Bean是同一个
+                if (exposedObject == bean) {
+                    // 当前实例化的Bean初始化完成
+                    exposedObject = earlySingletonReference;
+                }
+            }
+        }
 
         // 将bean注册为一次性的
         try {
@@ -490,6 +602,29 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         } catch (Exception ex) {
             throw new GPBeansException("Instantiation of bean=" + beanName + " failed", ex);
         }
+    }
+
+    /**
+     * 获取对指定bean的早期访问的引用，通常用于解析循环引用
+     * <p>
+     * Obtain a reference for early access to the specified bean,
+     * typically for the purpose of resolving a circular reference.
+     *
+     * @param beanName the name of the bean (for error handling purposes)
+     * @param bd       the merged bean definition for the bean
+     * @param bean     the raw bean instance
+     * @return the object to expose as bean reference
+     */
+    protected Object getEarlyBeanReference(String beanName, GPBeanDefinition bd, Object bean) {
+        Object exposedObject = bean;
+        for (GPBeanPostProcessor bp : getBeanPostProcessors()) {
+            if (bp instanceof GPInstantiationAwareBeanPostProcessor) {
+                GPInstantiationAwareBeanPostProcessor ibp = (GPInstantiationAwareBeanPostProcessor) bp;
+                // 获取对指定bean的早期访问的引用(此处实际为获取代理对象)
+                exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
+            }
+        }
+        return exposedObject;
     }
 
     /**

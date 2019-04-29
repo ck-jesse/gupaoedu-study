@@ -10,6 +10,9 @@ import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
 @GPService
 public class UserService {
 
+    /**
+     * 循环依赖
+     */
     @GPAutowired
     private IDemoService demoService;
 
