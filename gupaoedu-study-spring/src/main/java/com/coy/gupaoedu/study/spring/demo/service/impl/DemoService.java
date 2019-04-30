@@ -1,6 +1,9 @@
 package com.coy.gupaoedu.study.spring.demo.service.impl;
 
 import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
+import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
 
@@ -9,14 +12,19 @@ import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
  * 用于测试基于接口的JDK代理
  */
 @GPService
-public class DemoService implements IDemoService {
+public class DemoService implements IDemoService, GPBeanFactoryAware {
+
+    private GPBeanFactory beanFactory;
 
     /**
-     * 循环依赖
+     * 循环依赖的问题测试
      */
     @GPAutowired
     private UserService userService;
 
+    /**
+     *
+     */
     private String init;
 
     @Override
@@ -30,5 +38,11 @@ public class DemoService implements IDemoService {
     public void afterPropertiesSet() throws Exception {
         init = "通过GPInitializingBean来实现实例化后的初始化";
         System.out.println(init);
+    }
+
+    @Override
+    public void setBeanFactory(GPBeanFactory beanFactory) throws GPBeansException {
+        this.beanFactory = beanFactory;
+        System.out.println("DemoService 通过GPBeanFactory来实现实例化后的BeanFactory的注入");
     }
 }

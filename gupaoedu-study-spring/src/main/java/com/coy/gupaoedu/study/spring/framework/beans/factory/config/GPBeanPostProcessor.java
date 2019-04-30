@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.spring.framework.beans.factory.config;
 
 /**
- * bean后置处理器
+ * 初始化bean后置处理器
  *
  * @author chenck
  * @date 2019/4/14 21:27
