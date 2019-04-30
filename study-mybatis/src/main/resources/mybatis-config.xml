@@ -22,8 +22,12 @@
         <setting name="useGeneratedKeys" value="false"/>
         <setting name="autoMappingBehavior" value="PARTIAL"/>
         <setting name="autoMappingUnknownColumnBehavior" value="WARNING"/>
+
+        <!-- 配置默认的执行器。SIMPLE 就是普通的执行器；REUSE 执行器会重用预处理语句（prepared statements）； BATCH 执行器将重用语句并执行批量更新。 -->
         <setting name="defaultExecutorType" value="SIMPLE"/>
         <setting name="defaultStatementTimeout" value="25"/>
+
+        <!-- 为驱动的结果集获取数量（fetchSize）设置一个提示值。此参数只可以在查询设置中被覆盖。 -->
         <setting name="defaultFetchSize" value="100"/>
         <setting name="safeRowBoundsEnabled" value="false"/>
         <setting name="mapUnderscoreToCamelCase" value="false"/>
@@ -33,11 +37,36 @@
         <setting name="localCacheScope" value="SESSION"/>
 
         <setting name="jdbcTypeForNull" value="OTHER"/>
+
+        <!-- 指定哪个对象的方法触发一次延迟加载。 -->
         <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
 
         <!-- 指定 MyBatis 所用日志的具体实现，未指定时将自动查找。 SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING -->
         <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
+
+    <!-- 类型别名是为 Java 类型设置一个短的名字。 -->
+    <!--<typeAliases>
+        <typeAlias alias="Blog" type="com.coy.gupaoedu.study.mybatis.model.Blog"/>
+    </typeAliases>-->
+
+    <!-- 类型处理器
+        无论是 MyBatis 在预处理语句（PreparedStatement）中设置一个参数时，还是从结果集中取出一个值时， 都会用类型处理器将获取的值以合适的方式转换成 Java 类型。 -->
+    <!--<typeHandlers>
+        <typeHandler handler="org.mybatis.example.ExampleTypeHandler"/>
+    </typeHandlers>-->
+
+    <!-- 对象工厂 -->
+    <!--<objectFactory type="org.mybatis.example.ExampleObjectFactory">
+        <property name="someProperty" value="100"/>
+    </objectFactory>-->
+
+    <!-- 插件 -->
+    <!--<plugins>
+        <plugin interceptor="org.mybatis.example.ExamplePlugin">
+            <property name="someProperty" value="100"/>
+        </plugin>
+    </plugins>-->
 
     <!-- 环境配置 -->
     <environments default="development">

@@ -24,7 +24,7 @@ public class SpringTest {
        答：对于非抽象类、非延迟加载、且为单例模式的类进行创建
 
        3、是否对没有定义spring注解的类创建BeanDefinition？
-       答：
+       答：会
 
        4、依赖注入时，字段类型定义为接口的字段，是怎么注入的？
        答：1)根据字段类型获取所有的beanNames

@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.mybatis.model;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Date;
  * @date 2019/4/27 21:15
  */
 @Data
-public class Blog {
+public class Blog implements Serializable {
 
     /**
      * 主键id
