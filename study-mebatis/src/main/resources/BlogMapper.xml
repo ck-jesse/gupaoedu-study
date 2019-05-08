@@ -8,7 +8,7 @@
         blog_content,
         blog_author,
         state,
-        createTime
+        create_time
         from blog where id = ?
     </select>
 
@@ -19,7 +19,7 @@
         blog_content,
         blog_author,
         state,
-        createTime
+        create_time
         from blog
         <where>
             <if test="id != null">

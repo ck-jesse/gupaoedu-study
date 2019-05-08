@@ -2,7 +2,6 @@ package com.coy.gupaoedu.study.mebatis.executor;
 
 import com.coy.gupaoedu.study.mebatis.GPMappedStatement;
 import com.coy.gupaoedu.study.mebatis.GPResultHandler;
-import com.coy.gupaoedu.study.mebatis.demo.Blog;
 import com.coy.gupaoedu.study.mebatis.parameter.ParameterHandler;
 
 import java.sql.Connection;
@@ -45,18 +44,9 @@ public class GPSimpleExecutor extends GPBaseExecutor {
             // 执行SQL
             ResultSet rs = stmt.executeQuery();
 
-            // 获取结果集
-            while (rs.next()) {
-                Blog blog = new Blog();
-                blog.setId(rs.getLong("id"));
-                blog.setBlogTitle(rs.getString("blog_title"));
-                blog.setBlogContent(rs.getString("blog_content"));
-                blog.setBlogAuthor(rs.getString("blog_author"));
-                blog.setState(rs.getInt("state"));
-                blog.setCreateTime(rs.getDate("createTime"));
-                list.add((E) blog);
-                System.out.println(blog);
-            }
+            ResultSetHandler resultSetHandler = new ResultSetHandler();
+            list = resultSetHandler.handle(rs, ms.getResultType());
+
             rs.close();
             stmt.close();
             conn.close();
