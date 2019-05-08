@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="com.coy.gupaoedu.study.mebatis.demo.BlogMapper">
+
+    <select id="selectBlog" resultType="com.coy.gupaoedu.study.mebatis.demo.Blog">
+        select
+        id,
+        blog_title,
+        blog_content,
+        blog_author,
+        state,
+        createTime
+        from blog where id = ?
+    </select>
+
+    <select id="selectBlogList" resultType="com.coy.gupaoedu.study.mebatis.demo.Blog">
+        select
+        id,
+        blog_title,
+        blog_content,
+        blog_author,
+        state,
+        createTime
+        from blog
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="state != null">
+                state = #{state}
+            </if>
+        </where>
+    </select>
+
+</mapper>
