@@ -14,6 +14,7 @@ public class AppTest {
     public void test() {
         GPSqlSessionFactory sqlSessionFactory = new GPSqlSessionFactory().build();
         GPSqlSession sqlSession = sqlSessionFactory.openSqlSession();
+
         BlogMapper blogMapper = sqlSession.getMapper(BlogMapper.class);
         Blog blog = blogMapper.selectBlog(1);
         System.out.println(blog);
