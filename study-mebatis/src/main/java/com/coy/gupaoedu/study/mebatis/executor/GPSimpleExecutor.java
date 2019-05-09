@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.mebatis.executor;
 import com.coy.gupaoedu.study.mebatis.GPMappedStatement;
 import com.coy.gupaoedu.study.mebatis.GPResultHandler;
 import com.coy.gupaoedu.study.mebatis.parameter.ParameterHandler;
+import com.coy.gupaoedu.study.mebatis.session.GPConfiguration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,6 +18,10 @@ import java.util.List;
  * @date 2019/5/7 17:31
  */
 public class GPSimpleExecutor extends GPBaseExecutor {
+
+    public GPSimpleExecutor(GPConfiguration configuration) {
+        super(configuration);
+    }
 
     @Override
     protected <E> List<E> doQuery(GPMappedStatement ms, Object parameter, GPResultHandler resultHandler) throws SQLException {

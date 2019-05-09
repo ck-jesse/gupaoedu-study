@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="com.coy.gupaoedu.study.mebatis.demo.UserMapper">
+
+    <select id="selectUserById" resultType="com.coy.gupaoedu.study.mebatis.demo.User">
+        select
+        id,
+        user_id,
+        name,
+        addr,
+        create_time
+        from user where id = ? and user_id = ?
+    </select>
+
+</mapper>

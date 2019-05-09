@@ -63,5 +63,9 @@ public class PropertiesUtils {
         return config.getProperty("mapper.sql.xml.resource");
     }
 
+    public static String getPluginPath() {
+        return config.getProperty("plugin.path");
+    }
+
 
 }

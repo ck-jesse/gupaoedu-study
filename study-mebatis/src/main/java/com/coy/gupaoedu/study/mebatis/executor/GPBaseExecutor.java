@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.mebatis.executor;
 
 import com.coy.gupaoedu.study.mebatis.GPMappedStatement;
 import com.coy.gupaoedu.study.mebatis.GPResultHandler;
+import com.coy.gupaoedu.study.mebatis.session.GPConfiguration;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,6 +15,13 @@ import java.util.List;
  * @date 2019/5/7 15:57
  */
 public abstract class GPBaseExecutor implements GPExecutor {
+
+    protected GPConfiguration configuration;
+
+    protected GPBaseExecutor(GPConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
 
     @Override
     public <E> List<E> query(GPMappedStatement ms, Object parameter, GPResultHandler resultHandler) throws SQLException {

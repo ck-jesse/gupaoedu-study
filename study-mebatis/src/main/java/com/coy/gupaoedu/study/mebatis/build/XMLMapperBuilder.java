@@ -133,7 +133,7 @@ public class XMLMapperBuilder {
                 // throw new MebatisException(node.getNodeName() + " element is not support");
                 continue;
             }
-            System.out.println("元素名：" + node.getNodeName());
+            // System.out.println("元素名：" + node.getNodeName());
             parseSelect((Element) node, namespace);
         }
     }
@@ -148,10 +148,10 @@ public class XMLMapperBuilder {
         String resultType = select.getAttribute("resultType");
         String sql = select.getTextContent();
 
-        System.out.println("id=" + id);
-        System.out.println("parameterType=" + parameterType);
-        System.out.println("resultType=" + resultType);
-        System.out.println("sql=" + sql);
+        // System.out.println("id=" + id);
+        // System.out.println("parameterType=" + parameterType);
+        // System.out.println("resultType=" + resultType);
+        // System.out.println("sql=" + sql);
 
         String statementId = namespace + "." + id;
         GPMappedStatement.Builder builder = new GPMappedStatement.Builder(statementId, GPSqlCommandType.SELECT);

@@ -6,6 +6,10 @@ import com.coy.gupaoedu.study.mebatis.PropertiesUtils;
 import com.coy.gupaoedu.study.mebatis.binding.GPMapperRegistry;
 import com.coy.gupaoedu.study.mebatis.build.XMLMapperBuilder;
 import com.coy.gupaoedu.study.mebatis.exception.MebatisException;
+import com.coy.gupaoedu.study.mebatis.executor.GPExecutor;
+import com.coy.gupaoedu.study.mebatis.executor.GPSimpleExecutor;
+import com.coy.gupaoedu.study.mebatis.plugin.Interceptor;
+import com.coy.gupaoedu.study.mebatis.plugin.InterceptorChain;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +38,7 @@ public class GPConfiguration {
      */
     protected final Map<String, GPMappedStatement> mappedStatements = new StrictMap<GPMappedStatement>("Mapped Statements collection");
 
+    private InterceptorChain interceptorChain = new InterceptorChain(); // 插件
 
     public GPConfiguration() {
         this(DEFAULT_CONFIG_FILE);
@@ -51,6 +56,8 @@ public class GPConfiguration {
         // Mapper映射器解析（sql statement解析）
         mapperStatementParse(PropertiesUtils.getMapperSqlXmlResouce());
 
+        // 解析插件，可配置多个插件
+        pluginParse(PropertiesUtils.getPluginPath());
     }
 
     /**
@@ -80,6 +87,26 @@ public class GPConfiguration {
     }
 
     /**
+     * 插件解析
+     */
+    public void pluginParse(String pluginPath) {
+        if (null == pluginPath || pluginPath.trim().length() == 0) {
+            return;
+        }
+        String[] pluginPaths = pluginPath.trim().split(",");
+        // 将插件添加到interceptorChain中
+        for (String plugin : pluginPaths) {
+            Interceptor interceptor = null;
+            try {
+                interceptor = (Interceptor) Class.forName(plugin).newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            interceptorChain.addInterceptor(interceptor);
+        }
+    }
+
+    /**
      * 获取Mapper接口的代理对象
      */
     public <T> T getMapper(Class<T> type, GPSqlSession sqlSession) {
@@ -98,6 +125,22 @@ public class GPConfiguration {
      */
     public void addMappedStatement(GPMappedStatement ms) {
         mappedStatements.put(ms.getId(), ms);
+    }
+
+    /**
+     * 创建执行器，当开启缓存时使用缓存装饰
+     * 当配置插件时，使用插件代理
+     *
+     * @return
+     */
+    public GPExecutor newExecutor() {
+        GPExecutor executor = new GPSimpleExecutor(this);
+
+        // 目前只拦截了Executor，所有的插件都对Executor进行代理，没有对拦截类和方法签名进行判断
+        if (interceptorChain.hasPlugin()) {
+            return (GPExecutor) interceptorChain.pluginAll(executor);
+        }
+        return executor;
     }
 
     /**

@@ -20,14 +20,14 @@ public class GPDefaultSqlSession implements GPSqlSession {
     private final GPExecutor executor;
     private final boolean autoCommit;
 
-    public GPDefaultSqlSession(GPConfiguration configuration, GPExecutor executor, boolean autoCommit) {
+    public GPDefaultSqlSession(GPConfiguration configuration, boolean autoCommit) {
         this.configuration = configuration;
-        this.executor = executor;
+        this.executor = configuration.newExecutor();
         this.autoCommit = autoCommit;
     }
 
-    public GPDefaultSqlSession(GPConfiguration configuration, GPExecutor executor) {
-        this(configuration, executor, false);
+    public GPDefaultSqlSession(GPConfiguration configuration) {
+        this(configuration, false);
     }
 
     @Override
