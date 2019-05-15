@@ -19,8 +19,8 @@
         <module>study-tomcat</module>
         <module>study-netty</module>
         <module>study-mybatis</module>
-        <module>study-concurrency</module>
         <module>study-mebatis</module>
+        <module>study-juc</module>
     </modules>
 
     <parent>
