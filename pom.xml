@@ -12,15 +12,15 @@
     <description>咕泡学院-做技术人的指路明灯，职场生涯的精神导师</description>
 
     <modules>
-        <module>gupaoedu-study-pattern</module>
-        <module>gupaoedu-study-spring</module>
-        <module>study-data-structure</module>
-        <module>study-jvm</module>
-        <module>study-tomcat</module>
-        <module>study-netty</module>
+        <module>study-pattern</module>
+        <module>study-spring</module>
         <module>study-mybatis</module>
         <module>study-mebatis</module>
         <module>study-juc</module>
+        <module>study-netty</module>
+        <module>study-jvm</module>
+        <module>study-tomcat</module>
+        <module>study-data-structure</module>
     </modules>
 
     <parent>
