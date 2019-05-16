@@ -142,6 +142,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             // 如果当前线程等于当前持有锁的线程
             else if (current == getExclusiveOwnerThread()) {
                 // 累加获取次数1到同步状态上，用于表示锁的重入次数
+                // 因为 ReentrantLock 是重入锁，所以是可以重复 lock,unlock 的，只要成对出现就行。
                 int nextc = c + acquires;
                 if (nextc < 0) // overflow
                     throw new Error("Maximum lock count exceeded");
@@ -160,7 +161,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             if (Thread.currentThread() != getExclusiveOwnerThread())
                 throw new IllegalMonitorStateException();
             boolean free = false;
-            // 同步状态为0，则表示释放了锁
+            // 同步状态为0，则表示可以释放锁，大于0的场景是因为存在同一个线程的锁重入，没次重入该同步状态都会加1，所以当同步状态大于0时先不释放锁
             if (c == 0) {
                 free = true;
                 // 将锁的持有线程设置为null
@@ -265,6 +266,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     }
 
     /**
+     * 默认构造器 创建的是非公平锁
+     *
      * Creates an instance of {@code ReentrantLock}.
      * This is equivalent to using {@code ReentrantLock(false)}.
      */

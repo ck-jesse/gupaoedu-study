@@ -666,7 +666,7 @@ public abstract class AbstractQueuedSynchronizer
      * <p>
      * Creates and enqueues node for current thread and given mode.
      *
-     * @param mode Node.EXCLUSIVE for exclusive, Node.SHARED for shared
+     * @param mode Node.EXCLUSIVE for exclusive, Node.SHARED for shared  仅仅用来表示是独占锁，还是共享锁
      * @return the new node
      */
     private Node addWaiter(Node mode) {
@@ -744,6 +744,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 共享模式锁的释放操作——基于信号继承并确保传播
+     * <p>
      * Release action for shared mode -- signals successor and ensures
      * propagation. (Note: For exclusive mode, release just amounts
      * to calling unparkSuccessor of head if it needs signal.)
@@ -760,16 +762,22 @@ public abstract class AbstractQueuedSynchronizer
          * unparkSuccessor, we need to know if CAS to reset status
          * fails, if so rechecking.
          */
+        // 采用自旋的方式来唤醒所有的后续节点对应的线程
         for (; ; ) {
             Node h = head;
             if (h != null && h != tail) {
                 int ws = h.waitStatus;
+                // 如果当前节点是 SIGNAL 意味着，它正在等待一个信号，或者说，它在等待被唤醒
                 if (ws == Node.SIGNAL) {
+                    // 重置 waitStatus 标志位
                     if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
                         continue;            // loop to recheck cases
+                    // 唤醒节点的线程
                     unparkSuccessor(h);
-                } else if (ws == 0 &&
-                        !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+                }
+                // 如果本身头节点的 waitStatus 是处于重置状态（waitStatus==0）的，将其设置为“传播”状态，意味着需要将状态向后一个节点传播。
+                // 共享的状态是可以被共享的，也就是意味着 AQS 队列中的其他节点也应能第一时间知道状态的变化。
+                else if (ws == 0 && !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
                     continue;                // loop on failed CAS
             }
             if (h == head)                   // loop if head changed
@@ -778,6 +786,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 设置同步队列头部节点，并检查后续节点是否在共享模式下等待，如果是，则在设置了传播>0或传播状态时进行传播释放共享锁
+     * <p>
      * Sets head of queue, and checks if successor may be waiting
      * in shared mode, if so propagating if either propagate > 0 or
      * PROPAGATE status was set.
@@ -786,7 +796,9 @@ public abstract class AbstractQueuedSynchronizer
      * @param propagate the return value from a tryAcquireShared
      */
     private void setHeadAndPropagate(Node node, int propagate) {
+        // 记录旧的头部节点以便检查
         Node h = head; // Record old head for check below
+        // 将当前节点设置为头部节点
         setHead(node);
         /*
          * Try to signal next queued node if:
@@ -866,7 +878,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * 检查当前线程是否应该阻塞
+     * 检查当前线程是否应该阻塞，若返回true表示需要阻塞，则执行parkAndCheckInterrupt()使线程阻塞
+     * <p>
      * 规则1：如果前继节点状态为SIGNAL，表明当前节点需要被unpark(唤醒)，此时则返回true。
      * 规则2：如果前继节点状态为CANCELLED(ws>0)，说明前继节点已经被取消，则通过先前回溯找到一个有效(非CANCELLED状态)的节点，并返回false。
      * 规则3：如果前继节点状态为非SIGNAL、非CANCELLED，则设置前继的状态为SIGNAL，并返回false。
@@ -917,7 +930,7 @@ public abstract class AbstractQueuedSynchronizer
 
     /**
      * 响应阻塞过程中的中断
-     *
+     * <p>
      * 中断当前线程
      * <p>
      * Convenience method to interrupt current thread.
@@ -981,7 +994,7 @@ public abstract class AbstractQueuedSynchronizer
                     failed = false;
                     return interrupted;
                 }
-                // 检查当前线程是否应该阻塞，如果是唤醒，则阻塞当前线程
+                // 检查当前线程是否应该阻塞，若返回true表示需要阻塞，则执行parkAndCheckInterrupt()使线程阻塞
                 if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
                     interrupted = true;
             }
@@ -992,6 +1005,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 尝试获取独占锁，若线程阻塞过程中被执行过中断操作，则在线程被唤醒后，获取线程的中断状态，并直接抛出中断异常
+     * <p>
      * Acquires in exclusive interruptible mode.
      *
      * @param arg the acquire argument
@@ -1009,8 +1024,8 @@ public abstract class AbstractQueuedSynchronizer
                     failed = false;
                     return;
                 }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                        parkAndCheckInterrupt())
+                // 检查当前线程是否应该阻塞，若返回true表示需要阻塞，则执行parkAndCheckInterrupt()使线程阻塞
+                if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
                     throw new InterruptedException();
             }
         } finally {
@@ -1020,6 +1035,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 在指定时间内获取独占锁(即实现了获取锁的超时控制)
+     * <p>
      * Acquires in exclusive timed mode.
      *
      * @param arg          the acquire argument
@@ -1030,7 +1047,9 @@ public abstract class AbstractQueuedSynchronizer
             throws InterruptedException {
         if (nanosTimeout <= 0L)
             return false;
+        // 计算出超时的时间点
         final long deadline = System.nanoTime() + nanosTimeout;
+        // 创建一个独占模式的node
         final Node node = addWaiter(Node.EXCLUSIVE);
         boolean failed = true;
         try {
@@ -1042,12 +1061,15 @@ public abstract class AbstractQueuedSynchronizer
                     failed = false;
                     return true;
                 }
+                // 当当前时间 大于 超时时间点时，则说明已经超时，直接返回false，说明获取锁失败
                 nanosTimeout = deadline - System.nanoTime();
                 if (nanosTimeout <= 0L)
                     return false;
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                        nanosTimeout > spinForTimeoutThreshold)
+                // 检查是否需要阻塞获取锁的当前线程，当需要阻塞，并且在超时时间大于当前时间的1s以上时，才进行阻塞
+                if (shouldParkAfterFailedAcquire(p, node) && nanosTimeout > spinForTimeoutThreshold)
                     LockSupport.parkNanos(this, nanosTimeout);
+
+                // 检查当前线程的中断状态
                 if (Thread.interrupted())
                     throw new InterruptedException();
             }
@@ -1058,6 +1080,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 获取共享锁模式
+     * <p>
      * Acquires in shared uninterruptible mode.
      *
      * @param arg the acquire argument
@@ -1067,11 +1091,14 @@ public abstract class AbstractQueuedSynchronizer
         boolean failed = true;
         try {
             boolean interrupted = false;
+            // 自旋（无限循环），以便在线程被唤醒时能够自动的去获取锁
             for (; ; ) {
                 final Node p = node.predecessor();
                 if (p == head) {
+                    // 尝试获取共享锁：同步状态等于0时，返回1，表示无需阻塞，即可执行；若同步状态大于0时，返回-1，则表示需要阻塞
                     int r = tryAcquireShared(arg);
                     if (r >= 0) {
+                        // 无需阻塞时，则将当前node设置为头部节点，并且唤醒所有的后续节点对应的线程
                         setHeadAndPropagate(node, r);
                         p.next = null; // help GC
                         if (interrupted)
@@ -1080,8 +1107,9 @@ public abstract class AbstractQueuedSynchronizer
                         return;
                     }
                 }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                        parkAndCheckInterrupt())
+                // 检查当前线程是否应该阻塞，若返回true表示需要阻塞，则执行parkAndCheckInterrupt()使线程阻塞
+                // 注意：在此处如果线程被阻塞了，那么会释放CPU资源，所以对于此处的自旋消耗的资源是很有限的
+                if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
                     interrupted = true;
             }
         } finally {
@@ -1091,6 +1119,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 尝试获取共享锁，若线程阻塞过程中被执行过中断操作，则在线程被唤醒后，获取线程的中断状态，并直接抛出中断异常
+     * <p>
      * Acquires in shared interruptible mode.
      *
      * @param arg the acquire argument
@@ -1102,17 +1132,20 @@ public abstract class AbstractQueuedSynchronizer
         try {
             for (; ; ) {
                 final Node p = node.predecessor();
+                // 如果新建节点的前一个节点，就是 Head，说明当前节点是 AQS 队列中等待获取锁的第一个节点，按照 FIFO 的原则，可以直接尝试获取锁。
                 if (p == head) {
+                    // 尝试获取共享锁：同步状态等于0时，返回1，表示无需阻塞，即可执行；若同步状态大于0时，返回-1，则表示需要阻塞
                     int r = tryAcquireShared(arg);
                     if (r >= 0) {
+                        // 获取共享锁成功，需要将当前节点设置为 AQS 队列中的第一个节点，这是 AQS 的规则 // 队列的头节点表示
                         setHeadAndPropagate(node, r);
                         p.next = null; // help GC
                         failed = false;
                         return;
                     }
                 }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                        parkAndCheckInterrupt())
+                // 检查当前线程是否应该阻塞，若返回true表示需要阻塞，则执行parkAndCheckInterrupt()使线程阻塞
+                if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
                     throw new InterruptedException();
             }
         } finally {
@@ -1257,6 +1290,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 尝试设置同步状态以反映共享模式下的发布
+     * <p>
      * Attempts to set the state to reflect a release in shared mode.
      * <p>
      * <p>This method is always invoked by the thread performing release.
@@ -1404,6 +1439,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 获取一个共享锁，如果线程被中断，则
+     * <p>
      * Acquires in shared mode, aborting if interrupted.  Implemented
      * by first checking interrupt status, then invoking at least once
      * {@link #tryAcquireShared}, returning on success.  Otherwise the
@@ -1419,9 +1456,15 @@ public abstract class AbstractQueuedSynchronizer
      */
     public final void acquireSharedInterruptibly(int arg)
             throws InterruptedException {
+        // 先判断当前线程的中断状态是否为true，如果是，则抛出线程中断异常
         if (Thread.interrupted())
             throw new InterruptedException();
+
+        // 判断是否需要进行阻塞
+        // 返回1，表示无需阻塞，即可执行
+        // 返回-1，表示需要阻塞
         if (tryAcquireShared(arg) < 0)
+            // 尝试获取共享锁
             doAcquireSharedInterruptibly(arg);
     }
 
@@ -1450,6 +1493,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 释放共享锁，当tryReleaseShared返回true，则通过对一个或多个线程解除阻塞来实现释放
+     * <p>
      * Releases in shared mode.  Implemented by unblocking one or more
      * threads if {@link #tryReleaseShared} returns true.
      *
@@ -1459,7 +1504,9 @@ public abstract class AbstractQueuedSynchronizer
      * @return the value returned from {@link #tryReleaseShared}
      */
     public final boolean releaseShared(int arg) {
+        // 尝试设置同步状态字段，以便释放共享锁
         if (tryReleaseShared(arg)) {
+            // 释放共享锁
             doReleaseShared();
             return true;
         }
