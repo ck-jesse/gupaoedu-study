@@ -13,6 +13,8 @@ package com.coy.gupaoedu.study.data.structure.tree;
  * 应用：
  * Map 和 Set的实现
  *
+ * 注：可结合TreeMap来深入了解红黑树的原理和特性。
+ *
  * @author chenck
  * @date 2019/4/15 17:10
  */

@@ -237,7 +237,7 @@ public class Semaphore implements java.io.Serializable {
 
     /**
      * 非公平锁
-     * NonFair version
+     * NonFair versionLinkedList
      */
     static final class NonfairSync extends Sync {
         private static final long serialVersionUID = -2694183684443567898L;
