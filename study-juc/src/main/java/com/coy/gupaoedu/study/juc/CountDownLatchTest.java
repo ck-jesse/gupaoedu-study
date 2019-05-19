@@ -30,11 +30,11 @@ public class CountDownLatchTest {
 
         System.out.println("主线程-准备启动所有线程");
 
-        // 开始启动所有的线程
+        // 开始启动所有的线程 count-1=0，唤醒所有阻塞的线程
         startSignal.countDown();      // let all threads proceed
         System.out.println("主线程-启动所有阻塞的线程");
 
-        // 等待所有线程执行完毕
+        // 等待所有线程执行完毕 等待count=0，也就是等待被唤醒
         System.out.println("主线程-等待所有线程执行完毕");
         doneSignal.await();           // wait for all to finish
         System.out.println("主线程-所有线程执行完毕");

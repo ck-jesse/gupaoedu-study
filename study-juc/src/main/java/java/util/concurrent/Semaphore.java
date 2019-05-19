@@ -184,10 +184,11 @@ public class Semaphore implements java.io.Serializable {
          */
         final int nonfairTryAcquireShared(int acquires) {
             for (; ; ) {
+                // 获得许可证计数
                 int available = getState();
                 // 减少许可证计数
                 int remaining = available - acquires;
-                // 通过cas更新许可证计数
+                // 通过cas更新许可证计数，当剩余许可证小于0，或者更新成功则返回剩余许可证
                 if (remaining < 0 || compareAndSetState(available, remaining))
                     return remaining;
             }
