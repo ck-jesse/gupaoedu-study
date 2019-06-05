@@ -23,12 +23,13 @@ public class CustomFactoryBeanTest {
         GPApplicationContext context = new GPAbstractApplicationContext(scanPackage, configLoactions);
 
         Thread.sleep(5000);
-        // 获取自定义FactoryBean的
+        // 获取自定义FactoryBean创建的bean
         FactoryBeanService factoryBeanService = (FactoryBeanService) context.getBean(CustomFactoryBean.class);
-        factoryBeanService.test("FactoryBeanService test");
+        factoryBeanService.test("FactoryBeanService test1");
 
         Thread.sleep(3000);
-        AutowireFactoryBeanService autowireFactoryBeanService = (AutowireFactoryBeanService) context.getBean(AutowireFactoryBeanService.class);
+        // 向bean中自动注入依赖的自定义FactoryBean创建的bean
+        AutowireFactoryBeanService autowireFactoryBeanService = context.getBean(AutowireFactoryBeanService.class);
         System.out.println(autowireFactoryBeanService.getName("my name is yyy"));
     }
 }
