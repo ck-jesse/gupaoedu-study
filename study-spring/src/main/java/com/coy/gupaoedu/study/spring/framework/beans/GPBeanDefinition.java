@@ -76,6 +76,11 @@ public class GPBeanDefinition {
     private boolean proxyTargetClass = false;
 
     /**
+     *
+     */
+    private boolean synthetic = false;
+
+    /**
      * 判断是否是单利
      */
     public boolean isSingleton() {

@@ -5,6 +5,8 @@ import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeanCurrentlyInCreationException;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.SingletonBeanRegistry;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/4/14 18:49
  */
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
+
+    /** Logger available to subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
 
     /**
      * Cache of singleton objects: bean name --> bean instance

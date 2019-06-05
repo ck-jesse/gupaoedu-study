@@ -109,6 +109,7 @@ public interface GPBeanFactory {
 
     /**
      * 检查具有给定名称的bean是否与指定类型匹配
+     * 注：包含了检查typeToMatch是否为自定义FactoryBean中的type类型，这点很重要
      */
     boolean isTypeMatch(String beanName, Class<?> typeToMatch);
 

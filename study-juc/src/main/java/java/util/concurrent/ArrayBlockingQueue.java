@@ -159,9 +159,11 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         // assert items[putIndex] == null;
         final Object[] items = this.items;
         items[putIndex] = x;
+        // 当插入元素的下标等于数组的大小时，则将putIndex重置为0，即重头开始
         if (++putIndex == items.length)
             putIndex = 0;
         count++;
+        // 队列不为空时唤醒线程
         notEmpty.signal();
     }
 
@@ -175,12 +177,15 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         final Object[] items = this.items;
         @SuppressWarnings("unchecked")
         E x = (E) items[takeIndex];
+        // 取出元素，并清空该位置的元素
         items[takeIndex] = null;
+        // 当获取元素的下标等于数组下标时，则重置takeIndex为0，重头再开始获取
         if (++takeIndex == items.length)
             takeIndex = 0;
         count--;
         if (itrs != null)
             itrs.elementDequeued();
+        // 队列没有满时，唤醒因队列满时阻塞的线程
         notFull.signal();
         return x;
     }
@@ -350,6 +355,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         lock.lockInterruptibly();
         try {
             while (count == items.length)
+                // 当队列满时阻塞线程
                 notFull.await();
             enqueue(e);
         } finally {
@@ -400,6 +406,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         lock.lockInterruptibly();
         try {
             while (count == 0)
+                // 队列为空时阻塞线程
                 notEmpty.await();
             return dequeue();
         } finally {

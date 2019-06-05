@@ -1,10 +1,10 @@
 package com.coy.gupaoedu.study.spring.framework.mvc.servlet;
 
-import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
-import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPController;
+import com.coy.gupaoedu.study.spring.framework.beans.annotation.GPAutowired;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPController;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPRequestMapping;
 import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPRequestParam;
-import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

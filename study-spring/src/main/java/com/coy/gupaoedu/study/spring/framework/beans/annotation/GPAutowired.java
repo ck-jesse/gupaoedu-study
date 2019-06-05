@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.spring.framework.mvc.annotation;
+package com.coy.gupaoedu.study.spring.framework.beans.annotation;
 
 import java.lang.annotation.*;
 

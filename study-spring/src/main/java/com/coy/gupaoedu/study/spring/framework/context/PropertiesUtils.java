@@ -55,6 +55,12 @@ public class PropertiesUtils {
     public static String getScanPackage() {
         return config.getProperty("scanPackage");
     }
+    /**
+     * 设置包扫描路径
+     */
+    public static String setScanPackage(String scanPackage) {
+        return (String) config.setProperty("scanPackage", scanPackage);
+    }
 
     /**
      * 启动切面aop代理 true表示启动 false表示不启动

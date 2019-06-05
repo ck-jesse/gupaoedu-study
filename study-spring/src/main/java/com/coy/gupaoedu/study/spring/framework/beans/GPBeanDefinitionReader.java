@@ -2,6 +2,9 @@ package com.coy.gupaoedu.study.spring.framework.beans;
 
 import com.coy.gupaoedu.study.spring.framework.aop.framework.autoproxy.GPAbstractAutoProxyCreator;
 import com.coy.gupaoedu.study.spring.framework.context.PropertiesUtils;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPComponent;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPController;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -119,8 +122,18 @@ public class GPBeanDefinitionReader {
             Class clazz = Class.forName(className);
             // 排除接口和抽象类
             // 注：spring是通过ClassMetadata来存放class信息的，其中通过org.springframework.core.type.StandardClassMetadata.isConcrete()排除掉接口和抽象类
-            if (clazz.isInterface()) {
-                System.out.println("不创建Interface的BeanDefinition，interface=" + className);
+            if (Modifier.isInterface(clazz.getModifiers())) {
+                System.out.println("忽略 interface " + className);
+                return null;
+            }
+            if (Modifier.isAbstract(clazz.getModifiers())) {
+                System.out.println("忽略 abstract class " + className);
+                return null;
+            }
+
+            // 判断class是否为候选的bean，过滤掉非
+            if (!isCandidateComponent(clazz)) {
+                System.out.println("忽略class，未定义@Component等注解，" + className);
                 return null;
             }
 
@@ -136,5 +149,21 @@ public class GPBeanDefinitionReader {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * 判断class是否为候选的bean
+     */
+    private boolean isCandidateComponent(Class clazz) {
+        if (clazz.isAnnotationPresent(GPComponent.class)) {
+            return true;
+        }
+        if (clazz.isAnnotationPresent(GPController.class)) {
+            return true;
+        }
+        if (clazz.isAnnotationPresent(GPService.class)) {
+            return true;
+        }
+        return false;
     }
 }

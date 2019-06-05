@@ -43,10 +43,31 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
      */
     private final GPDefaultListableBeanFactory beanFactory;
 
+    public GPAbstractApplicationContext(String configLoactions) {
+        this(null, new String[]{configLoactions});
+    }
+
     public GPAbstractApplicationContext(String... configLoactions) {
+        this(null, configLoactions);
+    }
+
+    /**
+     * 增加scanPackage ，目的在于方便测试
+     */
+    public GPAbstractApplicationContext(String scanPackage, String configLoactions) {
+        this(scanPackage, new String[]{configLoactions});
+    }
+
+    public GPAbstractApplicationContext(String scanPackage, String... configLoactions) {
         this.configLoactions = configLoactions;
         this.beanFactory = new GPDefaultListableBeanFactory();
         try {
+            // 加载属性文件
+            PropertiesUtils.load(configLoactions);
+            if (null != scanPackage && scanPackage.length() > 0) {
+                PropertiesUtils.setScanPackage(scanPackage);
+            }
+
             refresh();
         } catch (Exception e) {
             e.printStackTrace();
@@ -170,9 +191,6 @@ public class GPAbstractApplicationContext implements GPApplicationContext {
 
     @Override
     public void refresh() {
-
-        // 加载属性文件
-        PropertiesUtils.load(configLoactions);
 
         // 1、定位，定位配置文件
         beanDefinitionReader = new GPBeanDefinitionReader();

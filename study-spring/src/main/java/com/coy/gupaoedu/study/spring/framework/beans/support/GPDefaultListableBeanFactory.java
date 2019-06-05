@@ -7,20 +7,23 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanNameAware;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanWrapper;
 import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
+import com.coy.gupaoedu.study.spring.framework.beans.GPFactoryBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPInitializingBean;
 import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.exception.BeanIsNotAFactoryException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeanCurrentlyInCreationException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPNoSuchBeanDefinitionException;
+import com.coy.gupaoedu.study.spring.framework.beans.factory.BeanFactoryUtils;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPScope;
 import com.coy.gupaoedu.study.spring.framework.core.NamedThreadLocal;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
-import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPAutowired;
-import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPController;
-import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPService;
+import com.coy.gupaoedu.study.spring.framework.beans.annotation.GPAutowired;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPController;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
@@ -40,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/4/10 21:43
  */
 @Slf4j
-public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry implements GPBeanFactory {
+public class GPDefaultListableBeanFactory extends FactoryBeanRegistrySupport implements GPBeanFactory {
 
     /**
      * Map of bean definition objects, keyed by bean name
@@ -115,6 +118,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons) {
         List<String> resolvedBeanNames = new ArrayList<>();
         // 检查所有的BeanDefinition
+        // 含普通的bean和自定义FactoryBean子类，所以此处变向的实现了对于type类型是自定义FactoryBean中的type类型的情况，也就获取到了由自定义FactoryBean创建的bean对象
         for (String beanName : this.beanDefinitionNames) {
             GPBeanDefinition bd = beanDefinitionMap.get(beanName);
             if (null == bd) {
@@ -122,8 +126,11 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             }
             // 检查bean定义是否完整
             if (!bd.isAbstractFlag() && (bd.hasBeanClass() || !bd.isLazyInit())) {
+                boolean isFactoryBean = isFactoryBean(beanName, bd);
                 boolean matchFound = true;
                 // 检查beanName是否与type匹配
+                // 注：当beanName对应的bean为FactoryBean时，检查type类型是否为自定义GPFactoryBean中的type类型，
+                // 可用于在其他bean中依赖自定义GPFactoryBean中的type类型bean的场景
                 if (!isTypeMatch(beanName, type)) {
                     matchFound = false;
                 }
@@ -132,6 +139,11 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
                 }
                 if (!includeNonSingletons && !bd.isSingleton()) {
                     matchFound = false;
+                }
+                if (!matchFound && isFactoryBean) {
+                    // In case of FactoryBean, try to match FactoryBean instance itself next.
+                    beanName = FACTORY_BEAN_PREFIX + beanName;
+                    matchFound = (includeNonSingletons || bd.isSingleton()) && isTypeMatch(beanName, type);
                 }
                 if (matchFound) {
                     resolvedBeanNames.add(beanName);
@@ -152,10 +164,57 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         for (String beanName : beanNames) {
             GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
             if (bd.isSingleton() && !bd.isLazyInit()) {
-                this.getBean(beanName);
+                // 如果指定名称的bean是创建bean的FactoryBean
+                if (isFactoryBean(beanName)) {
+                    // FACTORY_BEAN_PREFIX=”&”，当Bean名称前面加”&”符号时，获取的是产生容器对象本身，而不是容器产生的Bean.
+                    // 调用getBean方法，触发容器对Bean实例化和依赖注入过程
+                    final GPFactoryBean<?> factory = (GPFactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
+
+
+                } else {
+                    this.getBean(beanName);
+                }
             }
         }
         // TODO 触发所有适用bean的初始化后回调
+    }
+
+    /**
+     * 判断是否为FactoryBean
+     */
+    private boolean isFactoryBean(String name) {
+        String beanName = transformedBeanName(name);
+
+        Object beanInstance = getSingleton(beanName, false);
+        if (beanInstance != null) {
+            return (beanInstance instanceof GPFactoryBean);
+        }
+
+        GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
+        return isFactoryBean(beanName, bd);
+    }
+
+    /**
+     * Check whether the given bean is defined as a {@link GPFactoryBean}.
+     *
+     * @param beanName the name of the bean
+     * @param bd       bd corresponding bean definition
+     */
+    protected boolean isFactoryBean(String beanName, GPBeanDefinition bd) {
+        Class<?> beanType = predictBeanType(beanName, bd, GPFactoryBean.class);
+        return (beanType != null && GPFactoryBean.class.isAssignableFrom(beanType));
+    }
+
+    /**
+     * 预测bean类型
+     */
+    protected Class<?> predictBeanType(String beanName, GPBeanDefinition mbd, Class<?>... typesToMatch) {
+        Class<?> targetType = mbd.getBeanClazz();
+        if (targetType != null) {
+            return targetType;
+        }
+        //return resolveBeanClass(mbd, beanName, typesToMatch);
+        return null;
     }
 
     @Override
@@ -213,13 +272,19 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
      * Return an instance, which may be shared or independent, of the specified bean
      * 真正实现向IOC容器获取Bean的功能，也是触发依赖注入功能的地方
      */
-    protected <T> T doGetBean(final String beanName, Class<T> requiredType, final Object[] args, boolean typeCheckOnly) {
+    protected <T> T doGetBean(final String name, Class<T> requiredType, final Object[] args, boolean typeCheckOnly) {
+        // 去掉FactoryBean的前缀，返回bean名称
+        String beanName = transformedBeanName(name);
 
         Object bean = null;
         // 从容器中获取单例bean，若存在，则无需重复创建（此处可获取到已经创建但还未初始化完全的单例bean（若匹配aop规则，则会创建对应的代理对象并返回））
         Object sharedInstance = getSingleton(beanName);
         if (null != sharedInstance && args == null) {
-            bean = sharedInstance;
+            // bean = sharedInstance;
+            // 获取给定Bean的实例对象，主要是完成FactoryBean的相关处理
+            // 注意：BeanFactory是管理容器中Bean的工厂，而FactoryBean是创建对象的工厂Bean，两者之间有区别
+            bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+
             // 对创建的Bean实例对象进行类型检查
             if (null != requiredType && !requiredType.isInstance(bean)) {
                 throw new GPBeansException("Failed to convert bean '" + beanName + "' to required type '" + requiredType.getTypeName() + "'");
@@ -234,7 +299,10 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
         // 获取BeanDefinition
         final GPBeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-
+        if (beanDefinition == null) {
+            this.logger.warn("No bean named '" + beanName + "' found in " + this);
+            throw new GPNoSuchBeanDefinitionException(beanName);
+        }
         // 创建单例模式Bean的实例对象
         if (beanDefinition.isSingleton()) {
             // 获取单利bean
@@ -250,7 +318,8 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
                     }
                 }
             });
-            bean = singletonInstance;
+            // bean = singletonInstance;
+            bean = getObjectForBeanInstance(singletonInstance, name, beanName, beanDefinition);
         }
         // IOC容器创建原型模式Bean实例对象
         else if (beanDefinition.isPrototype()) {
@@ -265,7 +334,8 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
                 // 回调afterPrototypeCreation方法，默认告诉IOC容器指定Bean的原型对象不再创建
                 afterPrototypeCreation(beanName);
             }
-            bean = prototypeInstance;
+            // bean = prototypeInstance;
+            bean = getObjectForBeanInstance(prototypeInstance, name, beanName, beanDefinition);
         }
         // 要创建的Bean既不是单例模式，也不是原型模式，则根据Bean定义资源中
         // 配置的生命周期范围，选择实例化Bean的合适方法，这种在Web应用程序中
@@ -282,7 +352,8 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
                 Object scopedInstance = scope.get(beanName, () -> {
                     return createBean(beanName, beanDefinition, args);
                 });
-                bean = scopedInstance;
+                // bean = scopedInstance;
+                bean = getObjectForBeanInstance(scopedInstance, name, beanName, beanDefinition);
             } catch (IllegalStateException ex) {
                 throw new GPBeansException("beanName=" + beanName + "Scope '" + scopeName + "' is not active for the current thread; consider " +
                         "defining a scoped proxy for this bean if you intend to refer to it from a singleton", ex);
@@ -295,6 +366,43 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
         }
         return (T) bean;
     }
+
+    /**
+     * 获取给定Bean的实例对象，主要是完成FactoryBean的相关处理
+     */
+    public Object getObjectForBeanInstance(Object beanInstance, String name, String beanName, GPBeanDefinition bd) {
+        // 如果beanName是&开头，且bean不是FactoryBean，因约定&开头的是FactoryBean，所以当bean不是FactoryBean时，则抛出异常
+        // 实则为限制&开头的beanName，则bean必须是FactoryBean
+        if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof GPFactoryBean)) {
+            throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
+        }
+
+        // 当bean不是FacatoryBean 或者 beanName不是&开头，则直接返回bean
+        if (!(beanInstance instanceof GPFactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
+            return beanInstance;
+        }
+
+        // 处理指定名称不是容器的解引用，或者根据名称获取的Bean实例对象是一个工厂Bean
+        // 使用工厂Bean创建一个Bean的实例对象
+        Object object = null;
+        if (bd == null) {
+            // 从Bean工厂缓存中获取给定名称的Bean实例对象
+            object = getCachedObjectForFactoryBean(beanName);
+        }
+        // 让Bean工厂生产给定名称的Bean对象实例
+        if (object == null) {
+            // Return bean instance from factory.
+            GPFactoryBean<?> factory = (GPFactoryBean<?>) beanInstance;
+            // 如果从容器得到Bean定义信息，并且Bean定义信息不是虚构的，
+            // 则让工厂Bean生产Bean实例对象
+            boolean synthetic = (bd != null && bd.isSynthetic());
+            // 调用FactoryBeanRegistrySupport类的getObjectFromFactoryBean方法，
+            // 实现工厂Bean生产Bean对象实例的过程
+            object = getObjectFromFactoryBean(factory, beanName, !synthetic);
+        }
+        return object;
+    }
+
 
     /**
      * 创建bean对象实例
@@ -325,14 +433,26 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public boolean isSingleton(String beanName) {
-        Object beanInstance = getSingleton(beanName, false);
+        String beanName1 = transformedBeanName(beanName);
+        Object beanInstance = getSingleton(beanName1, false);
         if (beanInstance != null) {
-            return true;
+            if (beanInstance instanceof GPFactoryBean) {
+                return (BeanFactoryUtils.isFactoryDereference(beanName) || ((GPFactoryBean<?>) beanInstance).isSingleton());
+            }
+            return !BeanFactoryUtils.isFactoryDereference(beanName);
         }
 
-        GPBeanDefinition mbd = getBeanDefinition(beanName);
+        GPBeanDefinition mbd = getBeanDefinition(beanName1);
         if (mbd.isSingleton()) {
-            return true;
+            if (isFactoryBean(beanName, mbd)) {
+                if (BeanFactoryUtils.isFactoryDereference(beanName)) {
+                    return true;
+                }
+                GPFactoryBean<?> factoryBean = (GPFactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
+                return factoryBean.isSingleton();
+            } else {
+                return !BeanFactoryUtils.isFactoryDereference(beanName);
+            }
         }
         return false;
     }
@@ -347,11 +467,23 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     @Override
-    public boolean isTypeMatch(String beanName, Class<?> typeToMatch) {
+    public boolean isTypeMatch(String name, Class<?> typeToMatch) {
         Assert.notNull(typeToMatch, "Class typeToMatch must not be null");
+        String beanName = transformedBeanName(name);
         // 检查注册的单例
         Object beanInstance = getSingleton(beanName, false);
         if (null != beanInstance) {
+            // 当bean为FactoryBean时，检查typeToMatch类型是否为自定义了GPFactoryBean中的type类型
+            if (beanInstance instanceof GPFactoryBean) {
+                if (!BeanFactoryUtils.isFactoryDereference(name)) {
+                    // 从FactoryBean之类中获取type类型
+                    Class<?> type = getTypeForFactoryBean((GPFactoryBean<?>) beanInstance);
+                    // 此处判断传入的typeToMatch类型与FactoryBean中的type类型是否一致，若一致的话，则认为是自定义了GPFactoryBean来创建typeToMatch类型对应的类
+                    return (type != null && typeToMatch.isAssignableFrom(type));
+                } else {
+                    return typeToMatch.isInstance(beanInstance);
+                }
+            }
             if (typeToMatch.isInstance(beanInstance)) {
                 // Direct match for exposed instance?
                 return true;
@@ -361,6 +493,8 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             // null instance registered
             return false;
         }
+
+        // 预测
 
         // 单例不存在时，则检查bean定义
         GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
@@ -379,6 +513,33 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
             return mbd.getBeanClazz();
         }
         return null;
+    }
+
+    /**
+     * 去掉FactoryBean的前缀，返回bean名称
+     * Return the bean name, stripping out the factory dereference prefix if necessary,
+     * and resolving aliases to canonical names.
+     *
+     * @param name the user-specified name
+     * @return the transformed bean name
+     */
+    protected String transformedBeanName(String name) {
+        return BeanFactoryUtils.transformedBeanName(name);
+    }
+
+    /**
+     * 决定bean名称，将本地定义的别名解析为规范名称
+     * Determine the original bean name, resolving locally defined aliases to canonical names.
+     *
+     * @param name the user-specified name
+     * @return the original bean name
+     */
+    protected String originalBeanName(String name) {
+        String beanName = transformedBeanName(name);
+        if (name.startsWith(FACTORY_BEAN_PREFIX)) {
+            beanName = FACTORY_BEAN_PREFIX + beanName;
+        }
+        return beanName;
     }
 
 
@@ -692,6 +853,7 @@ public class GPDefaultListableBeanFactory extends DefaultSingletonBeanRegistry i
     protected void autowireByType(Object instance, Field field) throws IllegalAccessException {
         if (Object.class != field.getType()) {
             // 根据字段的class类型获取候选bean名称
+            // 此处可获取自定义FactoryBean的beanName，供下面getBean(beanName)来获取自定义FactoryBean创建bean
             String[] candidateNames = getBeanNamesForType(field.getType(), true);
             if (null == candidateNames || candidateNames.length == 0) {
                 throw new GPNoSuchBeanDefinitionException(field.getType(),
