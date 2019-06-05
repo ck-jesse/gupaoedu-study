@@ -4,6 +4,7 @@
 咕泡学院的学习
 
 #### 内容
+```json
 1、仿写spring框架：
     含资源加载、
     扫描类并封装BeanDefinition、
@@ -22,3 +23,4 @@
 6、netty
 7、jvm
 8、tomcat
+```
