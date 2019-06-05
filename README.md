@@ -15,5 +15,10 @@
     FactoryBean自定义创建bean的过程、
     InitializingBean初始化bean、
     BeanFactoryAware向之类提供BeanFactory实例
-    
-2、
+2、仿写mybatis
+3、JUC Java并发编程
+4、设计模式
+5、序列化
+6、netty
+7、jvm
+8、tomcat
