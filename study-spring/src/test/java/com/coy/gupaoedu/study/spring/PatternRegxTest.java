@@ -111,7 +111,7 @@ public class PatternRegxTest {
         System.out.println(aspectPointcut);
         Pattern methodPattern = Pattern.compile(aspectPointcut);
 
-        String methodString = "public abstract java.lang.String com.coy.gupaoedu.study.spring.demo.service.IDemoService.get(java.lang.String)";
+        String methodString = "public abstract java.lang.String com.coy.gupaoedu.study.spring.demo.service.DemoService.get(java.lang.String)";
         System.out.println(methodString);
         System.out.println(methodPattern.matcher(methodString).matches());
 

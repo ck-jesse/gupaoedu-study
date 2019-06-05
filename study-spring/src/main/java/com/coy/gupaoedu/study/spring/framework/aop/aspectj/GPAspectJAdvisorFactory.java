@@ -152,7 +152,7 @@ public class GPAspectJAdvisorFactory {
                 .replaceAll("\\(", "\\\\(")
                 .replaceAll("\\)", "\\\\)").trim();
         // 以public开头表达式的处理
-        // 因为对于接口的方法为： public abstract java.lang.String com.coy.gupaoedu.study.spring.demo.service.IDemoService.get(java.lang.String)
+        // 因为对于接口的方法为： public abstract java.lang.String com.coy.gupaoedu.study.spring.demo.service.DemoService.get(java.lang.String)
         if (aspectPointcutRegx.startsWith("public")) {
             aspectPointcutRegx = aspectPointcutRegx.replaceAll("public\\s+\\*\\s+", "public +[\\\\w\\\\s.*]* +");
         }

@@ -1,6 +1,6 @@
 //package com.coy.gupaoedu.study.spring.demo.mvc.action;
 //
-//import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
+//import com.coy.gupaoedu.study.spring.demo.service.DemoService;
 //import com.coy.gupaoedu.study.spring.framework.beans.annotation.GPAutowired;
 //import com.coy.gupaoedu.study.spring.framework.context.annotation.GPController;
 //import com.coy.gupaoedu.study.spring.framework.mvc.annotation.GPRequestMapping;
@@ -17,7 +17,7 @@
 //public class DemoAction {
 //
 //    @GPAutowired
-//    private IDemoService demoService;
+//    private DemoService demoService;
 //
 //    @GPRequestMapping("/query.*")
 //    public void query(HttpServletRequest req, HttpServletResponse resp,

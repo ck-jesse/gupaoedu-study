@@ -1,6 +1,6 @@
 package com.coy.gupaoedu.study.spring.demo.service.impl;
 
-import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
+import com.coy.gupaoedu.study.spring.demo.service.DemoService;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactory;
 import com.coy.gupaoedu.study.spring.framework.beans.GPBeanFactoryAware;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
@@ -12,7 +12,7 @@ import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
  * 用于测试基于接口的JDK代理
  */
 @GPService
-public class DemoService implements IDemoService, GPBeanFactoryAware {
+public class DemoServiceImpl implements DemoService, GPBeanFactoryAware {
 
     private GPBeanFactory beanFactory;
 
@@ -43,6 +43,6 @@ public class DemoService implements IDemoService, GPBeanFactoryAware {
     @Override
     public void setBeanFactory(GPBeanFactory beanFactory) throws GPBeansException {
         this.beanFactory = beanFactory;
-        System.out.println("DemoService 通过GPBeanFactory来实现实例化后的BeanFactory的注入");
+        System.out.println("DemoServiceImpl 通过GPBeanFactory来实现实例化后的BeanFactory的注入");
     }
 }

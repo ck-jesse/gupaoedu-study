@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.spring;
 
-import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
-import com.coy.gupaoedu.study.spring.demo.service.impl.DemoService;
+import com.coy.gupaoedu.study.spring.demo.service.DemoService;
+import com.coy.gupaoedu.study.spring.demo.service.impl.DemoServiceImpl;
 import com.coy.gupaoedu.study.spring.demo.service.impl.UserService;
 import com.coy.gupaoedu.study.spring.framework.context.GPApplicationContext;
 import com.coy.gupaoedu.study.spring.framework.context.support.GPAbstractApplicationContext;
@@ -20,7 +20,9 @@ public class SpringFrameworkTest {
     public void springFrameworkTest() throws Exception {
         String configLoactions = "application.properties";
         GPApplicationContext context = new GPAbstractApplicationContext(configLoactions);
-        IDemoService demoService = context.getBean(DemoService.class);
+
+        Thread.sleep(5000);
+        DemoService demoService = context.getBean(DemoServiceImpl.class);
         System.out.println(demoService.get("demoService"));
 
         //TwoAction twoAction = context.getBean(TwoAction.class);

@@ -10,7 +10,9 @@ import com.coy.gupaoedu.study.spring.framework.beans.GPDisposableBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPFactoryBean;
 import com.coy.gupaoedu.study.spring.framework.beans.GPInitializingBean;
 import com.coy.gupaoedu.study.spring.framework.beans.ObjectFactory;
+import com.coy.gupaoedu.study.spring.framework.beans.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.BeanIsNotAFactoryException;
+import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeanCreationException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeanCurrentlyInCreationException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPBeansException;
 import com.coy.gupaoedu.study.spring.framework.beans.exception.GPNoSuchBeanDefinitionException;
@@ -18,12 +20,11 @@ import com.coy.gupaoedu.study.spring.framework.beans.factory.BeanFactoryUtils;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPInstantiationAwareBeanPostProcessor;
 import com.coy.gupaoedu.study.spring.framework.beans.factory.config.GPScope;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPController;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 import com.coy.gupaoedu.study.spring.framework.core.NamedThreadLocal;
 import com.coy.gupaoedu.study.spring.framework.core.util.Assert;
 import com.coy.gupaoedu.study.spring.framework.core.util.StringUtils;
-import com.coy.gupaoedu.study.spring.framework.beans.annotation.GPAutowired;
-import com.coy.gupaoedu.study.spring.framework.context.annotation.GPController;
-import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
@@ -207,12 +208,14 @@ public class GPDefaultListableBeanFactory extends FactoryBeanRegistrySupport imp
 
     /**
      * 预测bean类型
+     * 不需要专门处理factrybean，因为它只应该在原bean类型上操作。
      */
     protected Class<?> predictBeanType(String beanName, GPBeanDefinition mbd, Class<?>... typesToMatch) {
         Class<?> targetType = mbd.getBeanClazz();
         if (targetType != null) {
             return targetType;
         }
+        // spring中的实现太复杂，我们不对此处做实现，直接返回GPBeanDefinition中的beanClazz即可
         //return resolveBeanClass(mbd, beanName, typesToMatch);
         return null;
     }
@@ -493,12 +496,72 @@ public class GPDefaultListableBeanFactory extends FactoryBeanRegistrySupport imp
             // null instance registered
             return false;
         }
-
-        // 预测
-
-        // 单例不存在时，则检查bean定义
         GPBeanDefinition bd = this.beanDefinitionMap.get(beanName);
-        return typeToMatch.isAssignableFrom(bd.getBeanClazz());
+
+        Class<?> classToMatch = typeToMatch;
+        if (classToMatch == null) {
+            classToMatch = GPFactoryBean.class;
+        }
+        Class<?>[] typesToMatch = (GPFactoryBean.class == classToMatch ?
+                new Class<?>[]{classToMatch} : new Class<?>[]{GPFactoryBean.class, classToMatch});
+
+        // 预测bean的类型（当beanName是对应的类型是FactoryBean的子类时，返回的就是自定义FactoryBean的class类型）
+        Class<?> beanType = predictBeanType(beanName, bd, typesToMatch);
+        if (beanType == null) {
+            return false;
+        }
+
+        // Check bean class whether we're dealing with a FactoryBean.
+        if (GPFactoryBean.class.isAssignableFrom(beanType)) {
+            if (!BeanFactoryUtils.isFactoryDereference(name)) {
+                // 如果是一个FactoryBean，那么则期望知道他创建的对象的class类型（不是FactoryBean本身的class类型）
+                // If it's a FactoryBean, we want to look at what it creates, not the factory class.
+                beanType = getTypeForFactoryBean(beanName, bd);
+                if (beanType == null) {
+                    return false;
+                }
+            }
+        } else if (BeanFactoryUtils.isFactoryDereference(name)) {
+            // Special case: A SmartInstantiationAwareBeanPostProcessor returned a non-FactoryBean
+            // type but we nevertheless are being asked to dereference a FactoryBean...
+            // Let's check the original bean class and proceed with it if it is a FactoryBean.
+            beanType = predictBeanType(beanName, bd, GPFactoryBean.class);
+            if (beanType == null || !GPFactoryBean.class.isAssignableFrom(beanType)) {
+                return false;
+            }
+        }
+        return typeToMatch.isAssignableFrom(beanType);
+    }
+
+    /**
+     * 尽可能确定给定factorybean定义的bean类型.
+     * 仅当没有为目标bean注册的singleton实例时调用.
+     * Determine the bean type for the given FactoryBean definition, as far as possible.
+     * Only called if there is no singleton instance registered for the target bean already.
+     */
+    protected Class<?> getTypeForFactoryBean(String beanName, GPBeanDefinition mbd) {
+        if (!mbd.isSingleton()) {
+            return null;
+        }
+        try {
+            GPFactoryBean<?> factoryBean = doGetBean(FACTORY_BEAN_PREFIX + beanName, GPFactoryBean.class, null, true);
+            return getTypeForFactoryBean(factoryBean);
+        } catch (GPBeanCreationException ex) {
+            if (ex instanceof GPBeanCurrentlyInCreationException) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
+                }
+            } else if (mbd.isLazyInit()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Bean creation exception on lazy FactoryBean type check: " + ex);
+                }
+            } else {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Bean creation exception on non-lazy FactoryBean type check: " + ex);
+                }
+            }
+            return null;
+        }
     }
 
     @Override

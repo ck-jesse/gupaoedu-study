@@ -1,6 +1,6 @@
 package com.coy.gupaoedu.study.spring.demo.service.impl;
 
-import com.coy.gupaoedu.study.spring.demo.service.IDemoService;
+import com.coy.gupaoedu.study.spring.demo.service.DemoService;
 import com.coy.gupaoedu.study.spring.framework.beans.annotation.GPAutowired;
 import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 
@@ -11,10 +11,10 @@ import com.coy.gupaoedu.study.spring.framework.context.annotation.GPService;
 public class UserService {
 
     /**
-     * 循环依赖
+     * 循环依赖的问题测试
      */
     @GPAutowired
-    private IDemoService demoService;
+    private DemoService demoService;
 
     public String getName(String name) {
         String result = demoService.get(name);

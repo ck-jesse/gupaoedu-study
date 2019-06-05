@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring.demo.aspect;
 
 import com.coy.gupaoedu.study.spring.framework.aop.aopalliance.intercept.GPMethodInvocation;
+import com.coy.gupaoedu.study.spring.framework.context.annotation.GPComponent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Arrays;
  * @author chenck
  * @date 2019/4/22 13:46
  */
+@GPComponent
 @Slf4j
 public class LogAspect {
 
