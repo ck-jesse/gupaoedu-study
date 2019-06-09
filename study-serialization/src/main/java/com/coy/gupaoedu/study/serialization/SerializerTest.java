@@ -1,12 +1,15 @@
 package com.coy.gupaoedu.study.serialization;
 
 import com.coy.gupaoedu.study.serialization.model.User;
-import com.coy.gupaoedu.study.serialization.serializer.FastJsonSerializer;
+import com.coy.gupaoedu.study.serialization.serializer.HessionSerializer;
 import com.coy.gupaoedu.study.serialization.serializer.Serializer;
 
 import java.io.IOException;
 
 /**
+ * 序列化是把对象的状态信息转化为可存储或传输的形式过程，也就是把对象转化为字节序列的过程称为对象的序列化
+ * 反序列化是序列化的逆向过程，把字节数组反序列化为对象，把字节序列恢复为对象的过程成为对象的反序列化
+ *
  * @author chenck
  * @date 2019/6/3 11:46
  */
@@ -35,7 +38,9 @@ public class SerializerTest {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
 
 //        Serializer serializer = new JavaSerializer();
-        Serializer serializer = new FastJsonSerializer();
+//        Serializer serializer = new FastJsonSerializer();
+//        Serializer serializer = new XStreamSerializer();
+        Serializer serializer = new HessionSerializer();
 
         User user = new User();
         user.setName("coy");
