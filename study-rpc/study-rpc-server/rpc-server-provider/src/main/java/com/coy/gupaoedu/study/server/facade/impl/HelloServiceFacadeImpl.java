@@ -2,11 +2,13 @@ package com.coy.gupaoedu.study.server.facade.impl;
 
 import com.coy.gupaoedu.study.server.dto.User;
 import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
+import com.coy.gupaoedu.study.server.rpc.RpcService;
 
 /**
  * @author chenck
  * @date 2019/6/6 16:44
  */
+@RpcService(value = HelloServiceFacade.class)
 public class HelloServiceFacadeImpl implements HelloServiceFacade {
 
     @Override
