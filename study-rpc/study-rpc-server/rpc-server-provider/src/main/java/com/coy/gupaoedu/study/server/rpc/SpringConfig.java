@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "com.coy.gupaoedu.study.server")
 public class SpringConfig {
 
-    @Bean(name = "rpcServicePublisher")
-    public RpcServicePublisher rpcServicePublisher() {
-        return new RpcServicePublisher(8080);
+    @Bean(name = "rpcServer")
+    public RpcServer rpcServer() {
+        return new RpcServer(8080);
     }
 }
