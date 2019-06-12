@@ -23,6 +23,7 @@
         <module>study-data-structure</module>
         <module>study-rpc</module>
         <module>study-serialization</module>
+        <module>study-io</module>
     </modules>
 
     <parent>
