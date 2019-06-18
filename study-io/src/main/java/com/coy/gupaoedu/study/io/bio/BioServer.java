@@ -23,6 +23,8 @@ public class BioServer {
         try {
             serverSocket = new ServerSocket(port);
             System.out.println("BIO服务已启动，监听端口:" + port);
+
+            // 通过死循环监听连接请求
             while (true) {
                 // 等待客户端连接，阻塞方法
                 Socket socket = serverSocket.accept();
