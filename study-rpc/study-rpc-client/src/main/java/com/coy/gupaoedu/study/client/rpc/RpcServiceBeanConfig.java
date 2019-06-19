@@ -14,25 +14,14 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan(basePackages = "com.coy.gupaoedu.study.client")
-public class SpringConfig {
-
-    private String host = "localhost";
-    private int port = 8080;
-
-    /**
-     * 定义客户端代理bean
-     */
-    @Bean(name = "rpcPRoxyClient")
-    public RpcProxyClient proxyClient() {
-        return new RpcProxyClient();
-    }
+public class RpcServiceBeanConfig {
 
     /**
      * 定义远程服务的bean
      */
     @Bean(name = "helloServiceFacade")
     public RefereceBean<HelloServiceFacade> helloServiceFacade() {
-        return new RefereceBean<HelloServiceFacade>(HelloServiceFacade.class, host, port);
+        return new RefereceBean<HelloServiceFacade>(HelloServiceFacade.class);
     }
 
     /**
@@ -40,6 +29,6 @@ public class SpringConfig {
      */
     @Bean(name = "paymentServiceFacade")
     public RefereceBean<PaymentServiceFacade> paymentServiceFacade() {
-        return new RefereceBean<PaymentServiceFacade>(PaymentServiceFacade.class, host, port, "v1.0");
+        return new RefereceBean<PaymentServiceFacade>(PaymentServiceFacade.class, "v1.0");
     }
 }

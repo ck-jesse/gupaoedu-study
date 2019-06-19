@@ -7,29 +7,27 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * 依赖的bean的定义
+ * <p>
+ * 基于FactoryBean来自定义bean的创建过程
  *
  * @author chenck
  * @date 2019/6/9 16:19
  */
 public class RefereceBean<T> implements FactoryBean, ApplicationContextAware {
 
-    private String host;
-    private int port;
     private String version;
     private Class<T> targetType;
 
     private T singletonObject;
     private ApplicationContext applicationContext;
 
-    public RefereceBean(Class<T> clazz, String host, int port, String version) {
+    public RefereceBean(Class<T> clazz, String version) {
         this.targetType = clazz;
-        this.host = host;
-        this.port = port;
         this.version = version;
     }
 
-    public RefereceBean(Class<T> clazz, String host, int port) {
-        this(clazz, host, port, null);
+    public RefereceBean(Class<T> clazz) {
+        this(clazz, null);
     }
 
     @Override
@@ -44,10 +42,10 @@ public class RefereceBean<T> implements FactoryBean, ApplicationContextAware {
             if (null != singletonObject) {
                 return singletonObject;
             }
-            singletonObject = rpcProxyClient.clientProxy(targetType, host, port, version);
+            singletonObject = rpcProxyClient.clientProxy(targetType, version);
             return singletonObject;
         } else {
-            return rpcProxyClient.clientProxy(targetType, host, port);
+            return rpcProxyClient.clientProxy(targetType, version);
         }
     }
 

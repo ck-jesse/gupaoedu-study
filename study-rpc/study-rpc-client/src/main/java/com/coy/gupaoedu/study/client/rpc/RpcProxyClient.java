@@ -1,5 +1,8 @@
 package com.coy.gupaoedu.study.client.rpc;
 
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 import java.lang.reflect.Proxy;
 
 /**
@@ -8,14 +11,18 @@ import java.lang.reflect.Proxy;
  * @author chenck
  * @date 2019/6/6 16:57
  */
+@Component
 public class RpcProxyClient {
 
-    public <T> T clientProxy(final Class<T> interfaces, final String host, final int port) {
-        return clientProxy(interfaces, host, port, host);
+    @Resource
+    RpcNetTransport rpcNetTransport;
+
+    public <T> T clientProxy(final Class<T> interfaces) {
+        return clientProxy(interfaces, null);
     }
 
-    public <T> T clientProxy(final Class<T> interfaces, final String host, final int port, String version) {
+    public <T> T clientProxy(final Class<T> interfaces, String version) {
         return (T) Proxy.newProxyInstance(interfaces.getClassLoader(), new Class[]{interfaces},
-                new RemoteInvocationHandler(host, port, version));
+                new RemoteInvocationHandler(version, rpcNetTransport));
     }
 }

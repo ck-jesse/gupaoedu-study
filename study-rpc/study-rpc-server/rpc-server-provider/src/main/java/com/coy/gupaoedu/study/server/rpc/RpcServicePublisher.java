@@ -9,18 +9,15 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
- * RPC 服务发布
+ * rpc 服务发布（注册服务到Map容器）
  *
  * @author chenck
  * @date 2019/6/6 17:20
  */
 @Component
 public class RpcServicePublisher implements ApplicationContextAware, InitializingBean {
-
 
     private ApplicationContext applicationContext;
 
@@ -58,14 +55,14 @@ public class RpcServicePublisher implements ApplicationContextAware, Initializin
     public void afterPropertiesSet() throws Exception {
         // 发布服务
         publisher();
-
-        // 启动socket服务监听
-        RpcServer rpcServer = applicationContext.getBean(RpcServer.class);
-        rpcServer.reciveRequest(handlerMap);
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public Map<String, Object> getHandlerMap() {
+        return handlerMap;
     }
 }

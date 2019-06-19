@@ -3,6 +3,8 @@ package com.coy.gupaoedu.study.server.rpc;
 import java.io.Serializable;
 
 /**
+ * 定义rpc协议
+ *
  * @author chenck
  * @date 2019/6/9 15:37
  */

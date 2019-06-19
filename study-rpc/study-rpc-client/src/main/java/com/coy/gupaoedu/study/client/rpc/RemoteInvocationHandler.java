@@ -13,18 +13,13 @@ import java.lang.reflect.Method;
  */
 public class RemoteInvocationHandler implements InvocationHandler {
 
-    private String host;
-    private int port;
     private String version;
+    private RpcNetTransport rpcNetTransport;
 
-    public RemoteInvocationHandler(String host, int port) {
-        this(host, port, null);
-    }
 
-    public RemoteInvocationHandler(String host, int port, String version) {
-        this.host = host;
-        this.port = port;
+    public RemoteInvocationHandler(String version, RpcNetTransport rpcNetTransport) {
         this.version = version;
+        this.rpcNetTransport = rpcNetTransport;
     }
 
     @Override
@@ -37,9 +32,8 @@ public class RemoteInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodName(method.getName());
         rpcRequest.setParameters(args);
         rpcRequest.setVersion(version);
-        // 远程通信
-        RpcNetTransport netTransport = new RpcNetTransport(host, port);
-        Object result = netTransport.send(rpcRequest);
+        // 执行rpc调用
+        Object result = rpcNetTransport.rpcInvoke(rpcRequest);
         return result;
     }
 }
