@@ -66,9 +66,9 @@ public class RpcNettyServer {
                              lengthAdjustment：要添加到长度字段值的补偿值
                              initialBytesToStrip：从解码帧中去除的第一个字节数
                              */
-                            ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                            ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
                             //自定义协议编码器
-                            ch.pipeline().addLast(new LengthFieldPrepender(4));
+                            ch.pipeline().addLast(new LengthFieldPrepender(2));
                             //对象参数类型编码器
                             ch.pipeline().addLast("encoder", new ObjectEncoder());
                             //对象参数类型解码器

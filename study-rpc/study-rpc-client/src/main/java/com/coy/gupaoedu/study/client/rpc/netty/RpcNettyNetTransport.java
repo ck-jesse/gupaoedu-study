@@ -43,7 +43,6 @@ public class RpcNettyNetTransport extends RpcNetTransport {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            // 自定义协议解码器
                             /** 入参有5个，分别解释如下
                              maxFrameLength：框架的最大长度。如果帧的长度大于此值，则将抛出TooLongFrameException。
                              lengthFieldOffset：长度字段的偏移量：即对应的长度字段在整个消息数据中得位置
@@ -51,9 +50,10 @@ public class RpcNettyNetTransport extends RpcNetTransport {
                              lengthAdjustment：要添加到长度字段值的补偿值
                              initialBytesToStrip：从解码帧中去除的第一个字节数
                              */
-                            ch.pipeline().addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                            // 自定义协议解码器
+                            ch.pipeline().addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
                             //自定义协议编码器
-                            ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
+                            ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(2));
                             //对象参数类型编码器
                             ch.pipeline().addLast("encoder", new ObjectEncoder());
                             //对象参数类型解码器

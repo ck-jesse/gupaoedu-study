@@ -1,58 +1,46 @@
-package com.coy.gupaoedu.study.client;
+package com.coy.gupaoedu.study.client.test;
 
 import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
 import com.coy.gupaoedu.study.client.rpc.RpcProxyClient;
-import com.coy.gupaoedu.study.client.rpc.bio.RpcBioNetTransport;
 import com.coy.gupaoedu.study.client.rpc.netty.RpcNettyNetTransport;
 import com.coy.gupaoedu.study.client.service.HelloService;
 import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
 import com.coy.gupaoedu.study.server.facade.PaymentServiceFacade;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Netty 客户端测试类
+ *
  * @author chenck
  * @date 2019/6/9 16:11
  */
 @Configuration
-@ComponentScan(basePackages = "com.coy.gupaoedu.study.client")
-public class RpcBioClientTest {
+@ComponentScan(basePackages = {"com.coy.gupaoedu.study.client.rpc", "com.coy.gupaoedu.study.client.service"})
+public class RpcNettyClientTest {
 
-    public static final String BIO = "bio";
-    public static final String NETTY = "netty";
-
-    protected String rpcType = BIO;
+    private String host = "localhost";
+    private int port = 8080;
 
     /**
-     * 实例化 RpcNetTransport
+     * 实例化 RpcNettyNetTransport
      * 注意：此处定义很重要，是用来区分是基于netty还是基于bio
      */
-    @Bean(name = "rpcNetTransport")
-    public RpcNetTransport rpcNetTransport() {
-        if (rpcType.equals(BIO)) {
-            return new RpcBioNetTransport("localhost", 8080);
-        }
-        return new RpcNettyNetTransport("localhost", 8080);
+    @Bean(name = "rpcNettyNetTransport")
+    public RpcNetTransport rpcNettyNetTransport() {
+        return new RpcNettyNetTransport(host, port);
     }
 
-    ApplicationContext context;
+    private AnnotationConfigApplicationContext context;
 
     @Before
     public void before() {
-        rpcType = BIO;
-        rpcType = NETTY;
-        System.out.println("即将实现基于 " + rpcType + " 的RPC远程服务调用");
-
-        if (rpcType.equals(BIO)) {
-            context = new AnnotationConfigApplicationContext(RpcBioClientTest.class);
-        } else {
-            context = new AnnotationConfigApplicationContext(RpcBioClientTest.class);
-        }
+        System.out.println("基于 Netty 的RPC远程服务调用");
+        context = new AnnotationConfigApplicationContext(RpcNettyClientTest.class);
     }
 
     @Test
