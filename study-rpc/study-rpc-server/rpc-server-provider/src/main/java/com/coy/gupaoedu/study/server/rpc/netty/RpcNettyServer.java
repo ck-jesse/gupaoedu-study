@@ -51,6 +51,7 @@ public class RpcNettyServer {
                     // 主线程通道处理类，底层用反射，针对ServerSocketChannel
                     .channel(NioServerSocketChannel.class)
                     // 子线程处理类，针对SocketChannel
+                    // 定义一个新连接的处理逻辑
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         /**
                          * 客户端通道初始化处理
