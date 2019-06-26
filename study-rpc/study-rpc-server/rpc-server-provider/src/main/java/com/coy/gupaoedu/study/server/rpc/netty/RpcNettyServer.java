@@ -51,6 +51,7 @@ public class RpcNettyServer {
                     // 主线程通道处理类，底层用反射，针对ServerSocketChannel
                     .channel(NioServerSocketChannel.class)
                     // 子线程处理类，针对SocketChannel
+                    // 定义一个新连接的处理逻辑
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         /**
                          * 客户端通道初始化处理
@@ -66,9 +67,9 @@ public class RpcNettyServer {
                              lengthAdjustment：要添加到长度字段值的补偿值
                              initialBytesToStrip：从解码帧中去除的第一个字节数
                              */
-                            ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                            ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
                             //自定义协议编码器
-                            ch.pipeline().addLast(new LengthFieldPrepender(4));
+                            ch.pipeline().addLast(new LengthFieldPrepender(2));
                             //对象参数类型编码器
                             ch.pipeline().addLast("encoder", new ObjectEncoder());
                             //对象参数类型解码器

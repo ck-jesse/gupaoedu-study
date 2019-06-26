@@ -3,7 +3,6 @@ package com.coy.gupaoedu.study.client.rpc;
 import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
 import com.coy.gupaoedu.study.server.facade.PaymentServiceFacade;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
  * @date 2019/6/9 15:57
  */
 @Configuration
-@ComponentScan(basePackages = "com.coy.gupaoedu.study.client")
 public class RpcServiceBeanConfig {
 
     /**

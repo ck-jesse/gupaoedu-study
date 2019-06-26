@@ -8,6 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Netty 服务端测试类
+ *
  * @author chenck
  * @date 2019/6/9 16:00
  */
@@ -23,6 +25,10 @@ public class RpcNettyServerTest {
         return new RpcNettyServer(8080, rpcInvoker);
     }
 
+
+    /**
+     * 对应的客户端测试类 com.coy.gupaoedu.study.client.test.RpcNettyClientTest
+     */
     public static void main(String[] args) {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(RpcNettyServerTest.class);
         applicationContext.start();

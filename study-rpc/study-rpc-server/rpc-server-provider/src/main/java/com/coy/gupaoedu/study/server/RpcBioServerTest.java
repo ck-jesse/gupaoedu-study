@@ -20,7 +20,7 @@ public class RpcBioServerTest {
      */
     @Bean(name = "rpcBioServer")
     public RpcBioServer rpcBioServer(RpcInvoker rpcInvoker) {
-        return new RpcBioServer(8080, rpcInvoker);
+        return new RpcBioServer(8081, rpcInvoker);
     }
 
     public static void main(String[] args) {

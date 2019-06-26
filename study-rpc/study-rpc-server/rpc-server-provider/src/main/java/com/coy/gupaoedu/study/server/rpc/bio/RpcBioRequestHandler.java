@@ -1,5 +1,6 @@
 package com.coy.gupaoedu.study.server.rpc.bio;
 
+import com.alibaba.fastjson.JSON;
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 
@@ -32,9 +33,12 @@ public class RpcBioRequestHandler implements Runnable {
             objectInputStream = new ObjectInputStream(socket.getInputStream());
             // 请求哪个类，方法名称、参数
             RpcRequest rpcRequest = (RpcRequest) objectInputStream.readObject();
+            System.out.println();
+            System.out.println("请求参数：" + JSON.toJSONString(rpcRequest));
 
             // 通过反射调用本地服务
             Object result = rpcInvoker.invoke(rpcRequest);
+            System.out.println("响应参数：" + JSON.toJSONString(result));
 
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             // 输出响应结果
