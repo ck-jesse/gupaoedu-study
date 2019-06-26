@@ -10,17 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>study-netty</artifactId>
+    <packaging>pom</packaging>
 
     <name>study-netty</name>
     <description>咕泡学院-Netty源码篇</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>study-netty-chat</module>
+    </modules>
 
 </project>
