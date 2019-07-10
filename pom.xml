@@ -24,6 +24,7 @@
         <module>study-rpc</module>
         <module>study-serialization</module>
         <module>study-io</module>
+        <module>study-zookeeper</module>
     </modules>
 
     <parent>
