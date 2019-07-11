@@ -1,6 +1,5 @@
 package com.coy.gupaoedu.study.zookeeper;
 
-import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.zookeeper.data.Stat;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,27 +68,6 @@ public class CurdTest {
     public void isExistNode() throws Exception {
         boolean result = curatorFramework.isExistNode("/curd/create1");
         System.out.println(result);
-    }
-
-    /**
-     * 注册节点数据变化事件
-     * <p>
-     * 将Zookeeper作为配置中心的时候，最常用的是监听节点数据的变动。
-     */
-    @Test
-    public void registryWatcherNodeChanged() throws Exception {
-
-        curatorFramework.registryWatcherNodeChanged("/curd/create1", new NodeCacheListener() {
-            @Override
-            public void nodeChanged() throws Exception {
-                String newData = curatorFramework.getNodeData("/curd/create1");
-                System.out.println("node data changed, new data = " + newData);
-            }
-        });
-
-        while (true) {
-
-        }
     }
 
 }

@@ -4,9 +4,15 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.curator.framework.recipes.leader.LeaderSelector;
+import org.apache.curator.framework.recipes.leader.LeaderSelectorListener;
+import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenck
@@ -121,5 +127,81 @@ public class ZookeeperClient {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 分布式锁
+     * <p>
+     * 本质：
+     * 1、创建一个临时有序节点（此时未持有锁）
+     * org.apache.curator.framework.recipes.locks.LockInternalsDriver#createsTheLock
+     * 2、自旋判断是否能够持有锁，
+     * org.apache.curator.framework.recipes.locks.LockInternals#internalLockLoop
+     * 3、获取到所有子节点列表，并且从小到大根据节点名称后10位数字进行排序；
+     * 若能持有锁，则返回true；
+     * 若不能持有锁，则获取到上一个临时节点的path，并添加一个watcher监听（也就是当前线程会监听自己节点的上一个节点的变化，而不是监听父节点下所有节点的变动）；
+     * 然后当前线程进入wait，等待被唤醒；
+     * 当监听的节点发生了变动时，那么就将线程从等待状态唤醒，重新开始下一轮的锁的争抢。
+     */
+    public void distributedLock(String path, long waitTime, TimeUnit unit) {
+        // Curator的几种锁方案
+        // InterProcessMutex：分布式可重入排它锁
+        // InterProcessSemaphoreMutex：分布式排它锁
+        // InterProcessReadWriteLock：分布式读写锁
+        // InterProcessMultiLock：将多个锁作为单个实体管理的容器
+
+        InterProcessMutex lock = new InterProcessMutex(curatorFramework, path);
+        String threadName = Thread.currentThread().getName();
+        try {
+            System.out.println(threadName + " 开始获取锁");
+            // 获取锁
+            if (lock.acquire(waitTime, unit)) {
+                System.out.println(threadName + " 获取锁成功");
+                System.out.println(threadName + " 开始sleep 5s");
+                Thread.sleep(5000);
+            } else {
+                System.out.println(threadName + " 获取锁失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (lock.isOwnedByCurrentThread()) {
+                    lock.release();
+                    System.out.println(threadName + " 释放锁");
+                } else {
+                    System.out.println(threadName + " 无需释放锁，因为没有获得锁");
+                }
+            } catch (Exception e) {
+                System.out.println(threadName + " 释放锁异常 " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * leader选举
+     */
+    public void leaderElection(String path) {
+        LeaderSelectorListener listener = new LeaderSelectorListenerAdapter() {
+            public void takeLeadership(CuratorFramework client) throws Exception {
+                // this callback will get called when you are the leader
+                // do whatever leader work you need to and only exit
+                // this method when you want to relinquish leadership
+                // 当你是领导者，做你需要做的任何领导工作时，这个回调都会被调用，只有当你想放弃领导时才退出这个方法。
+                System.out.println("我是Leader啦，听我号令，开干咯！我要一直保持不return该方法，一但return那么我就不是leader啦");
+                try {
+                    System.out.println("我将休眠20s，这段时间我是leader");
+                    Thread.sleep(20000);
+                } finally {
+                    System.out.println("relinquishing leadership 放弃领导权");
+                }
+            }
+        };
+
+        // create a leader selector
+        LeaderSelector selector = new LeaderSelector(curatorFramework, path, listener);
+        selector.autoRequeue();  // not required, but this is behavior that you will probably expect
+        selector.start();
     }
 }
