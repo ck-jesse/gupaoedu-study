@@ -14,13 +14,26 @@ public class LeaderElectionTest {
 
     ZookeeperClient curatorFramework = new ZookeeperClient(connectString);
 
+    String path = "/leader";
+
     @Test
-    public void leaderElectionTest() {
-        String path = "/leader";
-        curatorFramework.leaderElection(path);
-
+    public void leaderElectionTestA() {
+        curatorFramework.leaderElection(path, "ClientA", 10000);
         while (true) {
+        }
+    }
 
+    @Test
+    public void leaderElectionTestB() {
+        curatorFramework.leaderElection(path, "ClientB", 10000);
+        while (true) {
+        }
+    }
+
+    @Test
+    public void leaderElectionTestC() {
+        curatorFramework.leaderElection(path, "ClientC", 10000);
+        while (true) {
         }
     }
 }

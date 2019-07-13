@@ -20,7 +20,7 @@ public class DistributedLockTest {
     @Test
     public void test() {
         final String lockPath = "/lock";
-        final long waitTime = 1;
+        final long waitTime = 20;
 
         new Thread(new Runnable() {
             @Override

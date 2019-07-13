@@ -145,7 +145,7 @@ public class ZookeeperClient {
      * <p>
      * 总结：
      * 分布式锁的本质就是通过创建一个临时有序节点，和watcher监听上一个节点的变动来实现的。
-     *
+     * <p>
      * 利用临时有序节点+watcher监听机制可以做很多事情，如分布式锁、Leader选举、分布式队列（FIFO）
      */
     public void distributedLock(String path, long waitTime, TimeUnit unit) {
@@ -188,34 +188,36 @@ public class ZookeeperClient {
      * leader选举
      * <p>
      * 原理：
-     * 1、创建一个线程池，然后将在执行 LeaderSelector.start()方法时,王线程池中提交一个workloop任务
-     * 2、执行任务对应方法 LeaderSelector.doWork()，其中使用了分布式锁InterProcessMutex.acquire()来无限等待获得锁
+     * 1、创建一个线程池，然后将在执行 LeaderSelector.start()方法时,往线程池中提交一个workloop任务
+     * 2、调用方法internalRequeue，实质为执行任务对应方法 LeaderSelector.doWork()，其中使用了分布式锁InterProcessMutex.acquire()来无限等待获得锁
      * 3、若当前节点获得锁，则执行 LeaderSelectorListener.takeLeadership()方法，也就是自定义的Listener中的方法
      * 当该方法持有执行权限时，则表示当前节点被选举为leader了，退出该方法时，则表示放弃执行权限，放弃领导权
      * 4、若当前节点未获得锁，则无限等待获得锁（实质就是利用了分布式锁的特性来控制）
+     * 5、当放弃领导权时，并且LeaderSelector.autoRequeue()为true，则再次调用internalRequeue来获取锁（获取leader）
      * <p>
      * 总结：
      * leader选举的本质就是利用的分布式锁的特性来实现的主从选举。watcher监听上一个临时有序节点，然后无限等待，直到获得锁，获得锁则表示被选举为了leader。
      */
-    public void leaderElection(String path) {
+    public void leaderElection(String path, String clientName, long sleepTime) {
         LeaderSelectorListener listener = new LeaderSelectorListenerAdapter() {
             public void takeLeadership(CuratorFramework client) throws Exception {
                 // this callback will get called when you are the leader
                 // do whatever leader work you need to and only exit
                 // this method when you want to relinquish leadership
                 // 当你是领导者，做你需要做的任何领导工作时，这个回调都会被调用，只有当你想放弃领导时才退出这个方法。
-                System.out.println("我是Leader啦，听我号令，开干咯！我要一直保持不return该方法，一但return那么我就不是leader啦");
+                System.out.println("[" + clientName + "] 我是Leader啦，听我号令，开干咯！我要一直保持不return该方法，一但return那么我就不是leader啦");
                 try {
-                    System.out.println("我将休眠10s，这段时间我是leader");
-                    Thread.sleep(10000);
+                    System.out.println("[" + clientName + "] 我将休眠10s，这段时间我是leader");
+                    Thread.sleep(sleepTime);
                 } finally {
-                    System.out.println("relinquishing leadership 放弃领导权");
+                    System.out.println("[" + clientName + "] relinquishing leadership 放弃领导权");
                 }
             }
         };
 
         // create a leader selector
         LeaderSelector selector = new LeaderSelector(curatorFramework, path, listener);
+        // 自动重复参与选举(用于控制获得锁，并释放锁以后，再次进入等待获得锁，也就是重复参与锁的获取，实质为重复获取leader)
         selector.autoRequeue();  // not required, but this is behavior that you will probably expect
         selector.start();
     }
