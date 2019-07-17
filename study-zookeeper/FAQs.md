@@ -10,3 +10,17 @@
 
     server2
 
+### watcher机制的实现原理
+    客户端与服务端进行网络通信（NIO/Netty）
+    watcher存放到queue中
+    客户端
+    SendThread 从queue取出watcher并发送到服务端
+    EventThread 从queue取出服务端响应的watcher事件，并执行
+    
+    服务端
+    watcherTable
+    责任链模式实现Processor
+    提供Leader和Follower的Processor实现
+    （要注意每一个Processor的下一个Processor是谁，这样才方便阅读源码）
+ 
+
