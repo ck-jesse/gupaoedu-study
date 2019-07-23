@@ -1,5 +1,7 @@
 package com.coy.gupaoedu.study.server.registry;
 
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+
 /**
  * 服务注册中心
  *
@@ -8,5 +10,5 @@ package com.coy.gupaoedu.study.server.registry;
  */
 public interface RegistryCenter {
 
-    public void registry(String serviceName, String serviceAddress);
+    public void registry(RpcUrl rpcUrl);
 }
