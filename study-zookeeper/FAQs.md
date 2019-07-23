@@ -41,13 +41,17 @@
 
 ### watcher机制的实现原理
     客户端与服务端进行网络通信（NIO/Netty）
-    watcher存放到queue中
-    客户端
+    1、建立与服务端的SocketChannel连接
+    2、将watcher监听的path存放到queue中，
+    3、等待服务端的通知，当服务端path
+    客户端（异步生产者消费者模式来实现）
     SendThread 从queue取出watcher并发送到服务端
     EventThread 从queue取出服务端响应的watcher事件，并执行
     
     服务端
-    watcherTable
+    1、接收客户端连接，并将连接保存到 Map<path,BlockingQueue<Watcher>> 中，Map中的Watcher实际为一个客户端连接。
+    2、当watcher监听的path有变化时，则通知到监听该path的客户端
+    watcherTable（异步生产者消费者模式来实现）
     责任链模式实现Processor
     提供Leader和Follower的Processor实现
     （要注意每一个Processor的下一个Processor是谁，这样才方便阅读源码）
