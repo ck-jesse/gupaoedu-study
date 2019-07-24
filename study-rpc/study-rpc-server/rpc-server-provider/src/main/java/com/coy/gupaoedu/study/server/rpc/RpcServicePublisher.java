@@ -77,6 +77,7 @@ public class RpcServicePublisher implements ApplicationContextAware, Initializin
                 methodNames = methodNames.substring(0, methodNames.length() - 1);
             }
             rpcUrl.setMethodNames(methodNames);
+            rpcUrl.setSide("providers");
             System.out.println(JSON.toJSONString(rpcUrl));
 
             // 将该服务发布到注册中心

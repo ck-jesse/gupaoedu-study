@@ -1,24 +1,62 @@
 package com.coy.gupaoedu.study.server.rpc;
 
+import lombok.Data;
+
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
+@Data
 public class RpcUrl implements Serializable {
-
+    /**
+     * 应用名称
+     */
+    private String applicationName;
+    /**
+     * 协议
+     */
     private String protcol = "rpc";
+    /**
+     * 服务IP地址
+     */
     private String host;
+    /**
+     * 端口
+     */
     private int port;
+    /**
+     * 服务接口全路径
+     */
     private String interfaceName;
+    /**
+     * 服务版本号
+     */
     private String version;
+    /**
+     * 服务方法名称
+     */
     private String methodNames;
+    /**
+     * 服务角色，providers 表示服务提供方；consumers 表示服务消费方
+     */
+    private String side;
+
+
+    public String getServiceName() {
+        if (null == version || "".equals(version)) {
+            return interfaceName;
+        }
+        return interfaceName + "-" + version;
+    }
+
+    public String getAddress() {
+        return port <= 0 ? host : host + ":" + port;
+    }
 
     /**
      * 按照url序列化
@@ -31,11 +69,17 @@ public class RpcUrl implements Serializable {
         url.append(interfaceName);
 
         StringBuilder params = new StringBuilder();
+        if (null != applicationName && !"".equals(applicationName)) {
+            params.append("applicationName=").append(applicationName).append("&");
+        }
         if (null != version && !"".equals(version)) {
             params.append("version=").append(version).append("&");
         }
         if (null != methodNames && !"".equals(methodNames)) {
             params.append("methodNames=").append(methodNames).append("&");
+        }
+        if (null != side && !"".equals(side)) {
+            params.append("side=").append(side).append("&");
         }
         if (params.length() > 0) {
             url.append("?").append(params.substring(0, params.length() - 1));
@@ -46,36 +90,38 @@ public class RpcUrl implements Serializable {
     /**
      * 反序列化
      */
-    public void deserialize(String path) {
+    public static RpcUrl deserialize(String path) {
         try {
             System.out.println(URLDecoder.decode(path, "UTF-8"));
             String[] nodes = path.split("/");
             // 从路径中取最后一个节点
-            String serviceUrl = nodes[nodes.length - 1];
-            serviceUrl = URLDecoder.decode(serviceUrl, "UTF-8");
-            System.out.println(serviceUrl);
+            String serviceNodeUrl = nodes[nodes.length - 1];
+            serviceNodeUrl = URLDecoder.decode(serviceNodeUrl, "UTF-8");
+            System.out.println(serviceNodeUrl);
 
-            URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+            // 校验serviceNodeUrl是否匹配规则
+            String regex = "^(https|http|rpc|dubbo)?://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+            Pattern pattern = Pattern.compile(regex);
+            if (!pattern.matcher(serviceNodeUrl).matches()) {
+                System.out.println("path路径中最后一个节点不是service node，不进行反序列化； " + serviceNodeUrl);
+                return null;
+            }
+
+            // 解析url
+            URL url = new URL(null, serviceNodeUrl, new URLStreamHandler() {
                 @Override
-                public URLStreamHandler createURLStreamHandler(String protocol) {
-                    if ("rpc".equals(protocol)) {
-                        return new URLStreamHandler() {
-                            @Override
-                            protected URLConnection openConnection(URL u) throws IOException {
-                                System.out.println("自定义协议处理 " + u.toString());
-                                return null;
-                            }
-                        };
-                    }
+                protected URLConnection openConnection(URL u) throws IOException {
+                    System.out.println("自定义协议处理 " + u.toString());
                     return null;
                 }
             });
-            // 解析url
-            URL url = new URL(serviceUrl);
-            protcol = url.getProtocol();
-            host = url.getHost();
-            port = url.getPort();
-            interfaceName = url.getPath().substring(1);
+
+            RpcUrl rpcUrl = new RpcUrl();
+            rpcUrl.setProtcol(url.getProtocol());
+            rpcUrl.setHost(url.getHost());
+            rpcUrl.setPort(url.getPort());
+            rpcUrl.setInterfaceName(url.getPath().substring(1));
+
             // url参数解析
             String queryParams = url.getQuery();
             if (null != queryParams) {
@@ -85,15 +131,15 @@ public class RpcUrl implements Serializable {
                     String[] keyValue = param.split("=");
                     paramMap.put(keyValue[0], keyValue[1]);
                 }
-                version = paramMap.get("version");
-                methodNames = paramMap.get("methodNames");
+                rpcUrl.setApplicationName(paramMap.get("applicationName"));
+                rpcUrl.setVersion(paramMap.get("version"));
+                rpcUrl.setMethodNames(paramMap.get("methodNames"));
+                rpcUrl.setSide(paramMap.get("side"));
             }
-            System.out.println("deserialize finish");
-
-        } catch (UnsupportedEncodingException e) {
+            return rpcUrl;
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            return null;
         }
     }
 
@@ -103,51 +149,4 @@ public class RpcUrl implements Serializable {
         rpcUrl.deserialize(path);
     }
 
-    public String getProtcol() {
-        return protcol;
-    }
-
-    public void setProtcol(String protcol) {
-        this.protcol = protcol;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getInterfaceName() {
-        return interfaceName;
-    }
-
-    public void setInterfaceName(String interfaceName) {
-        this.interfaceName = interfaceName;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getMethodNames() {
-        return methodNames;
-    }
-
-    public void setMethodNames(String methodNames) {
-        this.methodNames = methodNames;
-    }
 }

@@ -4,6 +4,8 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.curator.framework.recipes.cache.TreeCache;
+import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListener;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
@@ -109,7 +111,7 @@ public class ZookeeperClient {
     }
 
     /**
-     * 注册节点数据变化事件
+     * 注册节点数据变化事件(监听单个节点变化)
      * <p>
      * 将Zookeeper作为配置中心的时候，最常用的是监听节点数据的变动。
      */
@@ -122,6 +124,24 @@ public class ZookeeperClient {
             nodeCache.getListenable().addListener(nodeCacheListener);
 
             nodeCache.start(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 注册path路径下所有子节点的数据变化事件(递归监听子节点的子节点)
+     */
+    public boolean registryWatcherTreeNodeChanged(String path, TreeCacheListener treeCacheListener) {
+
+        TreeCache treeCache = new TreeCache(curatorFramework, path);
+        try {
+            // curator实现了一直监听，zookeeper本身只能监听一次
+            treeCache.getListenable().addListener(treeCacheListener);
+
+            treeCache.start();
         } catch (Exception e) {
             e.printStackTrace();
             return false;

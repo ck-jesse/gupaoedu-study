@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.client.rpc.bio;
 
 import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,21 +17,17 @@ import java.net.Socket;
  */
 public class RpcBioNetTransport extends RpcNetTransport {
 
-    public RpcBioNetTransport(String host, int port) {
-        super(host, port);
-    }
-
     /**
      * 执行rpc调用
      */
-    public Object rpcInvoke(RpcRequest request) {
+    public Object rpcInvoke(RpcRequest request, RpcUrl rpcUrl) {
         Socket socket = null;
         Object result = null;
         ObjectOutputStream outputStream = null;
         ObjectInputStream inputStream = null;
         try {
             // 建立连接
-            socket = new Socket(host, port);
+            socket = new Socket(rpcUrl.getHost(), rpcUrl.getPort());
 
             // 网络socket io
             outputStream = new ObjectOutputStream(socket.getOutputStream());

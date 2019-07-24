@@ -1,5 +1,7 @@
 package com.coy.gupaoedu.study.client.rpc.discovery;
 
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+
 /**
  * 服务发现
  *
@@ -12,5 +14,7 @@ public interface ServiceDiscovery {
      * 服务查找
      * 通过监听来实现
      */
-    public String discovery(String serviceName);
+    public RpcUrl discovery(String serviceName);
+
+    public RpcUrl discovery(String serviceName, String version);
 }

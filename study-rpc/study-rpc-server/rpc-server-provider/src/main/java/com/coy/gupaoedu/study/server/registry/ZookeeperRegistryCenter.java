@@ -31,6 +31,7 @@ public class ZookeeperRegistryCenter implements RegistryCenter {
                 .build();
         // 启动
         curatorFramework.start();
+        this.rpcConfig = rpcConfig;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class ZookeeperRegistryCenter implements RegistryCenter {
                 rpcUrl.setPort(rpcConfig.getServerPort());
             }
             // 将服务信息作为path的最后一个节点
-            String path = getPath(rpcUrl.getInterfaceName()) + URLEncoder.encode(rpcUrl.serialize(), "UTF-8");
+            String path = getPath(rpcUrl) + URLEncoder.encode(rpcUrl.serialize(), "UTF-8");
             System.out.println("[server]registry service " + URLDecoder.decode(path, "UTF-8"));
             curatorFramework.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path, rpcUrl.getHost().getBytes());
         } catch (Exception e) {
@@ -48,14 +49,15 @@ public class ZookeeperRegistryCenter implements RegistryCenter {
         }
     }
 
-    private String getPath(String serviceName) {
+    private String getPath(RpcUrl rpcUrl) {
+        String serviceName = rpcUrl.getInterfaceName();
         if (serviceName.startsWith("/")) {
             serviceName = serviceName.substring(1);
         }
         if (serviceName.endsWith("/")) {
             serviceName = serviceName.substring(0, serviceName.length() - 1);
         }
-        String path = "/rpc/" + serviceName + "/providers/";
+        String path = "/rpc/" + serviceName + "/" + rpcUrl.getSide() + "/";
         return path;
     }
 }

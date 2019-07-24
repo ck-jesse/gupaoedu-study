@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.client.rpc.netty;
 
 import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -25,14 +26,10 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
  */
 public class RpcNettyNetTransport extends RpcNetTransport {
 
-    public RpcNettyNetTransport(String host, int port) {
-        super(host, port);
-    }
-
     /**
      * 执行rpc调用
      */
-    public Object rpcInvoke(RpcRequest request) {
+    public Object rpcInvoke(RpcRequest request, RpcUrl rpcUrl) {
         final RpcNettyConsumerHandler consumerHandler = new RpcNettyConsumerHandler();
         EventLoopGroup group = new NioEventLoopGroup();
         try {
@@ -61,7 +58,7 @@ public class RpcNettyNetTransport extends RpcNetTransport {
                             ch.pipeline().addLast("handler", consumerHandler);
                         }
                     });
-            ChannelFuture future = client.connect(host, port).sync();
+            ChannelFuture future = client.connect(rpcUrl.getHost(), rpcUrl.getPort()).sync();
             future.channel().writeAndFlush(request).sync();
             future.channel().closeFuture().sync();
         } catch (Exception e) {

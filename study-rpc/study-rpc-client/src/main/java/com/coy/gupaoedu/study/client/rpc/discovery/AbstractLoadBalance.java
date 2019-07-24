@@ -1,5 +1,6 @@
 package com.coy.gupaoedu.study.client.rpc.discovery;
 
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
     @Override
-    public String selectService(List<String> serviceList) {
+    public RpcUrl selectService(List<RpcUrl> serviceList) {
         if (CollectionUtils.isEmpty(serviceList)) {
             return null;
         }
@@ -20,5 +21,5 @@ public abstract class AbstractLoadBalance implements LoadBalance {
         return select(serviceList);
     }
 
-    public abstract String select(List<String> serviceList);
+    public abstract RpcUrl select(List<RpcUrl> serviceList);
 }

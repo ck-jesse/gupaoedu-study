@@ -2,9 +2,9 @@ package com.coy.gupaoedu.study.client.test;
 
 import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
 import com.coy.gupaoedu.study.client.rpc.RpcProxyClient;
+import com.coy.gupaoedu.study.client.rpc.discovery.ZookeeperServiceDiscovery;
 import com.coy.gupaoedu.study.client.rpc.netty.RpcNettyNetTransport;
 import com.coy.gupaoedu.study.client.service.HelloService;
-import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
 import com.coy.gupaoedu.study.server.facade.PaymentServiceFacade;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +12,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
 
 /**
  * Netty 客户端测试类
@@ -23,8 +25,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = {"com.coy.gupaoedu.study.client.rpc", "com.coy.gupaoedu.study.client.service"})
 public class RpcNettyClientTest {
 
-    private String host = "localhost";
-    private int port = 8080;
+    public static final String connectString = "127.0.0.1:2181";
 
     /**
      * 实例化 RpcNettyNetTransport
@@ -32,7 +33,13 @@ public class RpcNettyClientTest {
      */
     @Bean(name = "rpcNettyNetTransport")
     public RpcNetTransport rpcNettyNetTransport() {
-        return new RpcNettyNetTransport(host, port);
+        return new RpcNettyNetTransport();
+    }
+
+    @Bean(name = "zookeeperServiceDiscovery")
+    public ZookeeperServiceDiscovery zookeeperServiceDiscovery() {
+        ZookeeperServiceDiscovery serviceDiscovery =  new ZookeeperServiceDiscovery(connectString);
+        return serviceDiscovery;
     }
 
     private AnnotationConfigApplicationContext context;
@@ -44,16 +51,19 @@ public class RpcNettyClientTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException, InterruptedException {
         RpcProxyClient rpcProxyClient = context.getBean(RpcProxyClient.class);
 
+        Thread.sleep(1000);
         // 通过RpcProxyClient创建rpc服务代理对象
-        HelloServiceFacade helloServiceFacade = rpcProxyClient.clientProxy(HelloServiceFacade.class);
-        System.out.println(helloServiceFacade.sayHello("coy"));
-
-        // 通过RefereceBean定义来创建rpc服务代理对象
+        //HelloServiceFacade helloServiceFacade = rpcProxyClient.clientProxy(HelloServiceFacade.class);
+        //System.out.println(helloServiceFacade.sayHello("coy"));
+//
+        //// 通过RefereceBean定义来创建rpc服务代理对象
         PaymentServiceFacade paymentServiceFacade = context.getBean(PaymentServiceFacade.class);
         System.out.println(paymentServiceFacade.pay(" payment wechat "));
+
+        System.in.read();
     }
 
     /**

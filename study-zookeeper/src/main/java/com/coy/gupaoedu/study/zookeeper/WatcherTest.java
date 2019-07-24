@@ -1,6 +1,10 @@
 package com.coy.gupaoedu.study.zookeeper;
 
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
+import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.junit.Test;
 
 /**
@@ -36,5 +40,38 @@ public class WatcherTest {
         while (true) {
 
         }
+    }
+
+    @Test
+    public void registryWatcherTreeNodeChanged() throws Exception {
+
+        String path = "/watcher";
+
+        curatorFramework.registryWatcherTreeNodeChanged(path, new TreeCacheListener() {
+            @Override
+            public void childEvent(CuratorFramework client, TreeCacheEvent event) throws Exception {
+                ChildData childData = event.getData();
+                System.out.println(event.getType());
+                if (TreeCacheEvent.Type.NODE_ADDED == event.getType()) {
+                    System.out.println("[TreeNode]add node, path=" + childData.getPath() + ", data=" + new String(childData.getData()));
+                } else if (TreeCacheEvent.Type.NODE_UPDATED == event.getType()) {
+                    System.out.println("[TreeNode]updated node, path=" + childData.getPath() + ", data=" + new String(childData.getData()));
+                } else if (TreeCacheEvent.Type.NODE_REMOVED == event.getType()) {
+                    System.out.println("[TreeNode]removed node, path=" + childData.getPath() + ", data=" + new String(childData.getData()));
+                }
+            }
+        });
+
+        while (true) {
+
+        }
+    }
+
+    @Test
+    public void create() throws Exception {
+
+        String path = "/watcher/w2";
+
+        curatorFramework.createNode(path, "watcher");
     }
 }

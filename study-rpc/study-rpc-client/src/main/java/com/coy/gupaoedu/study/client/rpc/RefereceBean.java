@@ -37,6 +37,7 @@ public class RefereceBean<T> implements FactoryBean, ApplicationContextAware {
 
     @Override
     public Object getObject() throws Exception {
+        // 自定义rpc service的创建过程，并将rpc service发布到spring容器中，方便使用
         RpcProxyClient rpcProxyClient = applicationContext.getBean(RpcProxyClient.class);
         if (isSingleton()) {
             if (null != singletonObject) {

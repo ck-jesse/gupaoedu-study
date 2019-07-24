@@ -1,5 +1,7 @@
 package com.coy.gupaoedu.study.client.rpc.discovery;
 
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+
 import java.util.List;
 import java.util.Random;
 
@@ -12,9 +14,10 @@ import java.util.Random;
 public class RandonLoadBalance extends AbstractLoadBalance {
 
     @Override
-    public String select(List<String> serviceList) {
+    public RpcUrl select(List<RpcUrl> serviceList) {
         // 生成一个随机数务
-        Random random = new Random(serviceList.size());
-        return serviceList.get(random.nextInt());
+        Random random = new Random();
+        System.out.println(random.nextInt(serviceList.size()));
+        return serviceList.get(random.nextInt(serviceList.size()));
     }
 }

@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.client.test;
 import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
 import com.coy.gupaoedu.study.client.rpc.RpcProxyClient;
 import com.coy.gupaoedu.study.client.rpc.bio.RpcBioNetTransport;
+import com.coy.gupaoedu.study.client.rpc.discovery.ZookeeperServiceDiscovery;
 import com.coy.gupaoedu.study.client.service.HelloService;
 import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
 import com.coy.gupaoedu.study.server.facade.PaymentServiceFacade;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = {"com.coy.gupaoedu.study.client.rpc", "com.coy.gupaoedu.study.client.service"})
 public class RpcBioClientTest {
 
+    public static final String connectString = "127.0.0.1:2181";
     private String host = "localhost";
     private int port = 8081;
 
@@ -31,9 +33,13 @@ public class RpcBioClientTest {
      */
     @Bean(name = "rpcBioNetTransport")
     public RpcNetTransport rpcBioNetTransport() {
-        return new RpcBioNetTransport(host, port);
+        return new RpcBioNetTransport();
     }
 
+    @Bean(name = "zookeeperServiceDiscovery")
+    public ZookeeperServiceDiscovery zookeeperServiceDiscovery() {
+        return new ZookeeperServiceDiscovery(connectString);
+    }
 
     private ApplicationContext context;
 

@@ -1,5 +1,7 @@
 package com.coy.gupaoedu.study.client.rpc.discovery;
 
+import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+
 import java.util.List;
 
 /**
@@ -13,5 +15,5 @@ public interface LoadBalance {
     /**
      * 选择服务
      */
-    public String selectService(List<String> serviceList);
+    public RpcUrl selectService(List<RpcUrl> serviceList);
 }
