@@ -36,7 +36,8 @@ public class RpcNettyServerTest {
     }
 
     /**
-     * 构造zookeeper注册中心
+     * 构造zookeeper注册中心实例
+     * 注：基于zk实现分布式服务注册
      */
     @Bean(name = "zookeeperRegistryCenter")
     public ZookeeperRegistryCenter zookeeperRegistryCenter(RpcConfig rpcConfig) {

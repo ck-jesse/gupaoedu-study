@@ -36,9 +36,14 @@ public class RpcNettyClientTest {
         return new RpcNettyNetTransport();
     }
 
+    /**
+     * 服务发现
+     * <p>
+     * 注：基于zk实现分布式服务发现1
+     */
     @Bean(name = "zookeeperServiceDiscovery")
     public ZookeeperServiceDiscovery zookeeperServiceDiscovery() {
-        ZookeeperServiceDiscovery serviceDiscovery =  new ZookeeperServiceDiscovery(connectString);
+        ZookeeperServiceDiscovery serviceDiscovery = new ZookeeperServiceDiscovery(connectString);
         return serviceDiscovery;
     }
 
