@@ -36,6 +36,11 @@ public class RpcBioClientTest {
         return new RpcBioNetTransport();
     }
 
+    /**
+     * 服务发现
+     * <p>
+     * 注：基于zk实现分布式服务发现1
+     */
     @Bean(name = "zookeeperServiceDiscovery")
     public ZookeeperServiceDiscovery zookeeperServiceDiscovery() {
         return new ZookeeperServiceDiscovery(connectString);
@@ -50,9 +55,10 @@ public class RpcBioClientTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         RpcProxyClient rpcProxyClient = context.getBean(RpcProxyClient.class);
 
+        Thread.sleep(1000);
         // 通过RpcProxyClient创建rpc服务代理对象
         HelloServiceFacade helloServiceFacade = rpcProxyClient.clientProxy(HelloServiceFacade.class);
         System.out.println(helloServiceFacade.sayHello("coy"));

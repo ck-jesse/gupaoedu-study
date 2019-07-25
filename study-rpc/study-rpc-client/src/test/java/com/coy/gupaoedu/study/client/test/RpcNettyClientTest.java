@@ -5,6 +5,7 @@ import com.coy.gupaoedu.study.client.rpc.RpcProxyClient;
 import com.coy.gupaoedu.study.client.rpc.discovery.ZookeeperServiceDiscovery;
 import com.coy.gupaoedu.study.client.rpc.netty.RpcNettyNetTransport;
 import com.coy.gupaoedu.study.client.service.HelloService;
+import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
 import com.coy.gupaoedu.study.server.facade.PaymentServiceFacade;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,9 +62,9 @@ public class RpcNettyClientTest {
 
         Thread.sleep(1000);
         // 通过RpcProxyClient创建rpc服务代理对象
-        //HelloServiceFacade helloServiceFacade = rpcProxyClient.clientProxy(HelloServiceFacade.class);
-        //System.out.println(helloServiceFacade.sayHello("coy"));
-//
+        HelloServiceFacade helloServiceFacade = rpcProxyClient.clientProxy(HelloServiceFacade.class);
+        System.out.println(helloServiceFacade.sayHello("coy"));
+
         //// 通过RefereceBean定义来创建rpc服务代理对象
         PaymentServiceFacade paymentServiceFacade = context.getBean(PaymentServiceFacade.class);
         System.out.println(paymentServiceFacade.pay(" payment wechat "));

@@ -17,7 +17,6 @@ public class RandonLoadBalance extends AbstractLoadBalance {
     public RpcUrl select(List<RpcUrl> serviceList) {
         // 生成一个随机数务
         Random random = new Random();
-        System.out.println(random.nextInt(serviceList.size()));
         return serviceList.get(random.nextInt(serviceList.size()));
     }
 }

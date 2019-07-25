@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2019/6/9 15:57
  */
 @Configuration
-public class RpcServiceBeanConfig {
+public class RpcRefereceBeanConfig {
 
     /**
      * 定义远程服务的bean
