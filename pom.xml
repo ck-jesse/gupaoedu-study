@@ -25,6 +25,8 @@
         <module>study-serialization</module>
         <module>study-io</module>
         <module>study-zookeeper</module>
+        <module>study-nacos</module>
+        <module>study-sentinel</module>
     </modules>
 
     <parent>
