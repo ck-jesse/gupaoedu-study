@@ -51,6 +51,7 @@ public class AtomicMarkableReference<V> {
 
     private static class Pair<T> {
         final T reference;
+        // 将版本号简化为true或false
         final boolean mark;
         private Pair(T reference, boolean mark) {
             this.reference = reference;
