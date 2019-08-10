@@ -37,7 +37,7 @@ public class ReentrantLockTest1 {
 
     /**
      * 可重入锁的测试：
-     * 结果：可重入锁是为了解决同一个线程死锁的问题，所以若当前线程持有了锁，那么允许当前再次进入该锁，进入的次数记录在同步状态state字段上
+     * 结果：可重入锁是为了解决同一个线程死锁的问题，所以若当前线程持有了锁，那么允许当前线程再次进入该锁，进入的次数记录在同步状态state字段上
      */
     public static void main(String[] args) {
         ReentrantLockTest1 lockTest = new ReentrantLockTest1();

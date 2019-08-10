@@ -1439,7 +1439,7 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * 获取一个共享锁，如果线程被中断，则
+     * 获取一个共享锁，如果线程被中断，则抛出异常
      * <p>
      * Acquires in shared mode, aborting if interrupted.  Implemented
      * by first checking interrupt status, then invoking at least once
