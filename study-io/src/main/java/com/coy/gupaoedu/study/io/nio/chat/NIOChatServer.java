@@ -40,10 +40,12 @@ public class NIOChatServer {
         ServerSocketChannel server = ServerSocketChannel.open();
 
         server.bind(new InetSocketAddress(this.port));
+        // 设置false，表示异步IO
         server.configureBlocking(false);
 
         selector = Selector.open();
 
+        // 将通道 Channel 注册到 Selector 选择器上（内部有一个数据存放Channel），并且设置通道关心的I/O事件类型（如accept/read/write）
         server.register(selector, SelectionKey.OP_ACCEPT);
 
         System.out.println("服务已启动，监听端口是：" + this.port);
@@ -54,10 +56,14 @@ public class NIOChatServer {
      */
     public void listen() throws IOException {
         while (true) {
+            // select()会阻塞，知道至少有一个已注册的事件发生，当一个或者更多的事件发生时， select() 方法将返回所发生的事件的数量。
             int wait = selector.select();
             if (wait == 0) continue;
-            // 可以通过这个方法，知道可用通道的集合
+
+            // 可以通过这个方法，获取已经发生了某事件的通道的集合
             Set<SelectionKey> keys = selector.selectedKeys();
+
+            // 通过迭代，每次处理一个事件
             Iterator<SelectionKey> iterator = keys.iterator();
             while (iterator.hasNext()) {
                 SelectionKey key = (SelectionKey) iterator.next();
@@ -70,16 +76,23 @@ public class NIOChatServer {
 
 
     public void process(SelectionKey key) throws IOException {
+        // 表示接受了一个新的连接
         if (key.isAcceptable()) {
             ServerSocketChannel server = (ServerSocketChannel) key.channel();
+            // 从ServerSocketChannel上获取一个已经连接的SocketChannel
+            // 也就是说，不用担心 accept() 操作会阻塞：
             SocketChannel client = server.accept();
-            // 非阻塞模式
+
+            // 非阻塞模式，异步
             client.configureBlocking(false);
-            // 注册选择器，并设置为读取模式，收到一个连接请求，然后起一个SocketChannel，并注册到selector上，之后这个连接的数据，就由这个SocketChannel处理
+
+            // 将SocketChannel注册到选择器，并设置为读取模式
+            // 收到一个连接请求，然后起一个SocketChannel，并注册到selector上，之后这个连接的数据，就由这个SocketChannel处理
             client.register(selector, SelectionKey.OP_READ);
 
             // 将此对应的channel设置为准备接受其他客户端请求
             key.interestOps(SelectionKey.OP_ACCEPT);
+
             //System.out.println("有客户端连接，IP地址为 :" + client.getRemoteAddress());
             client.write(charset.encode("请输入你的昵称"));
         }
@@ -91,10 +104,12 @@ public class NIOChatServer {
             StringBuilder content = new StringBuilder();
             try {
                 while (client.read(buff) > 0) {
+                    // 翻转，从写模式切换到读模式，以便读取数据
                     buff.flip();
                     content.append(charset.decode(buff));
                 }
                 //System.out.println("从IP地址为：" + client.getRemoteAddress() + "的获取到消息: " + content);
+
                 // 将此对应的channel设置为准备下一次接受数据
                 key.interestOps(SelectionKey.OP_READ);
             } catch (IOException io) {
@@ -156,6 +171,7 @@ public class NIOChatServer {
         for (SelectionKey key : selector.keys()) {
             Channel targetchannel = key.channel();
             // 如果client不为空，不回发给发送此内容的客户端
+            // 将消息发送给其他客户端，不发送给自己
             if (targetchannel instanceof SocketChannel && targetchannel != client) {
                 SocketChannel target = (SocketChannel) targetchannel;
                 target.write(charset.encode(content));

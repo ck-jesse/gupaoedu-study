@@ -97,6 +97,7 @@ public class NioServer {
             SocketChannel channel = (SocketChannel) key.channel();
             int len = channel.read(buffer);
             if (len > 0) {
+                // 翻转，Buffer从写模式变成读模式
                 buffer.flip();
                 String content = new String(buffer.array(), 0, len);
                 System.out.println("server读取内容：" + content);

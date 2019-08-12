@@ -11,7 +11,7 @@ public class BufferDemo {
 
     public static void main(String args[]) throws Exception {
         //这用用的是文件IO处理
-        FileInputStream fin = new FileInputStream("E://test.txt");
+        FileInputStream fin = new FileInputStream("E://dubbo.xsd");
         //创建文件的操作管道
         FileChannel fc = fin.getChannel();
 
@@ -24,14 +24,18 @@ public class BufferDemo {
         output("调用read()", buffer);
 
         //准备操作之前，先锁定操作范围
+        // Buffer有两种模式，写模式和读模式。在写模式下调用flip()之后，Buffer从写模式变成读模式。
+        // capacity: 10, position: 10, limit: 10  => capacity: 10, position: 0, limit: 10
+        // 执行flip()后，将limit设置为position（最多只能读取到limit位置的数据），position设置为0(指针指到缓冲区头部)
         buffer.flip();
         output("调用flip()", buffer);
 
         //判断有没有可读数据
         while (buffer.remaining() > 0) {
             byte b = buffer.get();
-            // System.out.print(((char)b));  
+            System.out.print(((char) b));
         }
+        System.out.println();
         output("调用get()", buffer);
 
         //可以理解为解锁
@@ -42,7 +46,7 @@ public class BufferDemo {
         fin.close();
     }
 
-    //把这个缓冲里面实时状态给答应出来
+    //把这个缓冲里面实时状态给打印出来
     public static void output(String step, ByteBuffer buffer) {
         System.out.println(step + " : ");
         //容量，数组大小
