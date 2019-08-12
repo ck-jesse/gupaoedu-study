@@ -46,7 +46,7 @@ public class NettyTomcat {
         servletMapping = WebXmlParseUtil.<NettyServlet>parse("web-netty.properties");
 
         // Netty封装了NIO，Reactor模型，Boss，worker
-        // boos线程
+        // boos线程 默认线程数为cup*2
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         // work线程
         EventLoopGroup workGroup = new NioEventLoopGroup();
