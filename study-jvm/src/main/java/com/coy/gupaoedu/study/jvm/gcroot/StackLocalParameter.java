@@ -21,6 +21,10 @@ public class StackLocalParameter {
         System.gc();
     }
 
+    /*
+    ParNew : 年轻代垃圾收集器，多线程，采用标记—复制算法。
+    CMS：老年代的收集器，全称（Concurrent Mark and Sweep），是一种以获取最短回收停顿时间为目标的收集器。
+     */
 
     /**
      -XX:+PrintGC 输出GC日志

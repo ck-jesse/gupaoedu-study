@@ -49,6 +49,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             // 根据url在服务器上找到对应的文件
             file = new RandomAccessFile(getResource(page), "r");
         } catch (Exception e) {
+            // 文件不存在时，则认为请求是别的协议（如WebSocket），所以直接传递给下一个ChannelInboundHandler
+            // 如果请求了WebSocket协议升级，则增加引用技术，并将它传递给下一个ChannelInboundHandler
+            // 之所以需要调用retain（）方法，是因为调用channelRead（）方法完成之后，它将调用FullHttpRequest对象上的release（）方法以释放它的资源。
             ctx.fireChannelRead(request.retain());
             return;
         }

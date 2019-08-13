@@ -25,7 +25,7 @@ $(document).ready(function () {
     var host = location.href.replace(/http:\/\//i, "");
     window.CHAT = {
         //保存服务器端WebSocket的请求地址
-        serverAddr: "ws://" + host + "/im",
+        serverAddr: "ws://" + host + "im",
         //保存用户输入的昵称
         nickname: null,
         //保存浏览器socket对象
