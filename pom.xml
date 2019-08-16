@@ -28,6 +28,7 @@
         <module>study-nacos</module>
         <module>study-sentinel</module>
         <module>study-guava</module>
+        <module>study-kafka</module>
     </modules>
 
     <parent>

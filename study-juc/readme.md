@@ -1,3 +1,8 @@
+#### 为什么Java中 wait 方法需要在 synchronized 的方法中调用？
+    它们是在有 synchronized 标记的方法或 synchronized 块中调用的，因为 wait 和 modify 需要监视对其上调用 wait 或 notify-get 的 Object。
+    如果我们不从同步上下文中调用 wait() 或 notify() 方法，我们将在 Java 中收到 IllegalMonitorStateException。
+    
+
 ## 问题1：AQS是什么？
     分析：
     解答：

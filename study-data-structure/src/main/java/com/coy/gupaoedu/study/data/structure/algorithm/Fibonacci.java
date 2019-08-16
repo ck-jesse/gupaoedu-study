@@ -2,6 +2,8 @@ package com.coy.gupaoedu.study.data.structure.algorithm;
 
 /**
  * 斐波那契数列
+ * 公式：F(n)=F(n-1)+F(n-2)
+ * 特性：F(1)=1,F(2)=1
  *
  * @author chenck
  * @date 2019/7/25 14:13
