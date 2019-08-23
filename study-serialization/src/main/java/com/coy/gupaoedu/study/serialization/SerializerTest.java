@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.serialization;
 
 import com.coy.gupaoedu.study.serialization.model.User;
-import com.coy.gupaoedu.study.serialization.serializer.HessionSerializer;
+import com.coy.gupaoedu.study.serialization.serializer.FastJsonSerializer;
 import com.coy.gupaoedu.study.serialization.serializer.Serializer;
 
 import java.io.IOException;
@@ -37,10 +37,10 @@ public class SerializerTest {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
 
-//        Serializer serializer = new JavaSerializer();
-//        Serializer serializer = new FastJsonSerializer();
-//        Serializer serializer = new XStreamSerializer();
-        Serializer serializer = new HessionSerializer();
+//        Serializer serializer = new JavaSerializer();// length=213
+        Serializer serializer = new FastJsonSerializer();// length=23
+//        Serializer serializer = new XStreamSerializer();// length=325
+//        Serializer serializer = new HessionSerializer();// length=76
 
         User user = new User();
         user.setName("coy");

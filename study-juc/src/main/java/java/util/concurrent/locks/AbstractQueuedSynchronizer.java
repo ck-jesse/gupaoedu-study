@@ -308,6 +308,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * CLH锁也是一种基于链表的可扩展、高性能、公平的自旋锁，申请线程仅仅在本地变量上自旋，它不断轮询前驱的状态，假设发现前驱释放了锁就结束自旋。
+     *
      * Wait queue node class.
      * <p>
      * <p>The wait queue is a variant of a "CLH" (Craig, Landin, and
@@ -327,6 +329,7 @@ public abstract class AbstractQueuedSynchronizer
      * <p>
      * <p>To enqueue into a CLH lock, you atomically splice it in as new
      * tail. To dequeue, you just set the head field.
+     * 元素入队是添加到队列尾部tail上的，元素出队是从队列头部head出队的，当前head出队后，head的下一个节点next通过自旋可以知道head的状态，若出队后，则next会变为为head
      * <pre>
      *      +------+  prev +-----+       +-----+
      * head |      | <---- |     | <---- |     |  tail
@@ -348,6 +351,8 @@ public abstract class AbstractQueuedSynchronizer
      * of spin locks, see the papers by Scott and Scherer at
      * http://www.cs.rochester.edu/u/scott/synchronization/
      * <p>
+     *     每个节点的线程ID都保存在自己的节点中，因此前置节点通过遍历下一个链接来向下一个节点发出唤醒信号，以确定它是哪个线程。
+     *     确定后续节点必须避免与新排队的节点竞争，以设置其前置节点的“下一个”字段。
      * <p>We also use "next" links to implement blocking mechanics.
      * The thread id for each node is kept in its own node, so a
      * predecessor signals the next node to wake up by traversing
@@ -473,7 +478,7 @@ public abstract class AbstractQueuedSynchronizer
          * cancelled thread never succeeds in acquiring, and a thread only
          * cancels itself, not any other node.
          * <p>
-         * 前驱节点（上一个节点），当前节点加入到同步队列中被设置
+         * 前驱节点（上一个节点），当前节点加入到同步队列中时被设置
          */
         volatile Node prev;
 
@@ -490,7 +495,7 @@ public abstract class AbstractQueuedSynchronizer
          * point to the node itself instead of null, to make life
          * easier for isOnSyncQueue.
          * <p>
-         * 后继节点，当前节点加入到同步队列中被设置
+         * 后继节点，当前节点加入到同步队列中时被设置
          */
         volatile Node next;
 
@@ -662,7 +667,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * 为当前线程和给定模式创建节点并添加到队列尾部
+     * 为当前线程和给定模式创建Node节点并添加到队列尾部
+     * 构建一个Node，包含当前线程和独占锁或共享锁模式的node
      * <p>
      * Creates and enqueues node for current thread and given mode.
      *
@@ -895,14 +901,14 @@ public abstract class AbstractQueuedSynchronizer
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         // 前驱节点的状态
         int ws = pred.waitStatus;
-        // 如果前驱节点是SIGNAL状态，则意味着当前线程需要unpark唤醒，此时返回true
+        // 如果前驱节点是SIGNAL状态，则意味着前驱节点的线程需要unpark唤醒，此时返回true，以便安全的阻塞当前节点node的线程
         if (ws == Node.SIGNAL)
             /*
              * This node has already set status asking a release
              * to signal it, so it can safely park.
              */
             return true;
-        // 如果前驱节点是取消的状态，则设置当前节点的前驱节点为“当前前驱节点为”原节点的前驱节点
+        // 如果前驱节点是取消的状态，则设置当前节点的前驱节点为“当前前驱节点”的前驱节点
         if (ws > 0) {
             /*
              * Predecessor was cancelled. Skip over predecessors and
@@ -1198,6 +1204,8 @@ public abstract class AbstractQueuedSynchronizer
     // Main exported methods
 
     /**
+     * 尝试获取独占锁
+     * 该方法由子类实现
      * Attempts to acquire in exclusive mode. This method should query
      * if the state of the object permits it to be acquired in the
      * exclusive mode, and if so to acquire it.
@@ -1228,6 +1236,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 尝试释放独占锁
+     * 该方法由子类实现
      * Attempts to set the state to reflect a release in exclusive
      * mode.
      * <p>
@@ -1254,6 +1264,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 尝试获取共享锁
+     * 该方法由子类实现
      * Attempts to acquire in shared mode. This method should query if
      * the state of the object permits it to be acquired in the shared
      * mode, and if so to acquire it.
@@ -1290,6 +1302,7 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 尝试释放共享锁
      * 尝试设置同步状态以反映共享模式下的发布
      * <p>
      * Attempts to set the state to reflect a release in shared mode.
@@ -1350,8 +1363,11 @@ public abstract class AbstractQueuedSynchronizer
      *            获取锁
      */
     public final void acquire(int arg) {
-        if (!tryAcquire(arg) &&
-                acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        // tryAcquire(arg) 返回true，即表明当前线程获得了一个执行当前动作的资格，自然也就不需要构建数据结构进行阻塞等待。
+        // tryAcquire(arg) 返回false，那么当前线程没有获得执行当前动作的资格，接着执行"acquireQueued(addWaiter(Node.EXCLUSIVE), arg))"这句代码
+        // addWaiter(Node.EXCLUSIVE)，表示往队列尾部中添加一个等待者Node
+        // acquireQueued()，
+        if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
             selfInterrupt();
     }
 
@@ -1413,9 +1429,13 @@ public abstract class AbstractQueuedSynchronizer
      * @return the value returned from {@link #tryRelease}
      */
     public final boolean release(int arg) {
+        // 尝试释放锁，
+        // java.util.concurrent.locks.ReentrantLock.Sync.tryRelease中是判断当前线程是否为获得锁的线程，
+        // 若是，则判断state是否为0，若是则释放锁
         if (tryRelease(arg)) {
             Node h = head;
             if (h != null && h.waitStatus != 0)
+                // 唤醒head节点的后继节点
                 unparkSuccessor(h);
             return true;
         }
