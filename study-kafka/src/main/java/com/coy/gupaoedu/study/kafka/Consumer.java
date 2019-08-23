@@ -30,7 +30,13 @@ public class Consumer extends ShutdownableThread {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         // 消费的位置
+        // earliest: 当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，从头开始消费 。
+        // latest: 当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，消费新产生的该分区下的数据 。
+        // none: topic各分区都存在已提交的offset时，从offset后开始消费；只要有一个分区不存在已提交的offset，则抛出异常
         //props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+
+        // 设置一次最大拉取的消息条数
+        props.put("max.poll.records", "20");
 
         consumer = new KafkaConsumer<>(props);
         this.topic = topic;
@@ -55,6 +61,7 @@ public class Consumer extends ShutdownableThread {
             // 默认一次最多拉取500条消息
             ConsumerRecords<Integer, String> records = consumer.poll(Duration.ofSeconds(1).toMillis());
             System.out.println("pollNo = " + pollNo + ", records=" + records.count());
+
             for (ConsumerRecord<Integer, String> record : records) {
                 System.out.println("Received message: (" + record.key() + ", " + record.value() + ") at offset " + record.offset());
             }
