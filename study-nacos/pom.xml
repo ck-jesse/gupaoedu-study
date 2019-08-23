@@ -10,6 +10,38 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>study-nacos</artifactId>
+    <description>nacos 配置中心、注册中心 中间件，见psp-product-service</description>
 
+    <properties>
+        <nacos-config-spring-boot.version>0.2.1</nacos-config-spring-boot.version>
+    </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>nacos-config-spring-boot-starter</artifactId>
+            <version>${nacos-config-spring-boot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>nacos-config-spring-boot-actuator</artifactId>
+            <version>${nacos-config-spring-boot.version}</version>
+        </dependency>
+    </dependencies>
 </project>
