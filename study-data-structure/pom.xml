@@ -12,7 +12,7 @@
     <artifactId>study-data-structure</artifactId>
 
     <name>study-data-structure</name>
-    <description>咕泡学院-数据结构篇</description>
+    <description>咕泡学院-数据结构和算法篇</description>
 
     <dependencies>
         <dependency>
