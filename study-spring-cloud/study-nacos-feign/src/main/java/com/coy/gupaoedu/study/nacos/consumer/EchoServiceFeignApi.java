@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author chenck
  * @date 2019/9/4 11:58
  */
-@FeignClient(value = "nacos-provider-service")// 指定服务提供方的名字
+// Feign中使用断路器
+// Feign是自带断路器的，在D版本的Spring Cloud之后，它没有默认打开。需要在配置文件中配置打开它，
+// feign.hystrix.enabled=true
+@FeignClient(value = "nacos-provider-service", fallback = EchoServiceFeignApiImpl.class)// 指定服务提供方的名字
 public interface EchoServiceFeignApi {
 
     @RequestMapping(value = "/echo", method = RequestMethod.GET)
