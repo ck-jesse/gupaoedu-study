@@ -31,27 +31,31 @@
         <module>study-mq</module>
         <module>study-mysql</module>
         <module>study-elk</module>
+        <module>study-spring-cloud</module>
     </modules>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.1.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <jmockit.version>1.36</jmockit.version>
-        <fastjson-version>1.2.4</fastjson-version>
+        <fastjson.version>1.2.4</fastjson.version>
         <cglib.version>3.2.5</cglib.version>
         <lombok.version>1.16.10</lombok.version>
+        <commons-logging.version>1.2</commons-logging.version>
         <slf4j.version>1.7.25</slf4j.version>
         <mybatis.version>3.4.6</mybatis.version>
         <mysql.version>8.0.13</mysql.version>
         <servlet.api.version>2.4</servlet.api.version>
+        <spring-cloud.version>Greenwich.SR2</spring-cloud.version>
     </properties>
+
+    <!-- spring-boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.1.RELEASE</version>
+        <relativePath/>
+    </parent>
 
     <dependencyManagement>
         <dependencies>
@@ -62,7 +66,8 @@
                  Spring IO Platform就能很好地帮助我们解决这些问题。
                  开发人员在添加第三方库时，不需要关心版本号，Spring IO Platform会帮助我们提供一个最优的版本，而且该版本是经过严格测试的，可以更好地兼容其它的组件。
                  同时，你也可以根据自己的需要来升级或降级依赖版本。
-             -->
+                 注意：在Spring IO中定义了springboot的依赖版本，上面如果也定义spring-boot-starter-parent，那么会有版本冲突，请特别注意！
+                 如：java.lang.AbstractMethodError: org.springframework.boot.context.config.ConfigFileApplicationListener.supportsSourceType(Ljava/lang/Class;)Z
             <dependency>
                 <groupId>io.spring.platform</groupId>
                 <artifactId>platform-bom</artifactId>
@@ -70,11 +75,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+             -->
+
+            <!-- spring-cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>${fastjson-version}</version>
+                <version>${fastjson.version}</version>
             </dependency>
 
             <dependency>
@@ -87,6 +102,12 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
             </dependency>
 
             <dependency>
