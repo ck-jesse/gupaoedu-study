@@ -16,7 +16,7 @@ public class EchoController {
 
     @RequestMapping("/echo")
     public String echo(String name) {
-        return "nacos-consumer-service: " + echoServiceFeignApi.echo(name);
+        return "fegin + ribbon 方式：</br>nacos-consumer-service: " + echoServiceFeignApi.echo(name);
     }
 
 }
