@@ -18,8 +18,9 @@
         <module>study-nacos-provider</module>
         <module>study-nacos-feign</module>
         <module>study-zuul</module>
+        <module>study-config-server</module>
+        <module>study-config-client</module>
     </modules>
-
 
     <dependencies>
         <dependency>
@@ -27,5 +28,14 @@
             <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
