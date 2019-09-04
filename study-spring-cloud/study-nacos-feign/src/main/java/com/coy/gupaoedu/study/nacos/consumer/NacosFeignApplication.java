@@ -20,10 +20,10 @@ import org.springframework.web.client.RestTemplate;
 @EnableDiscoveryClient// 开启服务注册发现功能
 @EnableFeignClients // 开启Feign功能
 @EnableHystrix// 开启Hystrix熔断器功能
-public class NacosConsumerApplication {
+public class NacosFeignApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NacosConsumerApplication.class, args);
+        SpringApplication.run(NacosFeignApplication.class, args);
     }
 
     /**

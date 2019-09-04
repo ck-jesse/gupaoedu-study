@@ -17,6 +17,15 @@
         <module>study-eureka-feign</module>
         <module>study-nacos-provider</module>
         <module>study-nacos-feign</module>
+        <module>study-zuul</module>
     </modules>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
