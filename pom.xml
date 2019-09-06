@@ -32,6 +32,7 @@
         <module>study-mysql</module>
         <module>study-elk</module>
         <module>study-spring-cloud</module>
+        <module>study-apollo</module>
     </modules>
 
     <properties>
