@@ -9,6 +9,9 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
  *
  * 管理页面：http://localhost:8765
  *
+ * rest api
+ * http://localhost:8765/eureka/apps
+ *
  * @author chenck
  * @date 2019/9/4 10:56
  */
