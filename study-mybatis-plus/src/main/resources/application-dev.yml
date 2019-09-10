@@ -1,0 +1,27 @@
+# mybatis-plus 配置
+mybatis-plus:
+  typeAliasesPackage: com.coy.gupaoedu.study.mybatisplus
+  mapper-locations: classpath*:com.coy.gupaoedu.study.mybatisplus/dao/**/*Mapper.xml
+  global-config:
+    db-config:
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+# mybatis-plus 动态数据源配置
+# 具体参见：https://gitee.com/baomidou/dynamic-datasource-spring-boot-starter/wikis/pages?sort_id=1030570&doc_id=147063
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    dynamic:
+      primary: master #设置默认的数据源或者数据源组,默认值即为master
+      datasource:
+        master:
+          username: root
+          password: 12345678
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://10.0.20.4:3306/shop?characterEncoding=utf-8&allowMultiQueries=true
+        slave_1:
+          username: root
+          password: 12345678
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://172.31.10.78:3306/shop?characterEncoding=utf-8&allowMultiQueries=true

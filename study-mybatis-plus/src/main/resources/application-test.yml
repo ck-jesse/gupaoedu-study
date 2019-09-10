@@ -1,0 +1,16 @@
+# apollo 配置中心
+apollo:
+  bootstrap:
+    #true:apollo上注册中心配置会覆盖本地配置；false：本地注册中心配置生效
+    enabled : false
+    namespaces: application.yml
+  meta: http://192.168.3.247:9090
+
+#spring-cloud注冊中心配置
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos://127.0.0.1:8848
