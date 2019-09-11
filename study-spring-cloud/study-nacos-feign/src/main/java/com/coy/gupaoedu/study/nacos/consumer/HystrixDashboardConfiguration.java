@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Hystrix Dashboard是作为断路器状态的一个组件，提供了数据监控和友好的图形化界面。
+ *
  * @author chenck
  * @date 2019/9/11 15:52
  */
@@ -16,7 +18,7 @@ public class HystrixDashboardConfiguration {
 
     /**
      * hystrix-dashboard 监控面板
-     * http://localhost:8764/actuator/hystrix.stream
+     * 单个服务的 dashboard : http://localhost:8764/actuator/hystrix.stream
      */
     @Bean
     public ServletRegistrationBean getServlet() {

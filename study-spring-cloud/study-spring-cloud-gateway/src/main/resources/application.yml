@@ -1,0 +1,102 @@
+server:
+  port: 8081
+spring:
+  profiles:
+    active: after_route
+
+# 三个横线表示在application.yml中再建一个配置文件
+#Predict作为断言，它决定了请求会被路由到哪个router中。在断言之后，请求会被进入到filter过滤器的逻辑，
+
+#After Route Predicate Factory
+#配置一个时间，当请求的时间在配置时间之后，才交给 router去处理。否则则报错，不通过路由。
+#如：
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: after_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - After=2017-01-20T17:42:47.789-07:00[America/Denver]
+  profiles: after_route
+#Header Route Predicate Factory
+#需要2个参数，一个是header名，另外一个header值，该值可以是一个正则表达式。当此断言匹配了请求的header名和值时，断言通过，进入到router的规则中去。
+#如：curl -H 'X-Request-Id:1' localhost:8081
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: header_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - Header=X-Request-Id, \d+
+  profiles: header_route
+#Cookie Route Predicate Factory
+#需要2个参数，一个时cookie名字，另一个时值，可以为正则表达式。它用于匹配请求中，带有该名称的cookie和cookie匹配正则表达式的请求。
+#如：curl -H 'Cookie:name=forezp' localhost:8081
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: cookie_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - Cookie=name, forezp
+  profiles: cookie_route
+
+#Host Route Predicate Factory
+#需要一个参数即hostname，它可以使用. * 等去匹配host。这个参数会匹配请求头中的host的值，一致，则请求正确转发。
+#如：curl -H 'Host:www.fangzhipeng.com' localhost:8081
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: host_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - Host=**.fangzhipeng.com
+  profiles: host_route
+#Method Route Predicate Factory
+#需要一个参数，即请求的类型。比如GET类型的请求都转发到此路由。
+#如：curl localhost:8081
+#如：curl -XPOST localhost:8081  则不会进入该路由
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: method_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - Method=GET
+  profiles: method_route
+#Path Route Predicate Factory
+#需要一个参数: 一个spel表达式，应用匹配路径。
+#如：curl localhost:8081/foo/dew
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: path_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - Path=/foo/{segment}
+  profiles: path_route
+#Query Route Predicate Factory
+#配置了请求中含有参数foo，并且foo的值匹配ba.，则请求命中路由
+#如：curl localhost:8081?foo=bar
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: query_route
+          uri: http://httpbin.org:80/get
+          predicates:
+            - Query=foo, ba.
+  profiles: query_route
