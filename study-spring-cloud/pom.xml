@@ -20,6 +20,8 @@
         <module>study-zuul</module>
         <module>study-config-server</module>
         <module>study-config-client</module>
+        <module>study-zipkin-server</module>
+        <module>study-zipkin-client</module>
     </modules>
 
     <dependencies>

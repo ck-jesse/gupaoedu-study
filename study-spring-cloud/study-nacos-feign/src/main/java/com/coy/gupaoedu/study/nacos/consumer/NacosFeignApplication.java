@@ -28,6 +28,7 @@ public class NacosFeignApplication {
 
     /**
      * 一种是ribbon+restTemplate实现服务调用
+     * 注意：必须设置 @LoadBalanced 才能使用到ribbon的功能，会从注册中心获取服务，做负载均衡
      */
     @LoadBalanced
     @Bean

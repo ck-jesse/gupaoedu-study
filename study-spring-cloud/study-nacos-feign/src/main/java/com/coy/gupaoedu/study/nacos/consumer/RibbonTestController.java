@@ -21,6 +21,10 @@ public class RibbonTestController {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * TODO ribbon+restTemplate实现服务调用方式，不会被拦截并加入到zipkin追踪链路中去，这是为啥？
+     * 分析：是可以的，zipkin-ui有点坑，不方便看，排序也是乱的
+     */
     // 在ribbon使用断路器
     // 添加Hystrix熔断器
     @HystrixCommand(fallbackMethod = "error")

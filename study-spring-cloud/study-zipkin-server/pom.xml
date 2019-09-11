@@ -9,27 +9,29 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>study-nacos-provider</artifactId>
+    <artifactId>study-zipkin-server</artifactId>
     <description>
-        spring-cloud基于nacos注册中心来实现服务注册和发现
-        注意：nacos有自己的服务端程序，这是与eureka不同的点。
+        zipkin 服务链路追踪。
     </description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-            <version>0.2.2.RELEASE</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- spring-cloud-starter-zipkin依赖 -->
+        <!-- 注意：Zipkin最新2.12.9版从2.12.6开始有个较大的更新，迁移使用了Armeria HTTP引擎。
+        启动时报Failed to instantiate [com.linecorp.armeria.server.Server]: Factory method 'armeriaServer' threw exception; -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-zipkin</artifactId>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-server</artifactId>
+            <version>2.12.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-autoconfigure-ui</artifactId>
+            <version>2.12.3</version>
         </dependency>
     </dependencies>
 

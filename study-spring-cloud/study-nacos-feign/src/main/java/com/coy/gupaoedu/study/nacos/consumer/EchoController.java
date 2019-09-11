@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EchoController {
 
+    /**
+     * feign方式调用服务，可被加入到zipkin追踪链路中
+     */
     @Autowired
     EchoServiceFeignApi echoServiceFeignApi;
 
