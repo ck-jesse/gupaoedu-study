@@ -12,8 +12,8 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  * @date 2019/9/4 10:56
  */
 @SpringBootApplication
-@EnableConfigServer
-@EnableEurekaClient
+@EnableConfigServer // 开启配置服务器的功能
+@EnableEurekaClient // 开启服务注册功能，保证高可用
 public class ConfigServerApplication {
 
     /**
