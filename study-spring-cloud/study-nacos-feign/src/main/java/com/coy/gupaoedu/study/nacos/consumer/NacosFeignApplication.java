@@ -21,7 +21,12 @@ import org.springframework.web.client.RestTemplate;
 @EnableFeignClients // 开启Feign功能
 @EnableHystrix// 开启Hystrix熔断器功能
 public class NacosFeignApplication {
-
+    /**
+     * http://localhost:8764
+     * <p>
+     * 断路器面板： http://localhost:8764/hystrix
+     * 查看看具体数据： http://localhost:8764/actuator/hystrix.stream
+     */
     public static void main(String[] args) {
         SpringApplication.run(NacosFeignApplication.class, args);
     }
@@ -35,4 +40,5 @@ public class NacosFeignApplication {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
 }

@@ -35,6 +35,8 @@ public class RibbonTestController {
     }
 
     public String error(String name) {
-        return "hi," + name + ",sorry,error! 触发Hystrix熔断器";
+        String msg = "hi," + name + ",sorry,error! 触发Hystrix熔断器";
+        System.out.println(msg);
+        return msg;
     }
 }
