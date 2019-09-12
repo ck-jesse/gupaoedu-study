@@ -20,6 +20,11 @@ public class ApolloApplication {
 
     /**
      * http://localhost:8080/getConfig?key=user.id
+     *
+     * 直接访问apollo的配置
+     * http://172.31.1.122:8080/configs/shop-web-client/default/application
+     *
+     * 注意：一套Portal可以管理多个环境，但是每个环境都需要独立部署一套Config Service、Admin Service和ApolloConfigDB
      */
     public static void main(String[] args) {
         SpringApplication.run(ApolloApplication.class, args);
