@@ -34,6 +34,7 @@
         <module>study-spring-cloud</module>
         <module>study-apollo</module>
         <module>study-mybatis-plus</module>
+        <module>study-jdk-features</module>
     </modules>
 
     <properties>
