@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2019/9/11 15:52
  */
 @Configuration
-@EnableHystrixDashboard // 开启Hystrix熔断器Dashboard功能
+@EnableHystrixDashboard // 开启Hystrix熔断器Dashboard功能 - 基本上没人用了
 public class HystrixDashboardConfiguration {
 
     /**
