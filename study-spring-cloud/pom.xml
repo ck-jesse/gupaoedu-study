@@ -23,6 +23,7 @@
         <module>study-zipkin-server</module>
         <module>study-zipkin-client</module>
         <module>study-spring-cloud-gateway</module>
+        <module>study-spring-cloud-stream</module>
     </modules>
 
     <dependencies>

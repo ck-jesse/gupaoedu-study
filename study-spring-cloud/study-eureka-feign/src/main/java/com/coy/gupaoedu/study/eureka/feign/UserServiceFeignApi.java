@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author chenck
  * @date 2019/9/4 11:58
  */
-@FeignClient(value = "eureka-service-provider")// 指定服务提供方的名字
+@FeignClient(value = "eureka-provider-service")// 指定服务提供方的名字
 public interface UserServiceFeignApi {
 
     @RequestMapping(value = "/home", method = RequestMethod.GET)
