@@ -56,6 +56,9 @@ public class RpcNettyServer {
                         /**
                          * 客户端通道初始化处理
                          * Channel注册后将调用此方法，该方法返回后，此实例将从管道pipeline中删除
+                         * ChannelPipeline 是一个双向链表 ，元素为 DefaultChannelHandlerContext ，其封装了ChannelHandler
+                         * ChannelPipeline 含有 head , tail
+                         * DefaultChannelHandlerContext 含有 prev , next
                          */
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
@@ -67,14 +70,26 @@ public class RpcNettyServer {
                              lengthAdjustment：要添加到长度字段值的补偿值
                              initialBytesToStrip：从解码帧中去除的第一个字节数
                              */
+                            // inbound
                             ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 2, 0, 2));
                             //自定义协议编码器
+                            // outbound
                             ch.pipeline().addLast(new LengthFieldPrepender(2));
-                            //对象参数类型编码器
-                            ch.pipeline().addLast("encoder", new ObjectEncoder());
                             //对象参数类型解码器
+                            // inbound
                             ch.pipeline().addLast("decoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
+                            //对象参数类型编码器
+                            // outbound
+                            ch.pipeline().addLast("encoder", new ObjectEncoder());
+                            // inbound 和 outbound （可看做两者）
                             ch.pipeline().addLast(new RpcNettyRequestHandler(rpcInvoker));
+
+                            // handler的处理流程
+                            // inbound:  LengthFieldBasedFrameDecoder -> ObjectDecoder -> RpcNettyRequestHandler
+                            // outbound: RpcNettyRequestHandler       -> ObjectEncoder -> LengthFieldPrepender
+                            // 原理
+                            // inbound  -> pipeline.head.next 往后轮询获取DefaultChannelHandlerContext
+                            // outbound -> pipeline.tail.prev 往前轮询获取DefaultChannelHandlerContext
                         }
                     })
                     // 针对主线程配置线程最大数量

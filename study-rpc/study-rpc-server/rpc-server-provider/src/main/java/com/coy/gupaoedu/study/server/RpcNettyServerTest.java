@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = "com.coy.gupaoedu.study.server")
 public class RpcNettyServerTest {
 
-    public static final int port = 8080;
+    public static final int port = 8090;
     public static final String connectString = "127.0.0.1:2181";
 
     @Bean(name = "rpcConfig")
