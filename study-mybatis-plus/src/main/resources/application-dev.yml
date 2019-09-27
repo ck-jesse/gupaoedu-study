@@ -16,10 +16,10 @@ spring:
       primary: master #设置默认的数据源或者数据源组,默认值即为master
       datasource:
         master:
-          username: root
-          password: 12345678
+          username: perfect_w
+          password: 6eB_ew_9jH
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://10.0.20.4:3306/shop?characterEncoding=utf-8&allowMultiQueries=true
+          url: jdbc:mysql://172.100.28.90:3306/perfect_uat_center_progress?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
         slave_1:
           username: root
           password: 12345678

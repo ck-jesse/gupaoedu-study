@@ -35,6 +35,7 @@
         <module>study-apollo</module>
         <module>study-mybatis-plus</module>
         <module>study-jdk-features</module>
+        <module>study-redis</module>
     </modules>
 
     <properties>
