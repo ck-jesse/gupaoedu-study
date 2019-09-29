@@ -36,6 +36,7 @@
         <module>study-mybatis-plus</module>
         <module>study-jdk-features</module>
         <module>study-redis</module>
+        <module>study-spring-security</module>
     </modules>
 
     <properties>
