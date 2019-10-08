@@ -2,23 +2,33 @@ server:
   port: 8081
 spring:
   profiles:
+    # 配置激活的路由配置
     active: after_route
 
 # 三个横线表示在application.yml中再建一个配置文件
-#Predict作为断言，它决定了请求会被路由到哪个router中。在断言之后，请求会被进入到filter过滤器的逻辑，
+# 在此配置文件中通过spring.profiles来配置文件名，和spring.profiles.active保持一致，
+# 然后配置spring cloud gateway 相关的配置，id标签配置的是router的id，每个router都需要一个唯一的id，uri配置的是将请求路由到哪里，
+# Predict作为断言，它决定了请求会被路由到哪个router中。在断言之后，请求会被进入到filter过滤器的逻辑，
 
 #After Route Predicate Factory
 #配置一个时间，当请求的时间在配置时间之后，才交给 router去处理。否则则报错，不通过路由。
-#如：
+#如：http://localhost:8081 会路由到 http://httpbin.org:80/get
 ---
 spring:
   cloud:
     gateway:
+      # routes 是一个集合，配置多个元素时，使用单个横线来标记一个元素
       routes:
         - id: after_route
           uri: http://httpbin.org:80/get
+          # 会被解析成PredicateDefinition对象 （name =After ，args= 2017-01-20T17:42:47.789-07:00[America/Denver]）
+          # 在这里需要注意的是predicates的After这个配置，遵循的契约大于配置的思想，它实际被AfterRoutePredicateFactory这个类所处理，
+          # 这个After就是指定了它的Gateway web handler类为AfterRoutePredicateFactory，同理，其他类型的predicate也遵循这个规则。
           predicates:
-            - After=2017-01-20T17:42:47.789-07:00[America/Denver]
+            # - After=2020-11-20T17:42:47.789-07:00[America/Denver]
+            - After=2017-11-20T17:42:47.789-07:00[America/Denver]
+          filters:
+            - RequestTime=true
   profiles: after_route
 #Header Route Predicate Factory
 #需要2个参数，一个是header名，另外一个header值，该值可以是一个正则表达式。当此断言匹配了请求的header名和值时，断言通过，进入到router的规则中去。
