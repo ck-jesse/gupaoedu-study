@@ -18,7 +18,7 @@ import java.util.List;
  *
  * 测试地址： http://localhost:8081/?name=yes 会进入到该过滤器工厂
  */
-@Component
+//@Component
 public class RequestTimeGatewayFilterFactory extends AbstractGatewayFilterFactory<RequestTimeGatewayFilterFactory.Config> {
 
     private static final Log log = LogFactory.getLog(RequestTimeGatewayFilterFactory.class);

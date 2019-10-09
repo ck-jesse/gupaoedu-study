@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 /**
  * 自定义过滤器 GatewayFilter ，打印请求时间
  *
- * 注意：需要将该自定义过滤器注册到网关Route中才能生效，所以需要结合GatewayRouteLocatorConfiguration 中定义的 RouteLocatorBuilder 来创建路由，和添加各种 predicates和filters。
+ * 注意：需要将该自定义过滤器注册到网关Route中才能生效，所以需要结合 GatewayRouteLocatorConfiguration 中定义的 RouteLocatorBuilder 来创建路由，和添加各种 predicates和filters。
  */
 public class RequestTimeGatewayFilter implements GatewayFilter, Ordered {
 

@@ -1,9 +1,44 @@
 server:
   port: 8081
 spring:
+  application:
+    name: spring-cloud-gateway
   profiles:
     # 配置激活的路由配置
     active: after_route
+  # 网关配置
+  cloud:
+    gateway:
+      # 服务注册与发现配置
+      discovery:
+        locator:
+          # true 表明gateway开启服务注册和发现的功能
+          # 并且spring cloud gateway自动根据服务发现为每一个服务创建了一个router，这个router将以服务名开头的请求路径转发到对应的服务。
+          enabled: true
+          # true 将请求路径上的服务名配置为小写（因为服务注册的时候，向注册中心注册时将服务名转成大写的了）
+          # 比如以/service-hi/*的请求路径被路由转发到服务名为service-hi的服务上。
+          lower-case-service-id: true
+      # 网关路由配置，可自定义路径并转发到具体的服务
+      routes:
+        - id: eureka-consumer-service
+          # 服务的负载均衡地址
+          uri: lb://EUREKA-CONSUMER-SERVICE
+          # 断言配置，以/demo/**开头的请求都会转发到uri的地址上
+          predicates:
+            - Path=/demo/**
+          # 用StripPrefix的filter 在转发之前将/demo去掉
+          # 同时将spring.cloud.gateway.discovery.locator.enabled改为false，如果不改的话，之前的localhost:8081/eureka-consumer-service/home这样的请求地址也能正常访问，因为这时为每个服务创建了2个router。
+          filters:
+            - StripPrefix=1
+
+
+# 注册中心地址 - spring cloud gateway之服务注册与发现 - 配合服务注册中心进行路由转发
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8765/eureka/
+
+
 
 # 三个横线表示在application.yml中再建一个配置文件
 # 在此配置文件中通过spring.profiles来配置文件名，和spring.profiles.active保持一致，
@@ -17,7 +52,11 @@ spring:
 spring:
   cloud:
     gateway:
-      # routes 是一个集合，配置多个元素时，使用单个横线来标记一个元素
+      # TODO 此处定义是否是全局限流器，待验证
+      #redis-rate-limiter:
+      #  replenishRate: 1
+      #  burstCapacity: 3
+      # routes 是一个集合，配置多个元素时，使用单个横线 "-" 来标记一个元素
       routes:
         - id: after_route
           uri: http://httpbin.org:80/get
@@ -27,8 +66,21 @@ spring:
           predicates:
             # - After=2020-11-20T17:42:47.789-07:00[America/Denver]
             - After=2017-11-20T17:42:47.789-07:00[America/Denver]
+          # RequestTime是一个自定义过滤器工厂的简写，对应到RequestTimeGatewayFilterFactory
           filters:
-            - RequestTime=true
+            # - RequestTime=true
+            - name: RequestTime
+              args:
+                withParams: true
+            - name: RequestRateLimiter
+              args:
+                # 用于限流的键的解析器的 Bean 对象的名字。它使用 SpEL 表达式根据#{@beanName}从 Spring 容器中获取 Bean 对象。
+                key-resolver: '#{@hostAddrKeyResolver}'
+                # 当令牌不足时，返回 HttpStatus.TOO_MANY_REQUESTS(429, "Too Many Requests")
+                # 令牌桶每秒填充平均速率
+                redis-rate-limiter.replenishRate: 1
+                # 令牌桶总容量
+                redis-rate-limiter.burstCapacity: 1
   profiles: after_route
 #Header Route Predicate Factory
 #需要2个参数，一个是header名，另外一个header值，该值可以是一个正则表达式。当此断言匹配了请求的header名和值时，断言通过，进入到router的规则中去。
