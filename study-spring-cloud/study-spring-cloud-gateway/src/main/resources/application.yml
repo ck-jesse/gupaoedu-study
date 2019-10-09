@@ -24,6 +24,7 @@ spring:
           # 服务的负载均衡地址
           uri: lb://EUREKA-CONSUMER-SERVICE
           # 断言配置，以/demo/**开头的请求都会转发到uri的地址上
+          # TODO 怎么不起作用呢？
           predicates:
             - Path=/demo/**
           # 用StripPrefix的filter 在转发之前将/demo去掉
