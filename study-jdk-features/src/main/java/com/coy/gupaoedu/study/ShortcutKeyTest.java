@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.jdk8;
+package com.coy.gupaoedu.study;
 
 import java.util.Arrays;
 import java.util.List;

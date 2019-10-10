@@ -1,6 +1,9 @@
 package com.coy.gupaoedu.study.jdk8.functional;
 
 /**
+ * java8的新特性:
+ * 函数式接口编程
+ * 接口默认方法
  *
  * @author chenck
  * @date 2019/9/24 10:32

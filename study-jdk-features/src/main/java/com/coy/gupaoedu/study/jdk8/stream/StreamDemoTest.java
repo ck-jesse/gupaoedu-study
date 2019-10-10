@@ -1,5 +1,6 @@
-package com.coy.gupaoedu.study.jdk8;
+package com.coy.gupaoedu.study.jdk8.stream;
 
+import com.coy.gupaoedu.study.jdk8.Student;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * Stream作为java8的新特性，基于lambda表达式，是对集合对象功能的增强，
+ * 它专注于对集合对象进行各种高效、便利的聚合操作或者大批量的数据操作，提高了编程效率和代码可读性。
+ *
+ * Stream的原理：
+ * 将要处理的元素看做一种流，流在管道中传输，并且可以在管道的节点上处理，包括 过滤筛选、去重、排序、聚合等。
+ * 元素流在管道中经过中间操作的处理，最后由最终操作得到前面处理的结果。
+ *
  * @author chenck
  * @date 2019/9/18 10:20
  */
