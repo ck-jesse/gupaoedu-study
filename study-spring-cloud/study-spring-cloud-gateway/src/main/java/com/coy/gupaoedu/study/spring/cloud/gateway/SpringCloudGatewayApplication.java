@@ -6,6 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +26,11 @@ import reactor.core.publisher.Mono;
 public class SpringCloudGatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringCloudGatewayApplication.class, args);
+        // 通过切换 spring.profiles.active 来验证不同的场景
+        // discovery -> 对应 application-discovery.yml，表示基于服务注册中心进行路由转发
+        // after_route -> 对应
+        ConfigurableApplicationContext applicationContext = SpringApplication.run(SpringCloudGatewayApplication.class, args);
+        // TODO 此方式设置的激活的profiles不起作用，后续再研究
+        applicationContext.getEnvironment().setActiveProfiles("after_route");
     }
-
-
 }

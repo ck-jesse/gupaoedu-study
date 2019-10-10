@@ -30,6 +30,13 @@
 
 # Filter 简介
 
+Spring Cloud Gateway的filter生命周期不像Zuul那么丰富，它只有两个：“pre”和“post”：
+
+- pre:这种过滤器在请求被路由之前调用。可以利用这个过滤器实现身份验证、在集群中选择请求的微服务、记录调试的信息。
+- post：这种过滤器在路由到服务器之后执行。这种过滤器可用来为响应添加HTTP Header、统计信息和指标、响应从微服务发送给客户端等。
+
+  
+
 
 
 ## 自定义过滤器 - `GatewayFilter`
@@ -242,6 +249,10 @@ spring:
     client:
       service-url:
         defaultZone: http://localhost:8765/eureka/
+  # 调整相 gateway 包的 log 级别，以便排查问题。
+  logging:
+    level:
+      org.springframework.cloud.gateway: debug
   ```
 
 - 启动应用

@@ -1,0 +1,44 @@
+spring:
+  #profiles:
+  # 配置激活的路由配置
+  #active: after_route
+  # 网关配置
+  cloud:
+    gateway:
+      # 服务注册与发现配置
+      discovery:
+        locator:
+          # true 表明gateway开启服务注册和发现的功能
+          # 并且spring cloud gateway自动根据服务发现为每一个服务创建了一个router，这个router将以服务名开头的请求路径转发到对应的服务。
+          enabled: true
+          # true 将请求路径上的服务名配置为小写（因为服务注册的时候，向注册中心注册时将服务名转成大写的了）
+          # 比如以/eureka-provider-service/*的请求路径被路由转发到服务名为eureka-provider-service的服务上。
+          lower-case-service-id: true
+      # 网关路由配置，可自定义路径并转发到具体的服务
+      routes:
+        # 第一个服务路由route配置
+        - id: eureka-provider-service
+          # 服务的负载均衡地址
+          uri: lb://EUREKA-PROVIDER-SERVICE
+          # 断言配置，以/provider/**开头的请求都会转发到uri的地址上
+          # TODO 怎么不起作用呢？因为 spring.profiles.active=after_route配置了激活的routes，所以与本routes配置冲突了，所以要注意
+          predicates:
+            - Path=/provider/**
+          # 用StripPrefix的filter 在转发之前将/provider去掉
+          # 同时将spring.cloud.gateway.discovery.locator.enabled改为false，如果不改的话，之前的localhost:8081/eureka-provider-service/home这样的请求地址也能正常访问，因为这时为每个服务创建了2个router。
+          filters:
+            - StripPrefix=1
+        # 第二个服务路由route配置
+        - id: eureka-consumer-service
+          uri: lb://EUREKA-CONSUMER-SERVICE
+          predicates:
+            - Path=/consumer/**
+          filters:
+            - StripPrefix=1
+
+# 测验验证地址如下：
+# http://localhost:8081/eureka-provider-service/home?name=nihao
+# http://localhost:8081/provider/home?name=123
+
+# http://localhost:8081/eureka-consumer-service/home?name=nihao
+# http://localhost:8081/consumer/home?name=nihao
