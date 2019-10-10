@@ -43,6 +43,13 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+        <!-- actuator 监控，引入该包是为了支持网关动态配置
+         GatewayAutoConfiguration 中配置了 GatewayControllerEndpoint，引入该包表示启用。
+         -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

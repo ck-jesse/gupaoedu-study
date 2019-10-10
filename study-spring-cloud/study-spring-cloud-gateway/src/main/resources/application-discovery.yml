@@ -21,7 +21,8 @@ spring:
           # 服务的负载均衡地址
           uri: lb://EUREKA-PROVIDER-SERVICE
           # 断言配置，以/provider/**开头的请求都会转发到uri的地址上
-          # TODO 怎么不起作用呢？因为 spring.profiles.active=after_route配置了激活的routes，所以与本routes配置冲突了，所以要注意
+          # TODO 怎么不起作用呢？因为 spring.profiles.active=after_route中配置了激活的routes，所以与本routes配置冲突了，所以要注意。
+          # 该问题本质上是，与激活多个profiles时，若存在相同的配置项，则后面的profiles的配置项生效 的场景相同。
           predicates:
             - Path=/provider/**
           # 用StripPrefix的filter 在转发之前将/provider去掉

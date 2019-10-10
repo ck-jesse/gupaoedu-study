@@ -20,6 +20,16 @@ logging:
   level:
     org.springframework.cloud.gateway: debug
 
+# 开启actuator管理api，后面要关闭
+# GatewayAutoConfiguration 中定义 GatewayControllerEndpoint 来暴露了一些网关的查询功能（filter/route等）
+# http://localhost:8081/actuator/gateway/routes  返回网关的路由信息
+# 注意：如果需要动态添加网关路由roure，则可以参考GatewayControllerEndpoint自定义Controller来实现动态添加网关路由的功能，可参考 https://my.oschina.net/tongyufu/blog/1844573
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 
 # 三个横线表示在application.yml中再建一个配置文件
 # 在此配置文件中通过spring.profiles来配置文件名，和spring.profiles.active保持一致，
@@ -62,7 +72,7 @@ spring:
                 # 令牌桶每秒填充平均速率
                 redis-rate-limiter.replenishRate: 1
                 # 令牌桶总容量
-                redis-rate-limiter.burstCapacity: 1
+                redis-rate-limiter.burstCapacity: 2
 #Header Route Predicate Factory
 #需要2个参数，一个是header名，另外一个header值，该值可以是一个正则表达式。当此断言匹配了请求的header名和值时，断言通过，进入到router的规则中去。
 #如：curl -H 'X-Request-Id:1' localhost:8081

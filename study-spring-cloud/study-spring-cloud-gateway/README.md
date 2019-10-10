@@ -1,7 +1,16 @@
 # Spring Cloud Gateway 网关简介
-
-> 参考 方志朋 的博客
-> https://www.fangzhipeng.com/springcloud/2018/11/06/sc-f-gateway1.html
+> 官方文档
+> - https://cloud.spring.io/spring-cloud-gateway/reference/html
+>
+> 官方demo
+> - https://github.com/spring-cloud/spring-cloud-gateway
+>
+> 参考文档 - 芋道源码
+> - http://www.iocoder.cn/categories/Spring-Cloud-Gateway/
+>
+> 参考文档 - 方志朋的博客
+>
+> - https://www.fangzhipeng.com/springcloud/2018/11/06/sc-f-gateway1.html
 
 
 
@@ -124,6 +133,15 @@ spring:
 ## 自定义全局过滤器
 
 当Spring Cloud Gateway内置的GlobalFilter无法满足业务上的需求时，则需要编写满足自己需求的GlobalFilter。
+
+
+
+# Route 简介
+
+## 动态修改路由配置
+如果需要动态修改网关路由roure，则可以参考 GatewayControllerEndpoint 的实现来自定义Controller以实现动态修改网关路由的功能，可参考 https://my.oschina.net/tongyufu/blog/1844573
+
+
 
 
 
@@ -295,6 +313,24 @@ spring:
 
 
 
+## Spring Cloud Gateway 服务发现源码解析
+
+
+
+> - 自动配置入口 - GatewayDiscoveryClientAutoConfiguration
+>
+> org.springframework.cloud.gateway.discovery.GatewayDiscoveryClientAutoConfiguration
+>
+> - 从注册中心发现服务 - DiscoveryClientRouteDefinitionLocator
+>
+> 基于 org.springframework.cloud.client.discovery.DiscoveryClient 获取注册在注册中心的服务列表，生成对应的 RouteDefinition 数组。
+>
+> org.springframework.cloud.gateway.discovery.DiscoveryClientRouteDefinitionLocator
+>
+> 前置条件，必须配置属性 spring.cloud.gateway.discovery.locator.enabled
+>
+> - 
+
 
 
 
@@ -305,9 +341,17 @@ spring:
 >
 > org.springframework.cloud.gateway.filter.WeightCalculatorWebFilter#onApplicationEvent
 >
-> 2、基于自动属性装配来初始化
+> 2、基于自动属性装配来初始化 - 【重点】
 >
 > org.springframework.cloud.gateway.config.GatewayAutoConfiguration
+>
+> > GatewayAutoConfiguration 中定义了很多关键的要素，如：
+> >
+> > RoutePredicateHandlerMapping - 
+> >
+> > PropertiesRouteDefinitionLocator - 
+> >
+> > RouteLocator - 可以通过 RouteDefinitionRouteLocator 获取 RouteDefinition ，并转换成 Route
 >
 > 3、路由定义 - 含加载predicate和route	
 >
@@ -324,6 +368,10 @@ spring:
 > org.springframework.cloud.gateway.support.ConfigurationUtils#bind - 将参数设置到RequestTimeGatewayFilterFactory.Config类的属性上
 
 
+
+Spring
+
+> 
 
 
 

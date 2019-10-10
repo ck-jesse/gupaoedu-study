@@ -20,6 +20,8 @@ import java.util.function.Function;
 public class GatewayRouteLocatorConfiguration {
 
     /**
+     * RouteLocator 路由定位器
+     *
      * 使用RouteLocator的Bean进行路由转发，将请求进行处理，最后转发到目标的下游服务。
      * http://localhost:8080/get
      * <p>
