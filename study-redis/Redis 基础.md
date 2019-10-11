@@ -9,6 +9,10 @@
 - 图存储
   - graph 
 
+# Redis文档
+> Redis 命令参考 http://redisdoc.com/
+>
+> Redis 中文网站 http://www.redis.cn/
 
 
 # Redis 基础
