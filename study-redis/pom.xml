@@ -10,8 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>study-redis</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>study-redis-jedis</module>
+        <module>study-redis-redisson</module>
+    </modules>
 
-    <dependencies>
+    <!--<dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -33,7 +38,7 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-    </dependencies>
+    </dependencies>-->
 
     <build>
         <plugins>

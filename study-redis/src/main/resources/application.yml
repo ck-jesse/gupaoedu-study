@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: study-redis
-  profiles:
-    # 注意: spring.profiles.active 配置在该配置文件中可能不生效，可在启动的环境变量中增加 spring.profiles.active=dev
-    active: dev
-server:
-  port: 8001
