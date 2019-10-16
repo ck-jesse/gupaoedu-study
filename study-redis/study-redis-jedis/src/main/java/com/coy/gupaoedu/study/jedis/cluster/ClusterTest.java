@@ -30,6 +30,7 @@ public class ClusterTest {
         nodes.add(hp5);
         nodes.add(hp6);
 
+        // JedisCluster 中把slot和Redis实例对应的pool缓存起来
         JedisCluster cluster = new JedisCluster(nodes);
         cluster.set("gupao:cluster", "qingshan2673");
         System.out.println(cluster.get("gupao:cluster"));;

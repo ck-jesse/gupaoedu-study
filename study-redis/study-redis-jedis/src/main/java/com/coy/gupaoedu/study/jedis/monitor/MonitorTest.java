@@ -4,9 +4,13 @@ import com.google.common.util.concurrent.AtomicLongMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisMonitor;
 
-import java.util.List;
-
 /**
+ * 可以监控redis服务端的执行命令，如分析热点数据等场景
+ *
+ * 监控会消耗redis服务端的性能，同时监控只能针对单机进行监控，不支持集群监控
+ *
+ * 可以通过facebook开源的 redis-faina 来分析热点数据
+ *
  * @Author: qingshan
  * @Date: 2019/9/28 21:36
  * @Description: 咕泡学院，只为更好的你

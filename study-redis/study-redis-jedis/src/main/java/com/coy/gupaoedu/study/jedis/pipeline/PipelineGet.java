@@ -14,8 +14,8 @@ import java.util.Set;
  */
 public class PipelineGet {
     public static void main(String[] args) {
-        new Thread(){
-            public void run(){
+        new Thread() {
+            public void run() {
                 Jedis jedis = new Jedis("127.0.0.1", 6379);
                 Set<String> keys = jedis.keys("batch*");
                 List<String> result = new ArrayList();
@@ -26,12 +26,12 @@ public class PipelineGet {
                 for (String src : result) {
                     //System.out.println(src);
                 }
-                System.out.println("直接get耗时："+(System.currentTimeMillis() - t1));
+                System.out.println("直接get耗时：" + (System.currentTimeMillis() - t1) + "ms");
             }
         }.start();
 
-        new Thread(){
-            public void run(){
+        new Thread() {
+            public void run() {
                 Jedis jedis = new Jedis("127.0.0.1", 6379);
                 //jedis.auth("Qingshan@gupao666");
                 Set<String> keys = jedis.keys("batch*");
@@ -45,7 +45,7 @@ public class PipelineGet {
                 for (Object src : result) {
                     //System.out.println(src);
                 }
-                System.out.println("Pipeline get耗时："+(System.currentTimeMillis() - t1));
+                System.out.println("Pipeline get耗时：" + (System.currentTimeMillis() - t1)+ "ms");
             }
         }.start();
     }
