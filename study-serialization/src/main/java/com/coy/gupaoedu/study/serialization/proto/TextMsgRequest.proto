@@ -1,0 +1,23 @@
+syntax = "proto3"; // PB协议版本
+
+package com.hs.dingtalk.proto;
+
+option java_package = "com.coy.gupaoedu.study.serialization.proto"; // 生成类的包名
+option java_outer_classname = "TextMsgRequestProto"; // 生成类的类名
+
+enum ResponseCode {
+    RESP_CODE_SUCCESS = 0;
+    RESP_CODE_FAILED = 1;
+};
+
+message TextMsgRequest {
+    string useridList = 1; // 用户id列表
+    string deptIdList = 2; // 部门id列表
+    string content = 3; // 文本内容
+}
+
+message SendMsgResponse {
+    ResponseCode code = 1; // 请求是否成功编码
+    string msg = 2; // 响应消息
+    int64 data = 3; // 钉钉返回的异步消息任务id
+}

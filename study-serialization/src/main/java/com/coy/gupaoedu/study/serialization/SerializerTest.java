@@ -1,8 +1,13 @@
 package com.coy.gupaoedu.study.serialization;
 
+import com.alibaba.fastjson.JSON;
 import com.coy.gupaoedu.study.serialization.model.User;
-import com.coy.gupaoedu.study.serialization.serializer.FastJsonSerializer;
+import com.coy.gupaoedu.study.serialization.proto.msg.SendMsgRequest;
+import com.coy.gupaoedu.study.serialization.proto.msg.Text;
+import com.coy.gupaoedu.study.serialization.serializer.JavaSerializer;
+import com.coy.gupaoedu.study.serialization.serializer.ProtobufSerializer;
 import com.coy.gupaoedu.study.serialization.serializer.Serializer;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -38,9 +43,10 @@ public class SerializerTest {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
 
 //        Serializer serializer = new JavaSerializer();// length=213
-        Serializer serializer = new FastJsonSerializer();// length=23
+//        Serializer serializer = new FastJsonSerializer();// length=23
 //        Serializer serializer = new XStreamSerializer();// length=325
 //        Serializer serializer = new HessionSerializer();// length=76
+        Serializer serializer = new ProtobufSerializer();// length=7
 
         User user = new User();
         user.setName("coy");
@@ -52,5 +58,24 @@ public class SerializerTest {
 
         User userNew = serializer.deserialize(bytes, User.class);
         System.out.println("name=" + userNew.getName() + ",age=" + userNew.getAge());
+    }
+
+    @Test
+    public void test() throws IOException, ClassNotFoundException {
+        Serializer serializer = new JavaSerializer();// length=387
+//        Serializer serializer = new FastJsonSerializer();// length=70
+//        Serializer serializer = new HessionSerializer();// length=203
+//        Serializer serializer = new ProtobufSerializer();// length=81
+
+        SendMsgRequest msgRequest = new SendMsgRequest();
+        msgRequest.setUseridList("123");
+        msgRequest.setMsg(new Text().setContent("hello world!"));
+
+        byte[] bytes = serializer.serialize(msgRequest, SendMsgRequest.class);
+        System.out.println("serialize.length=" + bytes.length);
+        System.out.println(new String(bytes));
+
+        SendMsgRequest msg = serializer.deserialize(bytes, SendMsgRequest.class);
+        System.out.println(JSON.toJSONString(msg));
     }
 }

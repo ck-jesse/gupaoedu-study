@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.cache;
+package com.coy.gupaoedu.study.guava.cache;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
@@ -55,6 +55,7 @@ public class RefreshAfterWriteTest {
                  * 注意：reload() 默认调用 load() 来同步执行
                  *
                  * 此处扩展 reload()，将 load()中的逻辑 交给线程池来异步执行，也就是不会走到 load() 中了
+                 * 结论：所有的用户请求线程均返回旧的缓存值，这样就不会有用户线程被阻塞了
                  */
                 public ListenableFuture<String> reload(String key, String oldValue) throws Exception {
                     // 默认实现：reload() 直接调用了 load(key)
@@ -91,11 +92,13 @@ public class RefreshAfterWriteTest {
 
     /**
      * 测试cache中有数据的情况 refreshAfterWrite
-     * 结果：只阻塞加载数据的线程，其余线程返回旧数据。
+     * 结果：只阻塞更新数据的线程，其余线程返回旧数据。
      * <p>
-     * 问题：真正加载数据的那个线程一定会阻塞，我们希望这个加载过程是异步的。
-     * 分析：refreshAfterWrite默认的刷新是同步的，会在调用者的线程中执行。
+     * 问题：真正更新数据的那个线程一定会阻塞，我们希望这个更新过程是异步的。
+     * 场景：当缓存的key很多时，高并发条件下大量线程同时获取不同key对应的缓存，此时依然会造成大量线程阻塞，并且给数据库带来很大压力。
+     * 分析：refreshAfterWrite默认的刷新是同步的，会在调用者的线程中执行。解决办法就是将刷新缓存值的任务交给后台线程。
      * 处理：通过实现CacheLoader.reload()来异步刷新。
+     * 结论：所有的用户请求线程均返回旧的缓存值，这样就不会有用户线程被阻塞了。
      */
     @Test
     public void refreshAfterWriteTest() throws Exception {

@@ -1,0 +1,52 @@
+syntax = "proto3"; // PB协议版本
+
+package com.hs.dingtalk.proto;
+
+option java_package = "com.coy.gupaoedu.study.serialization.proto"; // 生成类的包名
+option java_outer_classname = "SendMsgRequestProto"; // 生成类的类名
+
+enum ResponseCode {
+    RESP_CODE_SUCCESS = 0;
+    RESP_CODE_FAILED = 1;
+};
+
+// 消息的发送进度请求参数
+message SendProgressRequest {
+    int64 msgTaskId = 1; // 发送消息时钉钉返回的异步任务id
+}
+
+// 消息的发送进度响应参数
+message SendProgressResponse {
+    ResponseCode code = 1; // 请求是否成功编码
+    string msg = 2; // 响应消息
+    int64 progressInPercent = 3; // 取值 0-100，表示处理的百分比
+    int64 status = 4; // 任务执行状态，0=未开始，1=处理中，2=处理完毕
+}
+
+// 获取消息的发送结果请求参数
+message GetSendResultRequest {
+    int64 msgTaskId = 1; // 发送消息时钉钉返回的异步任务id
+}
+
+// 获取消息的发送结果响应参数
+message GetSendResultResponse {
+    ResponseCode code = 1; // 请求是否成功编码
+    string msg = 2; // 响应消息
+    repeated string failedUserIdList = 3; // 发送失败的用户id
+    //repeated string forbiddenUserIdList = 4; // 被限流的用户id
+    //repeated int64 invalidDeptIdList = 5; // 无效的部门id
+    //repeated string invalidUserIdList = 6; // 无效的用户id
+    //repeated string readUserIdList = 7; // 已读消息的用户id
+    //repeated string unreadUserIdList = 8; // 未读消息的用户id
+}
+
+// 消息撤回请求参数
+message RecallRequest {
+    int64 msgTaskId = 1; // 发送消息时钉钉返回的异步任务id
+}
+
+// 消息撤回响应参数
+message RecallResponse {
+    ResponseCode code = 1; // 请求是否成功编码
+    string msg = 2; // 响应消息
+}
