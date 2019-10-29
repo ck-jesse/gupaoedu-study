@@ -1,51 +1,71 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
-    <springProperty scope="context" name="app.name" source="spring.application.name"/>
-    <property name="logDir" value="/app/logs/study-mybatis-plus"/>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%-40.36logger{40}:%-4.4line] - %msg%n</pattern>
-        </layout>
-    </appender>
-    <appender name="SYSTEM_ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${logDir}/${app.name}_error.log</File>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
+    <!-- 应用名称-->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+    <!-- 日志根目录-->
+    <springProperty scope="context" name="LOG_DIR" source="log.path"
+                    defaultValue="/apps/logs/study-mybatis-plus"/>
+
+    <property scope="system" name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{trace_id}] [%-5level] [%thread] %logger{128} [%method:%line] - %msg%n"/>
+
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${logDir}/history/${app.name}_error.%d{yyyy-MM-dd}.%i</fileNamePattern>
-            <maxHistory>7</maxHistory>
-            <maxFileSize>10MB</maxFileSize>
+        <file>${LOG_DIR}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${APP_NAME}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%-40.36logger{40}:%-4.4line] - %msg%n</pattern>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
 
-    <appender name="SYSTEM_INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${logDir}/${app.name}_info.log</File>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${logDir}/history/${app.name}_info.%d{yyyy-MM-dd}.%i</fileNamePattern>
-            <maxHistory>7</maxHistory>
-            <maxFileSize>10MB</maxFileSize>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <!-- 注释掉charset，避免中文输出到控制台时被编码，而出现中文乱码 -->
+            <!--<charset>UTF-8</charset>-->
+        </encoder>
+    </appender>
+
+    <!-- 定义 access 访问日志输出 -->
+    <appender name="ACCESSLOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <file>${LOG_DIR}/${APP_NAME}-access.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${APP_NAME}-access-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%-40.36logger{40}:%-4.4line] - %msg%n</pattern>
+        <encoder>
+            <pattern>%m%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
+
+    <!-- access performance logger -->
+    <logger name="access_logger" level="INFO" additivity="false">
+        <appender-ref ref="ACCESSLOG"/>
+    </logger>
+
+    <!-- logger是root的子打印器，可以有多个，输出name配置的包中的日志。 -->
+    <logger name="com.coy.gupaoedu" level="debug"/>
+    <logger name="org.springframework" level="INFO"/>
 
     <root level="INFO">
+        <appender-ref ref="ROLLING"/>
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="SYSTEM_ERROR_FILE"/>
-        <appender-ref ref="SYSTEM_INFO_FILE"/>
     </root>
 </configuration>
