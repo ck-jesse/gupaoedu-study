@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration scan="true">
     <springProperty scope="context" name="app.name" source="spring.application.name"/>
-    <property name="logDir" value="logs"/>
+    <property name="logDir" value="/app/logs/study-mybatis-plus"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] [%-5level] [%-40.36logger{40}:%-4.4line] - %msg%n</pattern>
