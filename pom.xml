@@ -38,6 +38,7 @@
         <module>study-redis</module>
         <module>study-spring-security</module>
         <module>study-job</module>
+        <module>study-docker</module>
     </modules>
 
     <properties>
