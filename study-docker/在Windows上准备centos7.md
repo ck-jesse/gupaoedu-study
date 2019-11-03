@@ -171,12 +171,14 @@ https://vagrantcloud.com/centos/boxes/7/versions/1905.1/providers/virtualbox.box
 
 - 2 配置阿里镜像加速器
 
+  >阿里云镜像加速器官网： https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
+  >
   >通过修改daemon配置文件/etc/docker/daemon.json来使用加速器
   >
   >sudo mkdir -p /etc/docker
   >sudo tee /etc/docker/daemon.json <<-'EOF'
   >{
-  >  "registry-mirrors": ["https://dqabg8lv.mirror.aliyuncs.com"]
+  >"registry-mirrors": ["https://dqabg8lv.mirror.aliyuncs.com"]
   >}
   >EOF
   >sudo systemctl daemon-reload
