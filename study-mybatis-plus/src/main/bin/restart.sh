@@ -11,11 +11,11 @@
 
 # 项目名称
 APPLICATION="study-mybatis-plus"
-
+echo ""
 # 停服
-echo stop ${APPLICATION} Application...
-sh shutdown.sh
+echo "======> stop ${APPLICATION}"
+sh shutdown.sh ${APPLICATION}
 
 # 启动服务
-echo start ${APPLICATION} Application...
-sh startup.sh
+echo "======> start ${APPLICATION}"
+sh start.sh ${APPLICATION}

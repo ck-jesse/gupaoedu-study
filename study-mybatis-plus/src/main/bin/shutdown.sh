@@ -10,8 +10,14 @@
 #======================================================================
 
 # 项目名称
-APPLICATION="study-mybatis-plus"
-
+APPLICATION="$1"
+if [ ! -n "$APPLICATION" ]
+then
+    echo "stop application name is empty!"
+    exit
+else
+    echo "stop application name is $APPLICATION"
+fi
 # 项目启动jar包名称
 APPLICATION_JAR="${APPLICATION}.jar"
 
