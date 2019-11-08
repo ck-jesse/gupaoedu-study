@@ -16,6 +16,7 @@ import java.util.List;
  */
 public interface IShopImageService {
 
+    DataResponse<ShopImageVO> selectShopImage(Long id);
     /**
      * 保存店铺图片（支持新增和修改）
      */

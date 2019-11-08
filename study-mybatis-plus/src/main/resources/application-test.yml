@@ -1,16 +1,23 @@
-# apollo 配置中心
-apollo:
-  bootstrap:
-    #true:apollo上注册中心配置会覆盖本地配置；false：本地注册中心配置生效
-    enabled : false
-    namespaces: application.yml
-  meta: http://192.168.3.247:9090
-
-#spring-cloud注冊中心配置
+# mybatis-plus 配置
+mybatis-plus:
+  typeAliasesPackage: com.coy.gupaoedu.study.mybatisplus
+  mapper-locations: classpath*:com.coy.gupaoedu.study.mybatisplus/dao/**/*Mapper.xml
+  global-config:
+    db-config:
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+# mybatis-plus 动态数据源配置
+# 具体参见：https://gitee.com/baomidou/dynamic-datasource-spring-boot-starter/wikis/pages?sort_id=1030570&doc_id=147063
 spring:
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    nacos:
-      discovery:
-        server-addr: nacos://127.0.0.1:8848
+  datasource:
+    dynamic:
+      primary: master #设置默认的数据源或者数据源组,默认值即为master
+      datasource:
+        master:
+          username: root
+          password: cck123
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          #url: jdbc:mysql://47.107.181.147:3309/test_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+          url: jdbc:mysql://my-mysql/test_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true

@@ -34,6 +34,17 @@ public class ShopImageServiceImpl implements IShopImageService {
     private ShopImageService shopImageService;
 
     @Override
+    public DataResponse<ShopImageVO> selectShopImage(Long id) {
+        ShopImageEntity shopImageEntity = shopImageMapper.selectById(id);
+        if (null == shopImageEntity) {
+            return new DataResponse<>();
+        }
+        ShopImageVO shopImageVO = new ShopImageVO();
+        BeanUtils.copyProperties(shopImageEntity, shopImageVO);
+        return new DataResponse<>(shopImageVO);
+    }
+
+    @Override
     public DataResponse<Long> saveOrUpdateShopImage(ShopImageRequest request) {
         ShopImageEntity entity = new ShopImageEntity();
         BeanUtils.copyProperties(request, entity);

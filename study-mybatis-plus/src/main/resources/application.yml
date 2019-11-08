@@ -3,8 +3,8 @@ spring:
     name: study-mybatis-plus
   profiles:
     # 注意: spring.profiles.active 配置在该配置文件中可能不生效，可在启动的环境变量中增加 spring.profiles.active=dev
-    active: dev
+    active: test
 server:
-  port: 8001
+  port: 8080
   #servlet:
   #  context-path: /study-mybatis-plus

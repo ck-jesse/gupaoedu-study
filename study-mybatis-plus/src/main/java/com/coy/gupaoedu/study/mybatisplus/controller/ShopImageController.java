@@ -9,6 +9,7 @@ import com.coy.gupaoedu.study.mybatisplus.service.IShopImageService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,14 @@ public class ShopImageController {
 
     @Autowired
     private IShopImageService shopImageService;
+
+    /**
+     * 查询店铺图片
+     */
+    @GetMapping(value = "/shop/image/select")
+    public DataResponse<ShopImageVO> selectShopImage(Long id) {
+        return shopImageService.selectShopImage(id);
+    }
 
     /**
      * 查询店铺图片列表
