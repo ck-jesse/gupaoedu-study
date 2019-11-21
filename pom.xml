@@ -39,6 +39,7 @@
         <module>study-spring-security</module>
         <module>study-job</module>
         <module>study-docker</module>
+        <module>study-jmeter</module>
     </modules>
 
     <properties>
