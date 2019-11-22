@@ -22,10 +22,10 @@ Date.prototype.format = function (format) {
 };
 
 $(document).ready(function () {
-    var host = location.href.replace(/http:\/\//i, "");
+    var host = window.location.host;
     window.CHAT = {
         //保存服务器端WebSocket的请求地址
-        serverAddr: "ws://" + host + "im",
+        serverAddr: "ws://" + host + "/im",
         //保存用户输入的昵称
         nickname: null,
         //保存浏览器socket对象
@@ -209,6 +209,7 @@ $(document).ready(function () {
                 window.WebSocket = window.MozWebSocket;
             }
             if (window.WebSocket) {
+                console.log(CHAT.serverAddr);
                 CHAT.socket = new WebSocket(CHAT.serverAddr);
                 CHAT.socket.onmessage = function (e) {
                     appendToPanel(e.data);
