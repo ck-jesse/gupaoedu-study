@@ -40,6 +40,7 @@
         <module>study-job</module>
         <module>study-docker</module>
         <module>study-jmeter</module>
+        <module>study-spring-demo</module>
     </modules>
 
     <properties>
