@@ -1,7 +1,12 @@
-package com.coy.gupaoedu.study.ldap;
+package com.ldap_user.prj;
 
+import com.coy.gupaoedu.study.ldap.LdapUtil;
+import com.coy.gupaoedu.study.ldap.UserDTO;
+import com.ldap_user.prj.ldap.LdapService;
+import org.junit.Before;
 import org.junit.Test;
 
+import javax.naming.directory.SearchControls;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,24 +21,41 @@ import java.util.Map;
  */
 public class LdapTest {
 
+    // LDAP 测试环境的配置
+    public static String LDAP_ADDRESS = "ldap://172.18.66.85:389";
+    public static String LDAP_AUTH = "simple";
+    public static String LDAP_BASEDN = "cn=Manager,dc=ldapuser,dc=com";
+    public static String LDAP_PASSWORD = "ldap@123";
+
     private static final String BASE_DN = "ou=花生日记,dc=ldapuser,dc=com";
 
     LdapService ldapService = new LdapService();
+
+    @Before
+    public void before() {
+        // 初始化 LDAP 目录服务上下文
+        LdapUtil.initDirContext(LDAP_ADDRESS, LDAP_BASEDN, LDAP_AUTH, LDAP_PASSWORD);
+    }
 
     // 查询部门
     @Test
     public void searchDepartmentList() {
         String dn = "ou=技术中心," + BASE_DN;
-        System.out.println(ldapService.searchDepartmentList(dn));
-        System.out.println(ldapService.searchDepartmentList(dn, "基础架构组"));
+        System.out.println(ldapService.searchDepartmentList(dn, SearchControls.OBJECT_SCOPE));
+        System.out.println(ldapService.searchDepartmentList(dn, SearchControls.ONELEVEL_SCOPE));
+        System.out.println(ldapService.searchDepartmentList(dn, SearchControls.SUBTREE_SCOPE));
+        System.out.println(ldapService.searchDepartmentList(dn, SearchControls.SUBTREE_SCOPE, "基础架构组"));
     }
 
     // 查询员工
     @Test
     public void searchEmployeeList() {
         String dn = "ou=技术中心," + BASE_DN;
-        System.out.println(ldapService.searchEmployeeList(dn + BASE_DN));
-        System.out.println(ldapService.searchEmployeeListByJobNum(dn, "1234"));
+        // 查询不同范围的员工信息列表
+        // searchScope 搜索范围；0-仅搜索当前节点命名的对象；1-仅搜索当前节点的下一级命名对象；2-搜索当前节点为根的整个子树
+        System.out.println(ldapService.searchEmployeeList(dn, SearchControls.OBJECT_SCOPE));
+        System.out.println(ldapService.searchEmployeeList(dn, SearchControls.ONELEVEL_SCOPE));
+        System.out.println(ldapService.searchEmployeeList(dn, SearchControls.SUBTREE_SCOPE));
     }
 
     // 创建部门
@@ -97,7 +119,7 @@ public class LdapTest {
     @Test
     public void searchEmployee() {
         String dn = "ou=大数据组,ou=技术中心," + BASE_DN;
-        Map<String, Object> data = ldapService.searchEmployee(dn);
+        UserDTO data = ldapService.searchEmployee(dn);
         System.out.println(data);
     }
 
