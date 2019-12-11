@@ -41,6 +41,7 @@
         <module>study-docker</module>
         <module>study-jmeter</module>
         <module>study-spring-demo</module>
+        <module>study-ldap</module>
     </modules>
 
     <properties>
