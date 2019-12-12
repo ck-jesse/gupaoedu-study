@@ -1,8 +1,5 @@
-package com.ldap_user.prj;
+package com.coy.gupaoedu.study.ldap;
 
-import com.coy.gupaoedu.study.ldap.LdapUtil;
-import com.coy.gupaoedu.study.ldap.UserDTO;
-import com.ldap_user.prj.ldap.LdapService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,7 +21,7 @@ public class LdapTest {
     // LDAP 测试环境的配置
     public static String LDAP_ADDRESS = "ldap://172.18.66.85:389";
     public static String LDAP_AUTH = "simple";
-    public static String LDAP_BASEDN = "cn=Manager,dc=ldapuser,dc=com";
+    public static String LDAP_BINDDN = "cn=Manager,dc=ldapuser,dc=com";
     public static String LDAP_PASSWORD = "ldap@123";
 
     private static final String BASE_DN = "ou=花生日记,dc=ldapuser,dc=com";
@@ -34,7 +31,14 @@ public class LdapTest {
     @Before
     public void before() {
         // 初始化 LDAP 目录服务上下文
-        LdapUtil.initDirContext(LDAP_ADDRESS, LDAP_BASEDN, LDAP_AUTH, LDAP_PASSWORD);
+        LdapUtil.initDirContext(LDAP_ADDRESS, LDAP_BINDDN, LDAP_AUTH, LDAP_PASSWORD);
+    }
+
+    // 查询部门
+    @Test
+    public void searchDepartment() {
+        String dn = "ou=技术中心1," + BASE_DN;
+        System.out.println(ldapService.searchDepartment(dn));
     }
 
     // 查询部门

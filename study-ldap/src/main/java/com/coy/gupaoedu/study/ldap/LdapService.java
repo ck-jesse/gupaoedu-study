@@ -1,10 +1,8 @@
-package com.ldap_user.prj.ldap;
+package com.coy.gupaoedu.study.ldap;
 
-import com.coy.gupaoedu.study.ldap.DepartmentDTO;
-import com.coy.gupaoedu.study.ldap.LdapUtil;
-import com.coy.gupaoedu.study.ldap.UserDTO;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.naming.directory.SearchControls;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -137,6 +135,9 @@ public class LdapService {
      */
     public DepartmentDTO searchDepartment(String dn) {
         Map<String, Object> map = searchEntry(dn, DEPARTMENT_FIELDS);
+        if (null == map) {
+            return null;
+        }
         DepartmentDTO departmentDTO = convertToDepartmentDTO(map);
         return departmentDTO;
     }
@@ -167,8 +168,10 @@ public class LdapService {
         filter.append(")");
 
         List<Map<String, Object>> list = LdapUtil.searchEntryList(dn, filter.toString(), searchScope, DEPARTMENT_FIELDS);
-
         List<DepartmentDTO> deptList = new ArrayList<>();
+        if (null == list) {
+            return deptList;
+        }
         for (Map<String, Object> map : list) {
             deptList.add(convertToDepartmentDTO(map));
         }
@@ -185,6 +188,9 @@ public class LdapService {
      */
     public UserDTO searchEmployee(String dn) {
         Map<String, Object> map = searchEntry(dn, USER_FIELDS);
+        if (null == map) {
+            return null;
+        }
         UserDTO userDTO = convertToUserDTO(map);
         return userDTO;
     }
@@ -194,6 +200,9 @@ public class LdapService {
      *
      * @param dn          DN-识别名
      * @param searchScope 搜索范围；0-仅搜索当前节点命名的对象；1-仅搜索当前节点的下一级命名对象；2-搜索当前节点为根的整个子树
+     * @see SearchControls#OBJECT_SCOPE
+     * @see SearchControls#ONELEVEL_SCOPE
+     * @see SearchControls#SUBTREE_SCOPE
      */
     public List<UserDTO> searchEmployeeList(String dn, int searchScope) {
         return searchEmployeeList(dn, searchScope, null, null, null, null, null);
@@ -231,8 +240,10 @@ public class LdapService {
         }
         filter.append(")");
         List<Map<String, Object>> list = LdapUtil.searchEntryList(dn, filter.toString(), searchScope, USER_FIELDS);
-
         List<UserDTO> userDTOList = new ArrayList<>();
+        if (null == list) {
+            return userDTOList;
+        }
         for (Map<String, Object> map : list) {
             userDTOList.add(convertToUserDTO(map));
         }

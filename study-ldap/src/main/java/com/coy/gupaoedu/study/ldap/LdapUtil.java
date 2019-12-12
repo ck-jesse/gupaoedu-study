@@ -1,8 +1,11 @@
 package com.coy.gupaoedu.study.ldap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.Context;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -32,6 +35,8 @@ import java.util.Map;
  */
 public class LdapUtil {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapUtil.class);
+
     /**
      * 目录服务上下文
      */
@@ -45,7 +50,7 @@ public class LdapUtil {
             return context;
         }
         // 初始化默认配置的DirContext
-        return initDirContext(SettingsUtil.LDAP_ADDRESS, SettingsUtil.LDAP_BASEDN, SettingsUtil.LDAP_AUTH, SettingsUtil.LDAP_PASSWORD);
+        return initDirContext(SettingsUtil.LDAP_ADDRESS, SettingsUtil.LDAP_BINDDN, SettingsUtil.LDAP_AUTH, SettingsUtil.LDAP_PASSWORD);
     }
 
     /**
@@ -139,6 +144,9 @@ public class LdapUtil {
         }
         try {
             getDirContext().modifyAttributes(dnName, modificationItems);
+        } catch (NameNotFoundException e) {
+            LOGGER.warn("修改条目：DN不存在，dn={}", dnName);
+            return;
         } catch (NamingException e) {
             throw new RuntimeException("LDAP-修改条目属性异常", e);
         }
@@ -155,6 +163,9 @@ public class LdapUtil {
         }
         try {
             getDirContext().destroySubcontext(dnName);
+        } catch (NameNotFoundException e) {
+            LOGGER.warn("删除条目：DN不存在，dn={}", dnName);
+            return;
         } catch (NamingException e) {
             throw new RuntimeException("LDAP-删除条目异常", e);
         }
@@ -205,6 +216,9 @@ public class LdapUtil {
                 }
             }
             return data;
+        } catch (NameNotFoundException e) {
+            LOGGER.warn("查询条目：DN不存在，dn={}", dnName);
+            return null;
         } catch (NamingException e) {
             throw new RuntimeException("LDAP-查询条目异常", e);
         }
@@ -255,6 +269,9 @@ public class LdapUtil {
                 list.add(map);
             }
             return list;
+        } catch (NameNotFoundException e) {
+            LOGGER.warn("查询条目列表：DN不存在，dn={}", dnName);
+            return null;
         } catch (NamingException e) {
             throw new RuntimeException("LDAP-查询条目列表异常", e);
         }
