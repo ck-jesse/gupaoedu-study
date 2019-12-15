@@ -295,3 +295,9 @@
     5、并发收集器设置
     -XX:+CMSIncrementalMode :设置为增量模式。适用于单CPU情况。
     -XX:ParallelGCThreads=n :设置并发收集器年轻代收集方式为并行收集时，使 用的CPU数。并行收集线程数。
+
+
+### gcviewer - 本地查看GC日志文件工具
+> 方便查看 吞吐量 和 停顿时间
+> 
+> gceasy.io - 在线查看GC日志
