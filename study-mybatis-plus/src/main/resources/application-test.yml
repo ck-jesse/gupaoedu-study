@@ -19,5 +19,5 @@ spring:
           username: root
           password: cck123
           driver-class-name: com.mysql.cj.jdbc.Driver
-          #url: jdbc:mysql://47.107.181.147:3309/test_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
-          url: jdbc:mysql://my-mysql/test_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+          url: jdbc:mysql://47.107.181.147:3309/test_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+          #url: jdbc:mysql://my-mysql/test_db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true

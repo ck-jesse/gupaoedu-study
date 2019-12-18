@@ -1,9 +1,6 @@
 package com.study.jmeter.idgen;
 
-import com.hs.id.generator.proto.IdGeneratorProto;
 import com.study.jmeter.common.IdConsts;
-import com.study.jmeter.common.RestTemplateInstance;
-import com.study.jmeter.common.UrlUtil;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -35,7 +32,7 @@ public class GenOrderNoTest extends AbstractJavaSamplerClient {
     @Override
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         SampleResult result = new SampleResult();
-        // 开始计时
+        /*// 开始计时
         result.sampleStart();
         String url = UrlUtil.buildURL(ip, port, "/idgen/genOrderNo");
         IdGeneratorProto.GenDistributeIdResponse response = RestTemplateInstance.protoRestTemplate.postForObject(url, null,
@@ -46,7 +43,7 @@ public class GenOrderNoTest extends AbstractJavaSamplerClient {
         result.sampleEnd();
         result.setSuccessful(true);
         result.setResponseData(json, "utf-8");
-        result.setDataType(SampleResult.TEXT);
+        result.setDataType(SampleResult.TEXT);*/
         return result;
     }
 

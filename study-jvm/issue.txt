@@ -1,3 +1,9 @@
-类卸载？
+类的加载和卸载？
 外部jar包的加载和卸载怎么处理？
 热部署的常见原理？
+
+# 设置为G1收集器，并设置GC最大停顿时间为15ms
+-XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+UseG1GC -XX:MaxGCPauseMillis=15 -Xloggc:g1_gc.log
+
+# 设置为CMS收集器，
+-XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+UseConcMarkSweepGC  -Xloggc:cms_gc.log
