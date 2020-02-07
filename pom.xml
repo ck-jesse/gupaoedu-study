@@ -42,6 +42,7 @@
         <module>study-jmeter</module>
         <module>study-spring-demo</module>
         <module>study-ldap</module>
+        <module>study-test</module>
     </modules>
 
     <properties>
