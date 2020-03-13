@@ -50,6 +50,7 @@ public class CustomAsyncConfigurer implements AsyncConfigurer {
         taskExecutor.setQueueCapacity(queueCapacity);
         taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
         taskExecutor.setThreadFactory(new NamedThreadFactory("checkout"));
+        taskExecutor.setTaskDecorator(new MDCTaskDecorator());
         taskExecutor.initialize();
         return taskExecutor;
     }
