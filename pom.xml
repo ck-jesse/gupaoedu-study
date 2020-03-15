@@ -43,6 +43,7 @@
         <module>study-spring-demo</module>
         <module>study-ldap</module>
         <module>study-test</module>
+        <module>study-demo</module>
     </modules>
 
     <properties>
