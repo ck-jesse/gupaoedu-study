@@ -14,14 +14,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author chenck
  * @date 2019/10/16 11:02
  */
-public class CacheTest {
+public class ExpireAfterWriteTest {
 
     // 这是一个本地缓存，guava提供的cache是一个简洁、高效，易于维护的。
     // 为什么这么说呢？因为并没有一个单独的线程用于刷新 OR 清理cache，对于cache的操作，都是通过访问/读写带来的，也就是说在读写中完成缓存的刷新操作！
     private static LoadingCache<Integer, AtomicInteger> cache = CacheBuilder.newBuilder()
             .maximumSize(10)
-//            .expireAfterWrite(2, TimeUnit.SECONDS)// 在key写入后5秒内,如果该key没有再写入数据则过期
-            .refreshAfterWrite(3, TimeUnit.SECONDS)
+            .expireAfterWrite(3, TimeUnit.SECONDS)// 在key写入后3秒内,如果该key没有再写入数据则过期
             .build(new CacheLoader<Integer, AtomicInteger>() {
                 @Override
                 public AtomicInteger load(Integer key) throws Exception {
@@ -75,7 +74,7 @@ public class CacheTest {
         // 打印数据
         Thread printThread = new Thread(() -> {
             try {
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 20; i++) {
                     System.out.println(i + " print before" + cache.asMap());
                     Thread.sleep(2000);
                     System.out.println(i + " print after" + cache.asMap());

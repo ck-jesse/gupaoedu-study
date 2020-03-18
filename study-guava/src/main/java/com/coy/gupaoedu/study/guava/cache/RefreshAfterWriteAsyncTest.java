@@ -1,6 +1,5 @@
 package com.coy.gupaoedu.study.guava.cache;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -11,24 +10,25 @@ import org.junit.Test;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * refreshAfterWrite可以做到：只阻塞加载数据的线程，其余线程返回旧数据。
+ * refreshAfterWrite 异步刷新缓存：加载数据的线程通过后台线程池异步加载，所以所有的线程都返回旧数据。
  *
  * @author chenck
  * @date 2019/10/16 18:10
  */
-public class RefreshAfterWriteTest {
+public class RefreshAfterWriteAsyncTest {
+
+    public static final String KEY = "name";
 
     // 模拟一个需要耗时2s的数据库查询任务
     private static Callable<String> callable = new Callable<String>() {
         @Override
         public String call() throws Exception {
             System.out.println(Thread.currentThread().getName() + " begin to mock query db...");
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             System.out.println(Thread.currentThread().getName() + " success to mock query db...");
             return UUID.randomUUID().toString();
         }
@@ -40,7 +40,8 @@ public class RefreshAfterWriteTest {
 
     // 1s后刷新缓存
     // 只有真正获取缓存的线程才会进入CacheLoader中
-    private static LoadingCache<String, String> cache = CacheBuilder.newBuilder().refreshAfterWrite(1, TimeUnit.SECONDS)
+    private static LoadingCache<String, String> cache = CacheBuilder.newBuilder()
+            .refreshAfterWrite(1, TimeUnit.SECONDS)
             .build(new CacheLoader<String, String>() {
                 /**
                  * 该方法在
@@ -62,33 +63,11 @@ public class RefreshAfterWriteTest {
                     // return Futures.immediateFuture(load(key));
 
                     // 自定义扩展实现：将 load()中的逻辑抽取出来 交给线程池来异步执行
-                    System.out.println(Thread.currentThread().getName() + " ......后台线程池异步刷新:" + key);
+                    System.out.println(Thread.currentThread().getName() + " 后台线程池异步刷新缓存:" + key);
                     return executorService.submit(callable);
                 }
             });
 
-    private static CountDownLatch latch = new CountDownLatch(1);
-
-    private static void startThread(int id) {
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    System.out.println(Thread.currentThread().getName() + " begin");
-                    latch.await();
-                    Stopwatch watch = Stopwatch.createStarted();
-                    System.out.println(Thread.currentThread().getName() + " value = " + cache.get("name"));
-                    watch.stop();
-                    System.out.println(Thread.currentThread().getName() + " finish, cost time=" + watch.elapsed(TimeUnit.SECONDS) + "s");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        t.setName("Thread-" + id);
-        t.start();
-    }
 
     /**
      * 测试cache中有数据的情况 refreshAfterWrite
@@ -104,14 +83,18 @@ public class RefreshAfterWriteTest {
     public void refreshAfterWriteTest() throws Exception {
 
         // 手动添加一条缓存数据,睡眠1.5s让其过期
-        cache.put("name", "coy");
+        cache.put(KEY, "coy");
         Thread.sleep(1500);
 
         for (int i = 0; i < 8; i++) {
-            startThread(i);
+            GetThread.startThread(i, KEY, cache);
         }
-        // 让线程运行
-        latch.countDown();
+        // 让多个线程同时运行
+        GetThread.latch.countDown();
+
+        // 模拟取最新的最新的值
+        Thread.sleep(1500);
+        System.out.println(Thread.currentThread().getName() + " value = " + cache.get(KEY));
 
         // hold住主线程
         while (true) {
@@ -125,12 +108,51 @@ public class RefreshAfterWriteTest {
      */
     @Test
     public void notDataOfCache() throws Exception {
-
+        System.out.println("cache中无数据：导致一个线程去加载数据的时候，别的线程都阻塞了(因为没有旧值可以返回)");
         for (int i = 0; i < 8; i++) {
-            startThread(i);
+            GetThread.startThread(i, KEY, cache);
         }
-        // 让线程运行
-        latch.countDown();
+        // 让多个线程同时运行
+        GetThread.latch.countDown();
+
+        // hold住主线程
+        while (true) {
+        }
+    }
+
+    @Test
+    public void test() throws InterruptedException {
+        cache.put(KEY, "coy");
+
+        // 单独启动一个线程打印信息
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        System.out.println(Thread.currentThread().getName() + "打印缓存:" + cache.asMap());
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+        // 开启一个获取缓存的线程，模拟获取新的值
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        System.out.println(Thread.currentThread().getName() + "获取缓存:" + cache.get(KEY));
+                        Thread.sleep(1500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
 
         // hold住主线程
         while (true) {
