@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.guava;
+package com.coy.gupaoedu.study.guava.collect;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Table代表一个特殊的映射，其中两个键可以在组合的方式被指定为单个值。它类似于创建映射的映射。
+ *
  * @author chenck
  * @date 2019/10/17 9:29
  */
