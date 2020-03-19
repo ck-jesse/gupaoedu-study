@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * 定时回收：expireAfterAccess 和 expireAfterWrite
+ *
  * @author chenck
  * @date 2019/10/16 11:02
  */
@@ -20,7 +22,8 @@ public class ExpireAfterWriteTest {
     // 为什么这么说呢？因为并没有一个单独的线程用于刷新 OR 清理cache，对于cache的操作，都是通过访问/读写带来的，也就是说在读写中完成缓存的刷新操作！
     private static LoadingCache<Integer, AtomicInteger> cache = CacheBuilder.newBuilder()
             .maximumSize(10)
-            .expireAfterWrite(3, TimeUnit.SECONDS)// 在key写入后3秒内,如果该key没有再写入数据则过期
+            //.expireAfterAccess(5, TimeUnit.SECONDS)// 缓存项在给定时间内没有被读/写访问,则回收
+            .expireAfterWrite(3, TimeUnit.SECONDS)// 缓存项在给定时间内没有被写访问(创建或覆盖),则回收
             .build(new CacheLoader<Integer, AtomicInteger>() {
                 @Override
                 public AtomicInteger load(Integer key) throws Exception {

@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 排序
+ *
  * @author chenck
  * @date 2020/3/18 20:08
  */
@@ -24,7 +26,7 @@ public class OrderingTest {
         numbers.add(new Integer(43));
         numbers.add(new Integer(16));
 
-        // 返回使用值的自然顺序排序序列化。
+        // 对可排序类型做自然排序，如数字按大小，日期按先后排序
         Ordering ordering = Ordering.natural();
         System.out.println("Input List: ");
         System.out.println(numbers);
@@ -46,8 +48,15 @@ public class OrderingTest {
         System.out.println("Null added to Sorted List: ");
         System.out.println(numbers);
 
+        // 使用当前排序器，但额外把null值排到最前面。
         Collections.sort(numbers, ordering.nullsFirst());
         System.out.println("Null first Sorted List: ");
+        System.out.println(numbers);
+        System.out.println("======================");
+
+        // 使用当前排序器，但额外把null值排到最后面。
+        Collections.sort(numbers, ordering.nullsLast());
+        System.out.println("Null last Sorted List: ");
         System.out.println(numbers);
         System.out.println("======================");
 

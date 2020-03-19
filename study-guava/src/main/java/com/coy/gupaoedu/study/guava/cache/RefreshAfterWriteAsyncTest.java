@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * refreshAfterWrite 异步刷新缓存：加载数据的线程通过后台线程池异步加载，所以所有的线程都返回旧数据。
  *
+ * 通过定时刷新可以让缓存项保持可用，但请注意：缓存项只有在被检索时才会真正刷新（如果CacheLoader.refresh实现为异步，那么检索不会被刷新拖慢）。
+ *
  * @author chenck
  * @date 2019/10/16 18:10
  */
