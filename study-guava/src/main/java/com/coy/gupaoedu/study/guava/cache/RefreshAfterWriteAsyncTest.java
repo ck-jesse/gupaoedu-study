@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * refreshAfterWrite 异步刷新缓存：加载数据的线程通过后台线程池异步加载，所以所有的线程都返回旧数据。
- *
+ * <p>
  * 通过定时刷新可以让缓存项保持可用，但请注意：缓存项只有在被检索时才会真正刷新（如果CacheLoader.refresh实现为异步，那么检索不会被刷新拖慢）。
  *
  * @author chenck
@@ -46,7 +46,7 @@ public class RefreshAfterWriteAsyncTest {
             .refreshAfterWrite(1, TimeUnit.SECONDS)
             .build(new CacheLoader<String, String>() {
                 /**
-                 * 该方法在
+                 *
                  */
                 @Override
                 public String load(String key) throws Exception {
@@ -107,6 +107,13 @@ public class RefreshAfterWriteAsyncTest {
      * 测试cache中无数据的情况
      * 结果：由于缓存没有数据，导致一个线程去加载数据的时候，别的线程都阻塞了(因为没有旧值可以返回)
      * 所以一般系统启动的时候，我们需要将数据预先加载到缓存，不然就会出现这种情况。
+     * <p>
+     * 问题：为什么重写了CacheLoader#reload方法（基于线程池异步加载），在没有数据时还是只有一个线程去加载数据，而阻塞其他线程呢？
+     * 分析：
+     * 通过分析源码发现，关键点在方法LocalCache.LoadingValueReference#loadFuture(Object, CacheLoader)中，具体处理如下：
+     * 先判断oldValue是否为null，为null时，则调用CacheLoader#load方法；不为null，则调用CacheLoader#reload方法。
+     * 因为上面load方法是同步阻塞加载数据的，而reload方法是通过线程池异步加载数据的，
+     * 综上，得出缓存中没有数据时，走load方法是同步阻塞加载数据的，而缓存中有数据时，走reload方法是异步加载数据的。
      */
     @Test
     public void notDataOfCache() throws Exception {
