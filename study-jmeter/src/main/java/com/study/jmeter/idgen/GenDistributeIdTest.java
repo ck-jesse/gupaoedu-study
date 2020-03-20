@@ -8,6 +8,7 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.springframework.util.StringUtils;
 
 /**
  * @author chenck
@@ -19,6 +20,7 @@ public class GenDistributeIdTest extends AbstractJavaSamplerClient {
     private Integer port;
     // 0-默认，1-USER_ID，2-ORDER_NO，3-COUPON_NO
     private int bizType;
+    private String bizTypeStr;
 
     @Override
     public Arguments getDefaultParameters() {
@@ -26,6 +28,7 @@ public class GenDistributeIdTest extends AbstractJavaSamplerClient {
         params.addArgument("ip", IdConsts.DEFAULT_IP);
         params.addArgument("port", IdConsts.DEFAULT_PORT);
         params.addArgument("bizType", "0");
+        params.addArgument("bizTypeStr", "");
         return params;
     }
 
@@ -34,6 +37,7 @@ public class GenDistributeIdTest extends AbstractJavaSamplerClient {
         ip = arg0.getParameter("ip");
         port = arg0.getIntParameter("port");
         bizType = arg0.getIntParameter("bizType");
+        bizTypeStr = arg0.getParameter("bizTypeStr");
     }
 
     @Override
@@ -44,6 +48,9 @@ public class GenDistributeIdTest extends AbstractJavaSamplerClient {
         String url = UrlUtil.buildURL(ip, port, "/idgen/genDistributeId");
         IdGeneratorProto.GenDistributeIdRequest.Builder builder = IdGeneratorProto.GenDistributeIdRequest.newBuilder();
         builder.setBizType(IdGeneratorProto.BizType.forNumber(bizType));
+        if (!StringUtils.isEmpty(bizTypeStr)) {
+            builder.setBizTypeStr(bizTypeStr);
+        }
         IdGeneratorProto.GenDistributeIdResponse response = RestTemplateInstance.protoRestTemplate.postForObject(url, builder.build(),
                 IdGeneratorProto.GenDistributeIdResponse.class);
 
