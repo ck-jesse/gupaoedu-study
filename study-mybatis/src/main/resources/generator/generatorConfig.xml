@@ -36,8 +36,8 @@
         </commentGenerator>
 
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://127.0.0.1:3306/test?useUnicode=true"
-                        userId="root" password="root">
+                        connectionURL="jdbc:mysql://rm-wz9002yygaor0511a.mysql.rds.aliyuncs.com:3306/hs_aftersale?useUnicode=true"
+                        userId="baseower" password="lktTI67sNB@F7i2f">
             <!-- 获取表的注释（针对mysql数据库） -->
             <property name="useInformationSchema" value="true"></property>
         </jdbcConnection>
@@ -80,7 +80,7 @@
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>-->
 
-        <table tableName="blog" domainObjectName="Blog"
+        <table tableName="t_batch_refund_apply_order" domainObjectName="BatchRefundApplyOrder"
                enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false"
                enableSelectByExample="false" selectByExampleQueryId="false">
             <!--  true 表示不转驼峰, false 表示转为驼峰(默认)  -->

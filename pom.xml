@@ -44,6 +44,7 @@
         <module>study-ldap</module>
         <module>study-test</module>
         <module>study-demo</module>
+        <module>study-code-generator</module>
     </modules>
 
     <properties>
@@ -53,6 +54,7 @@
         <fastjson.version>1.2.67</fastjson.version>
         <cglib.version>3.2.5</cglib.version>
         <lombok.version>1.16.10</lombok.version>
+        <guava.version>23.0</guava.version>
         <commons-logging.version>1.2</commons-logging.version>
         <slf4j.version>1.7.25</slf4j.version>
         <mybatis.version>3.4.6</mybatis.version>
@@ -114,6 +116,13 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+            </dependency>
+
+            <!-- guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
 
             <dependency>

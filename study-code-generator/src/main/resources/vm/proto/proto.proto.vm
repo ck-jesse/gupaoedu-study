@@ -1,0 +1,84 @@
+syntax = "proto3";
+/**
+${functionName}相关
+*/
+package ${packageName}.proto;
+option java_outer_classname = "${ClassName}Proto";
+
+// 响应编码
+enum ResponseCode {
+    RESP_CODE_SUCCESS = 0; //成功
+    RESP_CODE_FAILED = 1; //失败
+}
+// 通用的Response
+message BaseResponse {
+    ResponseCode code = 1; //响应码
+    string msg = 2; //响应描述
+    string errMsg = 3; //响应错误描述
+}
+
+// 查询${functionName}列表
+message ${ClassName}QueryRequest {
+    uint32 pageNum = 1; // 当前页码，从1开始
+    uint32 pageSize = 2; // 每页大小，默认10，最大1000
+#set($num=2)
+#foreach($column in $columns)
+#if($column.query)
+    #set($num=$num + 1)
+    $column.protoType $column.javaField = $num; // $column.columnComment
+#end
+#end
+}
+
+// 查询${functionName}列表
+message ${ClassName}QueryResponse {
+    ResponseCode code = 1; // 响应码
+    string msg = 2; // 响应描述
+    string errMsg = 3; // 响应错误描述
+    uint32 pageNum = 4; // 当前页码
+    uint32 pageSize = 5; // 每页大小
+    uint32 totalPage = 6; // 总页数-该字段暂不设置
+    uint64 totalCount = 7; // 总记录数
+    repeated ${ClassName}VO list = 8; // ${functionName}列表
+}
+
+// ${functionName}VO
+message ${ClassName}VO {
+#foreach ($column in $columns)
+    $column.protoType $column.javaField = $velocityCount; // $column.columnComment
+#end
+}
+
+// 新增${functionName}
+message ${ClassName}AddRequest {
+    string operatorId = 1; //操作人id
+    string operatorName = 2; //操作人姓名
+#foreach ($column in $columns)
+    #set($num=$velocityCount + 2)
+    $column.protoType $column.javaField = $num; // $column.columnComment
+#end
+}
+
+// 新增${functionName}
+message ${ClassName}AddResponse {
+    ResponseCode code = 1; //响应码
+    string msg = 2; //响应描述
+    string errMsg = 3; //响应错误描述
+    $pkColumn.protoType $pkColumn.javaField = 4; //${functionName}ID
+}
+
+// 修改${functionName}
+message ${ClassName}UpdateRequest {
+    string operatorId = 1; //操作人id
+    string operatorName = 2; //操作人姓名
+#foreach ($column in $columns)
+    #set($num=$velocityCount + 2)
+    $column.protoType $column.javaField = $num; // $column.columnComment
+#end
+}
+
+// 删除${functionName}
+message ${ClassName}DelRequest {
+    $pkColumn.protoType $pkColumn.javaField = 1; //${functionName}ID
+}
+
