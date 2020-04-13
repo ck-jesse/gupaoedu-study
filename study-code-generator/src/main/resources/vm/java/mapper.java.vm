@@ -12,62 +12,6 @@ import ${packageName}.dao.entity.${ClassName};
 public interface ${ClassName}Mapper {
 
     /**
-     * 插入
-     *
-     * @param record ${functionName}
-     * @gen ${datetime}
-     */
-    int insert(${ClassName} record);
-
-    /**
-     * 批量插入
-     *
-     * @param list ${functionName}集合
-     * @gen ${datetime}
-     */
-    int batchInsert(List<${ClassName}> list);
-
-    /**
-     * 选择性插入
-     *
-     * @param record ${functionName}
-     * @gen ${datetime}
-     */
-    int insertSelective(${ClassName} record);
-
-    /**
-     * 删除
-     *
-     * @param ${pkColumn.javaField} ${functionName}ID
-     * @gen ${datetime}
-     */
-    int deleteByPrimaryKey(${pkColumn.javaType} ${pkColumn.javaField});
-
-    /**
-     * 批量删除
-     *
-     * @param ${pkColumn.javaField}s 需要删除的数据ID
-     * @gen ${datetime}
-     */
-    public int batchDeleteByPrimaryKey(${pkColumn.javaType}[] ${pkColumn.javaField}s);
-
-    /**
-     * 修改
-     *
-     * @param record ${functionName}
-     * @gen ${datetime}
-     */
-    int updateByPrimaryKey(${ClassName} record);
-
-    /**
-     * 选择性修改
-     *
-     * @param record ${functionName}
-     * @gen ${datetime}
-     */
-    int updateByPrimaryKeySelective(${ClassName} record);
-
-    /**
      * 根据主键查询
      *
      * @param ${pkColumn.javaField} ${functionName}ID
@@ -82,5 +26,46 @@ public interface ${ClassName}Mapper {
      * @gen ${datetime}
      */
     List<${ClassName}> selectList(${ClassName} record);
+
+    /**
+     * 插入
+     *
+     * @param record ${functionName}
+     * @gen ${datetime}
+     */
+    int insertSelective(${ClassName} record);
+
+    /**
+     * 批量插入
+     *
+     * @param list ${functionName}集合
+     * @gen ${datetime}
+     */
+    int batchInsertSelective(List<${ClassName}> list);
+
+    /**
+     * 修改
+     *
+     * @param record ${functionName}
+     * @gen ${datetime}
+     */
+    int updateByPrimaryKeySelective(${ClassName} record);
+
+    /**
+     * 删除
+     *
+     * @param ${pkColumn.javaField} 主键
+     * @gen ${datetime}
+     */
+    int deleteByPrimaryKey(${pkColumn.javaType} ${pkColumn.javaField});
+
+    /**
+     * 批量删除
+     *
+     * @param ${pkColumn.javaField}List 主键列表
+     * @gen ${datetime}
+     */
+    int batchDeleteByPrimaryKey(List<${pkColumn.javaType}> ${pkColumn.javaField}List);
+
 
 }

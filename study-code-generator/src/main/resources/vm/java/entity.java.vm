@@ -1,0 +1,57 @@
+package ${packageName}.dao.entity;
+import lombok.Data;
+
+
+/**
+ * ${functionName} ${tableName}
+ *
+ * @author ${author}
+ * @gen ${datetime}
+ */
+@Data
+public class ${ClassName} implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+##单行注释
+##if(!$table.isSuperColumn($column.javaField))
+    /**
+     * $column.columnComment
+     */
+    private $column.javaType $column.javaField;
+##end
+#end
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(" [");
+        sb.append("Hash = ").append(hashCode());
+        sb.append(", serialVersionUID=").append(serialVersionUID);
+#foreach ($column in $columns)
+        sb.append(", $column.javaField=").append($column.javaField);
+#end
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public void dealNullField() {
+#foreach ($column in $columns)
+        if (null == $column.javaField) {
+#if($column.javaType == "String")
+            $column.javaField = "";
+#elseif($column.javaType == "Long")
+            $column.javaField = 0L;
+#elseif($column.javaType == "Integer")
+            $column.javaField = 0;
+#elseif($column.javaType == "Double")
+            $column.javaField = 0;
+#elseif($column.javaType == "BigDecimal")
+            $column.javaField = BigDecimal.ZERO;
+#end
+        }
+#end
+    }
+}
