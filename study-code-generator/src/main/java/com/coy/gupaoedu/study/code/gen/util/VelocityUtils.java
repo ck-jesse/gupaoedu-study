@@ -86,11 +86,11 @@ public class VelocityUtils {
     public static List<String> getTemplateList(String tplCategory) {
         List<String> templates = new ArrayList<String>();
         templates.add("vm/proto/proto.proto.vm");
-        templates.add("vm/java/entity.java.vm");
-        templates.add("vm/java/mapper.java.vm");
-        templates.add("vm/xml/mapper.xml.vm");
-//        templates.add("vm/java/service.java.vm");
-//        templates.add("vm/java/serviceImpl.java.vm");
+//        templates.add("vm/java/entity.java.vm");
+//        templates.add("vm/java/mapper.java.vm");
+//        templates.add("vm/xml/mapper.xml.vm");
+        templates.add("vm/java/service.java.vm");
+        templates.add("vm/java/serviceImpl.java.vm");
 //        templates.add("vm/java/controller.java.vm");
         return templates;
     }

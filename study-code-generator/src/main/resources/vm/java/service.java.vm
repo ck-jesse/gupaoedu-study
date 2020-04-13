@@ -1,61 +1,64 @@
 package ${packageName}.service;
 
 import java.util.List;
-import ${packageName}.domain.${ClassName};
+import com.hs.platform.common.dto.ServiceResult;
+import com.hs.platform.common.dto.PageResult;
+import ${packageName}.dao.entity.${ClassName};
+import ${packageName}.proto.${ClassName}Proto;
 
 /**
- * ${functionName}Service接口
- * 
+ * ${functionName}Mapper接口
+ *
  * @author ${author}
- * @date ${datetime}
+ * @gen ${datetime}
  */
-public interface I${ClassName}Service 
-{
+public interface ${ClassName}Service  {
+
     /**
      * 查询${functionName}
-     * 
-     * @param ${pkColumn.javaField} ${functionName}ID
-     * @return ${functionName}
+     *
+     * @gen ${datetime}
      */
-    public ${ClassName} select${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField});
+    public ${ClassName}Proto.${ClassName}QueryByIdResponse query${ClassName}ById(${ClassName}Proto.${ClassName}QueryByIdRequest request);
 
     /**
      * 查询${functionName}列表
-     * 
+     *
      * @param ${className} ${functionName}
-     * @return ${functionName}集合
+     * @gen ${datetime}
      */
-    public List<${ClassName}> select${ClassName}List(${ClassName} ${className});
+    public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(${ClassName}Proto.${ClassName}QueryListRequest request);
 
     /**
      * 新增${functionName}
-     * 
+     *
      * @param ${className} ${functionName}
-     * @return 结果
+     * @gen ${datetime}
      */
-    public int insert${ClassName}(${ClassName} ${className});
+    public ${ClassName}Proto.${ClassName}AddResponse add{ClassName}(${ClassName}Proto.${ClassName}AddRequest request);
 
     /**
      * 修改${functionName}
-     * 
+     *
      * @param ${className} ${functionName}
-     * @return 结果
+     * @gen ${datetime}
      */
-    public int update${ClassName}(${ClassName} ${className});
+    public ${ClassName}Proto.BaseResponse update${ClassName}(${ClassName}Proto.${ClassName}UpdateRequest request);
+
+    /**
+     * 删除${functionName}
+     *
+     * @param ${pkColumn.javaField} ${functionName}ID
+     * @gen ${datetime}
+     */
+    public ${ClassName}Proto.BaseResponse deleteById(${ClassName}Proto.${ClassName}DelRequest request);
 
     /**
      * 批量删除${functionName}
-     * 
-     * @param ${pkColumn.javaField}s 需要删除的${functionName}ID
-     * @return 结果
+     *
+     * @param ${pkColumn.javaField}List 主键列表
+     * @gen ${datetime}
      */
-    public int delete${ClassName}ByIds(${pkColumn.javaType}[] ${pkColumn.javaField}s);
+    public ${ClassName}Proto.BaseResponse deleteByIdList(${ClassName}Proto.${ClassName}DelRequest request);
 
-    /**
-     * 删除${functionName}信息
-     * 
-     * @param ${pkColumn.javaField} ${functionName}ID
-     * @return 结果
-     */
-    public int delete${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField});
 }

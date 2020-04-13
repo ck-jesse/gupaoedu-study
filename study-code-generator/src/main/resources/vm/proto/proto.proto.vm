@@ -17,8 +17,21 @@ message BaseResponse {
     string errMsg = 3; //响应错误描述
 }
 
+// 查询${functionName}
+message ${ClassName}QueryByIdRequest {
+    $pkColumn.javaType $pkColumn.javaField = 1; // $column.columnComment
+}
+
+// 查询${functionName}
+message ${ClassName}QueryByIdResponse {
+    ResponseCode code = 1; // 响应码
+    string msg = 2; // 响应描述
+    string errMsg = 3; // 响应错误描述
+    ${ClassName}VO data = 4; // ${functionName}
+}
+
 // 查询${functionName}列表
-message ${ClassName}QueryRequest {
+message ${ClassName}QueryListRequest {
     uint32 pageNum = 1; // 当前页码，从1开始
     uint32 pageSize = 2; // 每页大小，默认10，最大1000
 #set($num=2)
@@ -31,7 +44,7 @@ message ${ClassName}QueryRequest {
 }
 
 // 查询${functionName}列表
-message ${ClassName}QueryResponse {
+message ${ClassName}QueryListResponse {
     ResponseCode code = 1; // 响应码
     string msg = 2; // 响应描述
     string errMsg = 3; // 响应错误描述
@@ -80,5 +93,6 @@ message ${ClassName}UpdateRequest {
 // 删除${functionName}
 message ${ClassName}DelRequest {
     $pkColumn.protoType $pkColumn.javaField = 1; //${functionName}ID
+    repeated $pkColumn.protoType ${pkColumn.javaField}List = 2; //${functionName}ID列表
 }
 

@@ -1,109 +1,199 @@
 package ${packageName}.service.impl;
 
-import java.util.List;
-#foreach ($column in $columns)
-#if($column.javaField == 'createTime' || $column.javaField == 'updateTime')
-import com.ruoyi.common.utils.DateUtils;
-#break
-#end
-#end
+import ${packageName}.dao.entity.${ClassName};
+import ${packageName}.dao.mapper.${ClassName}Mapper;
+import ${packageName}.service.${ClassName}Service;
+import ${packageName}.proto.${ClassName}Proto;
+import ${packageName}.util.PageUtil;
+import ${packageName}.util.BigDecimals;
+
+import lombok.extern.slf4j.Slf4j;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.hs.platform.common.exception.BizException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ${packageName}.mapper.${ClassName}Mapper;
-import ${packageName}.domain.${ClassName};
-import ${packageName}.service.I${ClassName}Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * ${functionName}Service业务层处理
- * 
+ *
  * @author ${author}
- * @date ${datetime}
+ * @gen ${datetime}
  */
+@Slf4j
 @Service
-public class ${ClassName}ServiceImpl implements I${ClassName}Service 
-{
+public class ${ClassName}ServiceImpl implements ${ClassName}Service {
+
     @Autowired
-    private ${ClassName}Mapper ${className}Mapper;
+    ${ClassName}Mapper ${className}Mapper;
 
-    /**
-     * 查询${functionName}
-     * 
-     * @param ${pkColumn.javaField} ${functionName}ID
-     * @return ${functionName}
-     */
     @Override
-    public ${ClassName} select${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField})
-    {
-        return ${className}Mapper.select${ClassName}ById(${pkColumn.javaField});
+    public ${ClassName}Proto.${ClassName}QueryResponse query${ClassName}ById(${ClassName}Proto.${ClassName}QueryRequest request) {
+
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        if (null == request.get${AttrName}()) {
+            throw new BizException("${functionName}ID不能为空");
+        }
+        ${ClassName} record = ${className}Mapper.selectByPrimaryKey(request.get${AttrName}());
+
+        ${ClassName}Proto.${ClassName}QueryResponse.Builder response = ${ClassName}Proto.${ClassName}QueryResponse.newBuilder();
+        if (null != record) {
+            // 将为null的字段处理为默认值
+            record.dealNullField();
+
+            ${ClassName}Proto.${ClassName}VO.Builder vo = ${ClassName}Proto.${ClassName}VO.newBuilder();
+            BeanUtils.copyProperties(record, vo);
+            response.setData(vo);
+        }
+        response.setCode(BatchRefundApplyProto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setMsg("ok");
+        return response.build();
     }
 
-    /**
-     * 查询${functionName}列表
-     * 
-     * @param ${className} ${functionName}
-     * @return ${functionName}
-     */
     @Override
-    public List<${ClassName}> select${ClassName}List(${ClassName} ${className})
-    {
-        return ${className}Mapper.select${ClassName}List(${className});
+    public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(${ClassName}Proto.${ClassName}QueryListRequest request) {
+
+        ${ClassName} record = new ${ClassName}();
+#foreach($column in $columns)
+#if($column.query)
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        record.set$AttrName(request.get$AttrName());
+#end
+#end
+
+        // 分页
+        Page page = PageHelper.startPage(PageUtil.getPageNum(request.getPageNum()),
+        PageUtil.getPageSize(request.getPageSize()));
+        List<${ClassName}> list = ${className}Mapper.selectList(record);
+
+        ${ClassName}Proto.${ClassName}QueryListResponse.Builder response = ${ClassName}Proto.${ClassName}QueryListResponse.newBuilder();
+        ${ClassName}Proto.${ClassName}VO.Builder vo = null;
+        for (${ClassName} record : list) {
+            // 将为null的字段处理为默认值
+            record.dealNullField();
+
+            vo = ${ClassName}Proto.${ClassName}VO.newBuilder();
+            BeanUtils.copyProperties(record, vo);
+            response.addList(vo);
+        }
+        response.setTotalCount(page.getTotal());
+        response.setTotalPage(page.getPages());
+        response.setPageSize(page.getPageSize());
+        response.setPageNum(page.getPageNum());
+        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setMsg("ok");
+        return response.build();
     }
 
-    /**
-     * 新增${functionName}
-     * 
-     * @param ${className} ${functionName}
-     * @return 结果
-     */
     @Override
-    public int insert${ClassName}(${ClassName} ${className})
-    {
-#foreach ($column in $columns)
+    public ${ClassName}Proto.${ClassName}AddResponse add{ClassName}(${ClassName}Proto.${ClassName}AddRequest request) {
+
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        ${ClassName} record = new ${ClassName}();
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
 #if($column.javaField == 'createTime')
-        ${className}.setCreateTime(DateUtils.getNowDate());
+        record.setCreateTime(new Date());
+#elseif($column.javaField == 'updateTime')
+        record.setUpdateTime(new Date());
+#else
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        record.set$AttrName(request.get$AttrName());
 #end
 #end
-        return ${className}Mapper.insert${ClassName}(${className});
+#end
+
+        int rslt = ${className}Mapper.insertSelective(record);
+        if (rslt != 1) {
+            throw new BizException("新增${functionName}失败，受影响行数为" + rslt);
+        }
+
+        ${ClassName}Proto.${ClassName}AddResponse.Builder response = ${ClassName}Proto.${ClassName}AddResponse.newBuilder();
+        response.set$AttrName(record.get$AttrName();
+        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setMsg("ok");
+        return response.build();
     }
 
-    /**
-     * 修改${functionName}
-     * 
-     * @param ${className} ${functionName}
-     * @return 结果
-     */
     @Override
-    public int update${ClassName}(${ClassName} ${className})
-    {
-#foreach ($column in $columns)
-#if($column.javaField == 'updateTime')
-        ${className}.setUpdateTime(DateUtils.getNowDate());
+    public ${ClassName}Proto.BaseResponse update${ClassName}(${ClassName}Proto.${ClassName}UpdateRequest request) {
+
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        if (null == request.get${AttrName}()) {
+            throw new BizException("${functionName}ID不能为空");
+        }
+
+        ${ClassName} recordTemp = ${className}Mapper.selectByPrimaryKey(request.get${AttrName}());
+        if (null == recordTemp) {
+            throw new BizException("${functionName}信息不存在");
+        }
+
+        ${ClassName} record = new ${ClassName}();
+#foreach($column in $columns)
+#if($column.javaField == 'createTime')
+        record.setCreateTime(new Date());
+#elseif($column.javaField == 'updateTime')
+        record.setUpdateTime(new Date());
+#else
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+        record.set$AttrName(request.get$AttrName());
 #end
 #end
-        return ${className}Mapper.update${ClassName}(${className});
+
+        int rslt = ${className}Mapper.updateByPrimaryKeySelective(record);
+        if (rslt != 1) {
+            throw new BizException("修改${functionName}失败，受影响行数为" + rslt);
+        }
+
+        ${ClassName}Proto.BaseResponse.Builder response = ${ClassName}Proto.BaseResponse.newBuilder();
+        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setMsg("ok");
+        return response.build();
     }
 
-    /**
-     * 批量删除${functionName}
-     * 
-     * @param ${pkColumn.javaField}s 需要删除的${functionName}ID
-     * @return 结果
-     */
     @Override
-    public int delete${ClassName}ByIds(${pkColumn.javaType}[] ${pkColumn.javaField}s)
-    {
-        return ${className}Mapper.delete${ClassName}ByIds(${pkColumn.javaField}s);
+    public ${ClassName}Proto.BaseResponse deleteById(${ClassName}Proto.${ClassName}DelRequest request) {
+
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        if (null == request.get${AttrName}()) {
+            throw new BizException("${functionName}ID不能为空");
+        }
+
+        int rslt = ${className}Mapper.deleteByPrimaryKey(request.get${AttrName}());
+        if (rslt != 1) {
+            throw new BizException("删除${functionName}失败，受影响行数为" + rslt);
+        }
+
+        ${ClassName}Proto.BaseResponse.Builder response = ${ClassName}Proto.BaseResponse.newBuilder();
+        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setMsg("ok");
+        return response.build();
     }
 
-    /**
-     * 删除${functionName}信息
-     * 
-     * @param ${pkColumn.javaField} ${functionName}ID
-     * @return 结果
-     */
     @Override
-    public int delete${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField})
-    {
-        return ${className}Mapper.delete${ClassName}ById(${pkColumn.javaField});
+    public ${ClassName}Proto.BaseResponse deleteByIdList(${ClassName}Proto.${ClassName}DelRequest request) {
+
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        if (CollectionUtils.isEmpty(request.get${AttrName}List())) {
+            throw new BizException("${functionName}ID集合不能为空");
+        }
+
+        int rslt = ${className}Mapper.deleteByPrimaryKey(request.get${AttrName}List());
+        if (rslt != 1) {
+            throw new BizException("批量删除${functionName}失败，受影响行数为" + rslt);
+        }
+
+        ${ClassName}Proto.BaseResponse.Builder response = ${ClassName}Proto.BaseResponse.newBuilder();
+        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setMsg("ok");
+        return response.build();
     }
+
 }
