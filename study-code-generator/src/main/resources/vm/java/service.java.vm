@@ -35,7 +35,7 @@ public interface ${ClassName}Service  {
      * @param ${className} ${functionName}
      * @gen ${datetime}
      */
-    public ${ClassName}Proto.${ClassName}AddResponse add{ClassName}(${ClassName}Proto.${ClassName}AddRequest request);
+    public ${ClassName}Proto.${ClassName}AddResponse add${ClassName}(${ClassName}Proto.${ClassName}AddRequest request);
 
     /**
      * 修改${functionName}
@@ -51,7 +51,7 @@ public interface ${ClassName}Service  {
      * @param ${pkColumn.javaField} ${functionName}ID
      * @gen ${datetime}
      */
-    public ${ClassName}Proto.BaseResponse deleteById(${ClassName}Proto.${ClassName}DelRequest request);
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ById(${ClassName}Proto.${ClassName}DelRequest request);
 
     /**
      * 批量删除${functionName}
@@ -59,6 +59,6 @@ public interface ${ClassName}Service  {
      * @param ${pkColumn.javaField}List 主键列表
      * @gen ${datetime}
      */
-    public ${ClassName}Proto.BaseResponse deleteByIdList(${ClassName}Proto.${ClassName}DelRequest request);
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(${ClassName}Proto.${ClassName}DelRequest request);
 
 }

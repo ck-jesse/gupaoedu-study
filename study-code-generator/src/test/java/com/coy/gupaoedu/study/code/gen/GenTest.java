@@ -39,7 +39,10 @@ public class GenTest {
      */
     @Test
     public void generatorCode() {
-        genTableService.generatorCode(tableNames);
+        String zipName = "code.zip";
+        String outZipPath = GenTest.class.getResource("/").getPath() + zipName;
+        System.out.println("代码生成路径： " + outZipPath);
+        genTableService.generatorCode(tableNames, outZipPath);
     }
 
     /**

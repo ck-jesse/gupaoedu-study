@@ -1,114 +1,86 @@
 package ${packageName}.controller;
 
-import java.util.List;
-import org.springframework.security.access.prepost.PreAuthorize;
+import ${packageName}.service.${ClassName}Service;
+
+import com.hs.doc.gen.annotation.DocMethod;
+import com.hs.doc.gen.annotation.DocService;
+import com.hs.doc.gen.consts.DocRequestMethod;
+import com.hs.platform.log.access.annotation.LogAccess;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.ruoyi.framework.aspectj.lang.annotation.Log;
-import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
-import ${packageName}.domain.${ClassName};
-import ${packageName}.service.I${ClassName}Service;
-import com.ruoyi.framework.web.controller.BaseController;
-import com.ruoyi.framework.web.domain.AjaxResult;
-import com.ruoyi.common.utils.poi.ExcelUtil;
-#if($table.crud)
-import com.ruoyi.framework.web.page.TableDataInfo;
-#elseif($table.tree)
-#end
 
 /**
  * ${functionName}Controller
- * 
+ *
  * @author ${author}
- * @date ${datetime}
+ * @gen ${datetime}
  */
+@Slf4j
+@LogAccess
 @RestController
 @RequestMapping("/${moduleName}/${businessName}")
-public class ${ClassName}Controller extends BaseController
-{
+@DocService(service = "${serviceName}", module = "${functionName}相关", version = "1.0", value = "/${moduleName}/${businessName}")
+public class ${ClassName}Controller {
+
     @Autowired
-    private I${ClassName}Service ${className}Service;
+    ${ClassName}Service ${className}Service;
 
-    /**
-     * 查询${functionName}列表
-     */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:list')")
-    @GetMapping("/list")
-#if($table.crud)
-    public TableDataInfo list(${ClassName} ${className})
-    {
-        startPage();
-        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
-        return getDataTable(list);
-    }
-#elseif($table.tree)
-    public AjaxResult list(${ClassName} ${className})
-    {
-        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
-        return AjaxResult.success(list);
-    }
-#end
-
-    /**
-     * 导出${functionName}列表
-     */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:export')")
-    @Log(title = "${functionName}", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    public AjaxResult export(${ClassName} ${className})
-    {
-        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
-        ExcelUtil<${ClassName}> util = new ExcelUtil<${ClassName}>(${ClassName}.class);
-        return util.exportExcel(list, "${businessName}");
+    @PostMapping(value = "/query${ClassName}ById", produces = MediaTypeConsts.X_PROTOBUF)
+    @DocMethod(name = "/query${ClassName}ById", version = "1.0", produces = MediaTypeConsts.X_PROTOBUF,
+            method = DocRequestMethod.POST, desc = "查询${functionName}",
+            parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}QueryByIdRequest.class,
+            returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.${ClassName}QueryByIdResponse.class)
+    public ${ClassName}Proto.${ClassName}QueryByIdResponse query${ClassName}ById(${ClassName}Proto.${ClassName}QueryByIdRequest request) {
+        return ${className}Service.query${ClassName}ById(request);
     }
 
-    /**
-     * 获取${functionName}详细信息
-     */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:query')")
-    @GetMapping(value = "/{${pkColumn.javaField}}")
-    public AjaxResult getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField})
-    {
-        return AjaxResult.success(${className}Service.select${ClassName}ById(${pkColumn.javaField}));
+    @PostMapping(value = "/query${ClassName}List", produces = MediaTypeConsts.X_PROTOBUF)
+    @DocMethod(name = "/query${ClassName}List", version = "1.0", produces = MediaTypeConsts.X_PROTOBUF,
+            method = DocRequestMethod.POST, desc = "查询${functionName}列表",
+            parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}QueryListRequest.class,
+            returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.${ClassName}QueryListResponse.class)
+    public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(${ClassName}Proto.${ClassName}QueryListRequest request) {
+        return ${className}Service.query${ClassName}List(request);
     }
 
-    /**
-     * 新增${functionName}
-     */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:add')")
-    @Log(title = "${functionName}", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody ${ClassName} ${className})
-    {
-        return toAjax(${className}Service.insert${ClassName}(${className}));
+    @PostMapping(value = "/add${ClassName}", produces = MediaTypeConsts.X_PROTOBUF)
+    @DocMethod(name = "/add${ClassName}", version = "1.0", produces = MediaTypeConsts.X_PROTOBUF,
+            method = DocRequestMethod.POST, desc = "新增${functionName}",
+            parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}AddRequest.class,
+            returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.${ClassName}AddResponse.class)
+    public ${ClassName}Proto.${ClassName}AddResponse add${ClassName}(${ClassName}Proto.${ClassName}AddRequest request) {
+        return ${className}Service.add${ClassName}(request);
     }
 
-    /**
-     * 修改${functionName}
-     */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:edit')")
-    @Log(title = "${functionName}", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody ${ClassName} ${className})
-    {
-        return toAjax(${className}Service.update${ClassName}(${className}));
+    @PostMapping(value = "/update${ClassName}", produces = MediaTypeConsts.X_PROTOBUF)
+    @DocMethod(name = "/update${ClassName}", version = "1.0", produces = MediaTypeConsts.X_PROTOBUF,
+            method = DocRequestMethod.POST, desc = "修改${functionName}",
+            parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}UpdateRequest.class,
+            returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.BaseResponse.class)
+    public ${ClassName}Proto.BaseResponse update${ClassName}(${ClassName}Proto.${ClassName}UpdateRequest request) {
+        return ${className}Service.update${ClassName}(request);
     }
 
-    /**
-     * 删除${functionName}
-     */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:remove')")
-    @Log(title = "${functionName}", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{${pkColumn.javaField}s}")
-    public AjaxResult remove(@PathVariable ${pkColumn.javaType}[] ${pkColumn.javaField}s)
-    {
-        return toAjax(${className}Service.delete${ClassName}ByIds(${pkColumn.javaField}s));
+    @PostMapping(value = "/delete${ClassName}ById", produces = MediaTypeConsts.X_PROTOBUF)
+    @DocMethod(name = "/delete${ClassName}ById", version = "1.0", produces = MediaTypeConsts.X_PROTOBUF,
+            method = DocRequestMethod.POST, desc = "删除${functionName}",
+            parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}DelRequest.class,
+            returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.BaseResponse.class)
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ById(${ClassName}Proto.${ClassName}DelRequest request) {
+        return ${className}Service.delete${ClassName}ById(request);
     }
+
+    @PostMapping(value = "/delete${ClassName}ByIdList", produces = MediaTypeConsts.X_PROTOBUF)
+    @DocMethod(name = "/delete${ClassName}ByIdList", version = "1.0", produces = MediaTypeConsts.X_PROTOBUF,
+            method = DocRequestMethod.POST, desc = "批量删除${functionName}",
+            parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}DelRequest.class,
+            returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.BaseResponse.class)
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(${ClassName}Proto.${ClassName}DelRequest request) {
+        return ${className}Service.delete${ClassName}ByIdList(request);
+    }
+
 }

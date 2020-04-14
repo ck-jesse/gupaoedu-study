@@ -8,6 +8,7 @@ import com.coy.gupaoedu.study.code.gen.domain.GenTableColumn;
 import com.coy.gupaoedu.study.code.gen.mapper.GenTableColumnMapper;
 import com.coy.gupaoedu.study.code.gen.mapper.GenTableMapper;
 import com.coy.gupaoedu.study.code.gen.util.GenUtils;
+import com.coy.gupaoedu.study.code.gen.util.StringUtils;
 import com.coy.gupaoedu.study.code.gen.util.VelocityInitializer;
 import com.coy.gupaoedu.study.code.gen.util.VelocityUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
@@ -162,10 +165,30 @@ public class GenTableServiceImpl implements GenTableService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ZipOutputStream zip = new ZipOutputStream(outputStream);
         for (String tableName : tableNames) {
+            if (StringUtils.isBlank(tableName)) {
+                continue;
+            }
             generatorCode(tableName, zip);
         }
         IOUtils.closeQuietly(zip);
         return outputStream.toByteArray();
+    }
+
+    @Override
+    public void generatorCode(String[] tableNames, String outZipPath) {
+        try {
+            FileOutputStream outputStream = new FileOutputStream(outZipPath);
+            ZipOutputStream zip = new ZipOutputStream(outputStream);
+            for (String tableName : tableNames) {
+                if (StringUtils.isBlank(tableName)) {
+                    continue;
+                }
+                generatorCode(tableName, zip);
+            }
+            IOUtils.closeQuietly(zip);
+        } catch (FileNotFoundException e) {
+            log.error("生成异常", e);
+        }
     }
 
     /**

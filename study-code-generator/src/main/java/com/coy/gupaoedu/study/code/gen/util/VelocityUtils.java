@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.code.gen.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.coy.gupaoedu.study.code.gen.config.GenConfig;
 import com.coy.gupaoedu.study.code.gen.consts.GenConstants;
 import com.coy.gupaoedu.study.code.gen.domain.GenTable;
 import com.coy.gupaoedu.study.code.gen.domain.GenTableColumn;
@@ -22,6 +23,10 @@ public class VelocityUtils {
      * mybatis空间路径
      */
     private static final String MYBATIS_PATH = "main/resources/mybatis";
+    /**
+     * proto文件路径
+     */
+    private static final String PROTO_PATH = "main/resources/proto";
 
     /**
      * 设置模板变量信息
@@ -36,6 +41,7 @@ public class VelocityUtils {
         String functionName = genTable.getFunctionName();
 
         VelocityContext velocityContext = new VelocityContext();
+        velocityContext.put("serviceName", GenConfig.getServiceName());
         velocityContext.put("tplCategory", genTable.getTplCategory());
         velocityContext.put("tableName", genTable.getTableName());
         velocityContext.put("functionName", StringUtils.isNotEmpty(functionName) ? functionName : "【请填写功能名称】");
@@ -86,12 +92,12 @@ public class VelocityUtils {
     public static List<String> getTemplateList(String tplCategory) {
         List<String> templates = new ArrayList<String>();
         templates.add("vm/proto/proto.proto.vm");
-//        templates.add("vm/java/entity.java.vm");
-//        templates.add("vm/java/mapper.java.vm");
-//        templates.add("vm/xml/mapper.xml.vm");
+        templates.add("vm/java/entity.java.vm");
+        templates.add("vm/java/mapper.java.vm");
+        templates.add("vm/xml/mapper.xml.vm");
         templates.add("vm/java/service.java.vm");
         templates.add("vm/java/serviceImpl.java.vm");
-//        templates.add("vm/java/controller.java.vm");
+        templates.add("vm/java/controller.java.vm");
         return templates;
     }
 
@@ -114,12 +120,12 @@ public class VelocityUtils {
         String mybatisPath = MYBATIS_PATH + "/" + moduleName;
         String vuePath = "vue";
 
-        if (template.contains("domain.java.vm")) {
-            fileName = String.format("%s/domain/%s.java", javaPath, className);
+        if (template.contains("entity.java.vm")) {
+            fileName = String.format("%s/dao.entity/%s.java", javaPath, className);
         } else if (template.contains("mapper.java.vm")) {
-            fileName = String.format("%s/mapper/%sMapper.java", javaPath, className);
+            fileName = String.format("%s/dao.mapper/%sMapper.java", javaPath, className);
         } else if (template.contains("service.java.vm")) {
-            fileName = String.format("%s/service/I%sService.java", javaPath, className);
+            fileName = String.format("%s/service/%sService.java", javaPath, className);
         } else if (template.contains("serviceImpl.java.vm")) {
             fileName = String.format("%s/service/impl/%sServiceImpl.java", javaPath, className);
         } else if (template.contains("controller.java.vm")) {
@@ -134,6 +140,8 @@ public class VelocityUtils {
             fileName = String.format("%s/views/%s/%s/index.vue", vuePath, moduleName, businessName);
         } else if (template.contains("index-tree.vue.vm")) {
             fileName = String.format("%s/views/%s/%s/index.vue", vuePath, moduleName, businessName);
+        } else if (template.contains("proto.proto.vm")) {
+            fileName = String.format("%s/%sProto.proto", PROTO_PATH, className);
         }
         return fileName;
     }

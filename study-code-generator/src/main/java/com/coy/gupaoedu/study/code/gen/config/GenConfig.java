@@ -30,9 +30,9 @@ public class GenConfig {
     public static String tablePrefix;
 
     /**
-     * 表名(指定生成代码的表名)
+     * 服务名
      */
-    public static String tableNames;
+    public static String serviceName;
 
     public static String getAuthor() {
         return author;
@@ -66,11 +66,11 @@ public class GenConfig {
         GenConfig.tablePrefix = tablePrefix;
     }
 
-    public static String getTableNames() {
-        return tableNames;
+    public static String getServiceName() {
+        return serviceName;
     }
 
-    public void setTableNames(String tableNames) {
-        GenConfig.tableNames = tableNames;
+    public void setServiceName(String serviceName) {
+        GenConfig.serviceName = serviceName;
     }
 }

@@ -159,7 +159,7 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
     }
 
     @Override
-    public ${ClassName}Proto.BaseResponse deleteById(${ClassName}Proto.${ClassName}DelRequest request) {
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ById(${ClassName}Proto.${ClassName}DelRequest request) {
 
 #set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
         if (null == request.get${AttrName}()) {
@@ -178,7 +178,7 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
     }
 
     @Override
-    public ${ClassName}Proto.BaseResponse deleteByIdList(${ClassName}Proto.${ClassName}DelRequest request) {
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(${ClassName}Proto.${ClassName}DelRequest request) {
 
 #set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
         if (CollectionUtils.isEmpty(request.get${AttrName}List())) {

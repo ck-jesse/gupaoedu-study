@@ -54,4 +54,15 @@ public interface GenTableService {
      */
     public byte[] generatorCode(String[] tableNames);
 
+    /***
+     * 生成代码到指定zip文件
+     *
+     * @param tableNames 表数组
+     * @param outZipPath 输出zip文件路径
+     * @return void
+     * @author chenck
+     * @date 2020/4/14 15:17
+     */
+    public void generatorCode(String[] tableNames, String outZipPath);
+
 }
