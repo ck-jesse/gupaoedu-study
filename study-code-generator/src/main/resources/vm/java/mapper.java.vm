@@ -63,7 +63,7 @@ public interface ${ClassName}Mapper {
     /**
      * 批量删除
      *
-     * @param ${pkColumn.javaField}List 主键列表
+     * @param list 主键列表
      * @gen ${datetime}
      */
     int batchDeleteByPrimaryKey(List<${pkColumn.javaType}> list);
