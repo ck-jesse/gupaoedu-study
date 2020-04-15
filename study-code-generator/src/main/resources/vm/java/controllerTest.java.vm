@@ -30,9 +30,9 @@ public class ${ClassName}ControllerTest {
         ${ClassName}Proto.${ClassName}QueryByIdRequest.Builder request = ${ClassName}Proto.${ClassName}QueryByIdRequest.newBuilder();
 #set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
 #if($pkColumn.protoType == 'uint64')
-        request.set${AttrName}(0L);
+        request.set${AttrName}(1L);
 #elseif($pkColumn.protoType == 'uint32')
-        request.set${AttrName}(0);
+        request.set${AttrName}(1);
 #elseif($pkColumn.protoType == 'string')
         request.set${AttrName}("");
 #end
