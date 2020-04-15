@@ -34,6 +34,11 @@ public class GenConfig {
      */
     public static String serviceName;
 
+    /**
+     * 服务端口
+     */
+    public static String servicePort;
+
     public static String getAuthor() {
         return author;
     }
@@ -72,5 +77,13 @@ public class GenConfig {
 
     public void setServiceName(String serviceName) {
         GenConfig.serviceName = serviceName;
+    }
+
+    public static String getServicePort() {
+        return servicePort;
+    }
+
+    public void setServicePort(String servicePort) {
+        GenConfig.servicePort = servicePort;
     }
 }

@@ -1,7 +1,5 @@
 package ${packageName}.controller;
 
-import ${packageName}.service.${ClassName}Service;
-
 import com.hs.doc.gen.annotation.DocMethod;
 import com.hs.doc.gen.annotation.DocService;
 import com.hs.doc.gen.consts.DocRequestMethod;
@@ -13,6 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ${packageName}.service.${ClassName}Service;
+import ${packageName}.proto.${ClassName}Proto;
+import ${packageName}.constant.MediaTypeConsts;
+
 /**
  * ${functionName}Controller
  *
@@ -22,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @LogAccess
 @RestController
-@RequestMapping("/${moduleName}/${businessName}")
-@DocService(service = "${serviceName}", module = "${functionName}相关", version = "1.0", value = "/${moduleName}/${businessName}")
+@RequestMapping("/${className}")
+@DocService(service = "${serviceName}", module = "${functionName}相关", version = "1.0", value = "/${className}")
 public class ${ClassName}Controller {
 
     @Autowired
@@ -34,7 +36,7 @@ public class ${ClassName}Controller {
             method = DocRequestMethod.POST, desc = "查询${functionName}",
             parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}QueryByIdRequest.class,
             returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.${ClassName}QueryByIdResponse.class)
-    public ${ClassName}Proto.${ClassName}QueryByIdResponse query${ClassName}ById(${ClassName}Proto.${ClassName}QueryByIdRequest request) {
+    public ${ClassName}Proto.${ClassName}QueryByIdResponse query${ClassName}ById(@RequestBody ${ClassName}Proto.${ClassName}QueryByIdRequest request) {
         return ${className}Service.query${ClassName}ById(request);
     }
 
@@ -43,7 +45,10 @@ public class ${ClassName}Controller {
             method = DocRequestMethod.POST, desc = "查询${functionName}列表",
             parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}QueryListRequest.class,
             returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.${ClassName}QueryListResponse.class)
-    public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(${ClassName}Proto.${ClassName}QueryListRequest request) {
+    public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(@RequestBody(required = false) ${ClassName}Proto.${ClassName}QueryListRequest request) {
+        if (null == request) {
+            request = ${ClassName}Proto.${ClassName}QueryListRequest.newBuilder().build();
+        }
         return ${className}Service.query${ClassName}List(request);
     }
 
@@ -52,7 +57,7 @@ public class ${ClassName}Controller {
             method = DocRequestMethod.POST, desc = "新增${functionName}",
             parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}AddRequest.class,
             returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.${ClassName}AddResponse.class)
-    public ${ClassName}Proto.${ClassName}AddResponse add${ClassName}(${ClassName}Proto.${ClassName}AddRequest request) {
+    public ${ClassName}Proto.${ClassName}AddResponse add${ClassName}(@RequestBody ${ClassName}Proto.${ClassName}AddRequest request) {
         return ${className}Service.add${ClassName}(request);
     }
 
@@ -61,7 +66,7 @@ public class ${ClassName}Controller {
             method = DocRequestMethod.POST, desc = "修改${functionName}",
             parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}UpdateRequest.class,
             returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.BaseResponse.class)
-    public ${ClassName}Proto.BaseResponse update${ClassName}(${ClassName}Proto.${ClassName}UpdateRequest request) {
+    public ${ClassName}Proto.BaseResponse update${ClassName}(@RequestBody ${ClassName}Proto.${ClassName}UpdateRequest request) {
         return ${className}Service.update${ClassName}(request);
     }
 
@@ -70,7 +75,7 @@ public class ${ClassName}Controller {
             method = DocRequestMethod.POST, desc = "删除${functionName}",
             parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}DelRequest.class,
             returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.BaseResponse.class)
-    public ${ClassName}Proto.BaseResponse delete${ClassName}ById(${ClassName}Proto.${ClassName}DelRequest request) {
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ById(@RequestBody ${ClassName}Proto.${ClassName}DelRequest request) {
         return ${className}Service.delete${ClassName}ById(request);
     }
 
@@ -79,7 +84,7 @@ public class ${ClassName}Controller {
             method = DocRequestMethod.POST, desc = "批量删除${functionName}",
             parameterTypeIdl = "${ClassName}Proto.proto", parameterType = ${ClassName}Proto.${ClassName}DelRequest.class,
             returnTypeIdl = "${ClassName}Proto.proto", returnType = ${ClassName}Proto.BaseResponse.class)
-    public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(${ClassName}Proto.${ClassName}DelRequest request) {
+    public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(@RequestBody ${ClassName}Proto.${ClassName}DelRequest request) {
         return ${className}Service.delete${ClassName}ByIdList(request);
     }
 

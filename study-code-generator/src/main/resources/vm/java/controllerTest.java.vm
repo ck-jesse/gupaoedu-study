@@ -1,0 +1,144 @@
+package ${packageName};
+
+import org.junit.Test;
+import com.googlecode.protobuf.format.JsonFormat;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+import ${packageName}.proto.${ClassName}Proto;
+
+import java.util.Collections;
+
+/**
+ * ${functionName}Controller测试
+ *
+ * @author ${author}
+ * @gen ${datetime}
+ */
+public class ${ClassName}ControllerTest {
+
+    private static final String HOST = "http://127.0.0.1:${servicePort}/${serviceName}";
+
+    /**
+     * 该 RestTemplate 中注入了 ProtobufHttpMessageConverter ，所以可以直接发起请求
+     */
+    RestTemplate protoRestTemplate = new RestTemplate(Collections.singletonList(new ProtobufHttpMessageConverter()));
+
+    // 查询${functionName}
+    @Test
+    public void query${ClassName}ByIdTest() {
+        String url = HOST + "/${className}/query${ClassName}ById";
+        ${ClassName}Proto.${ClassName}QueryByIdRequest.Builder request = ${ClassName}Proto.${ClassName}QueryByIdRequest.newBuilder();
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+#if($pkColumn.protoType == 'uint64')
+        request.set${AttrName}(0L);
+#elseif($pkColumn.protoType == 'uint32')
+        request.set${AttrName}(0);
+#elseif($pkColumn.protoType == 'string')
+        request.set${AttrName}("");
+#end
+
+        ${ClassName}Proto.${ClassName}QueryByIdResponse response = protoRestTemplate.postForObject(url, request.build(), ${ClassName}Proto.${ClassName}QueryByIdResponse.class);
+        System.out.println(new JsonFormat().printToString(response));
+    }
+
+    // 查询${functionName}列表
+    @Test
+    public void query${ClassName}ListTest() {
+        String url = HOST + "/${className}/query${ClassName}List";
+        ${ClassName}Proto.${ClassName}QueryListRequest.Builder request = ${ClassName}Proto.${ClassName}QueryListRequest.newBuilder();
+#foreach($column in $columns)
+#if($column.query)
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.protoType == 'uint64')
+        request.set${AttrName}(0L);
+#elseif($column.protoType == 'uint32')
+        request.set${AttrName}(0);
+#elseif($column.protoType == 'string')
+        request.set${AttrName}("");
+#end
+#end
+#end
+
+        ${ClassName}Proto.${ClassName}QueryListResponse response = protoRestTemplate.postForObject(url, request.build(), ${ClassName}Proto.${ClassName}QueryListResponse.class);
+        System.out.println(new JsonFormat().printToString(response));
+    }
+
+    // 新增${functionName}
+    @Test
+    public void add${ClassName}Test() {
+        String url = HOST + "/${className}/add${ClassName}";
+        ${ClassName}Proto.${ClassName}AddRequest.Builder request = ${ClassName}Proto.${ClassName}AddRequest.newBuilder();
+#foreach($column in $columns)
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaField != $pkColumn.javaField)
+#if($column.protoType == 'uint64')
+        request.set${AttrName}(0L);
+#elseif($column.protoType == 'uint32')
+        request.set${AttrName}(0);
+#elseif($column.protoType == 'string')
+        request.set${AttrName}("");
+#end
+#end
+#end
+
+        ${ClassName}Proto.${ClassName}AddResponse response = protoRestTemplate.postForObject(url, request.build(), ${ClassName}Proto.${ClassName}AddResponse.class);
+        System.out.println(new JsonFormat().printToString(response));
+    }
+
+    // 修改${functionName}
+    @Test
+    public void update${ClassName}Test() {
+        String url = HOST + "/${className}/update${ClassName}";
+        ${ClassName}Proto.${ClassName}UpdateRequest.Builder request = ${ClassName}Proto.${ClassName}UpdateRequest.newBuilder();
+#foreach($column in $columns)
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.protoType == 'uint64')
+        request.set${AttrName}(0L);
+#elseif($column.protoType == 'uint32')
+        request.set${AttrName}(0);
+#elseif($column.protoType == 'string')
+        request.set${AttrName}("");
+#end
+#end
+
+        ${ClassName}Proto.BaseResponse response = protoRestTemplate.postForObject(url, request.build(), ${ClassName}Proto.BaseResponse.class);
+        System.out.println(new JsonFormat().printToString(response));
+    }
+
+    // 删除${functionName}
+    @Test
+    public void delete${ClassName}ByIdTest() {
+        String url = HOST + "/${className}/delete${ClassName}ById";
+        ${ClassName}Proto.${ClassName}DelRequest.Builder request = ${ClassName}Proto.${ClassName}DelRequest.newBuilder();
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+#if($pkColumn.protoType == 'uint64')
+        request.set${AttrName}(0L);
+#elseif($pkColumn.protoType == 'uint32')
+        request.set${AttrName}(0);
+#elseif($pkColumn.protoType == 'string')
+        request.set${AttrName}("");
+#end
+
+        ${ClassName}Proto.BaseResponse response = protoRestTemplate.postForObject(url, request.build(), ${ClassName}Proto.BaseResponse.class);
+        System.out.println(new JsonFormat().printToString(response));
+    }
+
+    // 批量删除${functionName}
+    @Test
+    public void delete${ClassName}ByIdListTest() {
+        String url = HOST + "/${className}/delete${ClassName}ByIdList";
+        ${ClassName}Proto.${ClassName}DelRequest.Builder request = ${ClassName}Proto.${ClassName}DelRequest.newBuilder();
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+#if($pkColumn.protoType == 'uint64')
+        request.add${AttrName}List(0L);
+#elseif($pkColumn.protoType == 'uint32')
+        request.add${AttrName}List(0);
+#elseif($pkColumn.protoType == 'string')
+        request.add${AttrName}List("");
+#end
+
+        ${ClassName}Proto.BaseResponse response = protoRestTemplate.postForObject(url, request.build(), ${ClassName}Proto.BaseResponse.class);
+        System.out.println(new JsonFormat().printToString(response));
+    }
+
+}

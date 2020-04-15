@@ -22,8 +22,11 @@ public class GenTest {
     GenTableService genTableService;
 
     String[] tableNames = {
-            "t_batch_refund_apply",
-            ""
+            "hx_banner_config",
+            "hx_card_catalog",
+            "hx_card_equity",
+            "hx_card_supplier",
+            "hx_popup_config",
     };
 
     /**

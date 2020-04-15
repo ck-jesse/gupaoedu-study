@@ -1,22 +1,18 @@
 package ${packageName}.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.hs.platform.common.exception.BizException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import ${packageName}.dao.entity.${ClassName};
 import ${packageName}.dao.mapper.${ClassName}Mapper;
 import ${packageName}.service.${ClassName}Service;
 import ${packageName}.proto.${ClassName}Proto;
 import ${packageName}.util.PageUtil;
-import ${packageName}.util.BigDecimals;
-
-import lombok.extern.slf4j.Slf4j;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
-import com.hs.platform.common.exception.BizException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -35,36 +31,37 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
     ${ClassName}Mapper ${className}Mapper;
 
     @Override
-    public ${ClassName}Proto.${ClassName}QueryResponse query${ClassName}ById(${ClassName}Proto.${ClassName}QueryRequest request) {
-
-#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
-        if (null == request.get${AttrName}()) {
+    public ${ClassName}Proto.${ClassName}QueryByIdResponse query${ClassName}ById(${ClassName}Proto.${ClassName}QueryByIdRequest request) {
+#set($PKAttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        if (request.get${PKAttrName}() <= 0) {
             throw new BizException("${functionName}ID不能为空");
         }
-        ${ClassName} record = ${className}Mapper.selectByPrimaryKey(request.get${AttrName}());
+        ${ClassName} record = ${className}Mapper.selectByPrimaryKey(request.get${PKAttrName}());
 
-        ${ClassName}Proto.${ClassName}QueryResponse.Builder response = ${ClassName}Proto.${ClassName}QueryResponse.newBuilder();
+        ${ClassName}Proto.${ClassName}QueryByIdResponse.Builder response = ${ClassName}Proto.${ClassName}QueryByIdResponse.newBuilder();
         if (null != record) {
-            // 将为null的字段处理为默认值
-            record.dealNullField();
-
             ${ClassName}Proto.${ClassName}VO.Builder vo = ${ClassName}Proto.${ClassName}VO.newBuilder();
-            BeanUtils.copyProperties(record, vo);
+            build${ClassName}VO(record, vo);
             response.setData(vo);
         }
-        response.setCode(BatchRefundApplyProto.ResponseCode.RESP_CODE_SUCCESS);
+        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
         response.setMsg("ok");
         return response.build();
     }
 
     @Override
     public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(${ClassName}Proto.${ClassName}QueryListRequest request) {
-
         ${ClassName} record = new ${ClassName}();
 #foreach($column in $columns)
 #if($column.query)
 #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaType == 'Date')
+        if (request.get$AttrName() > 0) {
+            record.set$AttrName(new Date(request.get$AttrName()));
+        }
+#else
         record.set$AttrName(request.get$AttrName());
+#end
 #end
 #end
 
@@ -75,12 +72,9 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
 
         ${ClassName}Proto.${ClassName}QueryListResponse.Builder response = ${ClassName}Proto.${ClassName}QueryListResponse.newBuilder();
         ${ClassName}Proto.${ClassName}VO.Builder vo = null;
-        for (${ClassName} record : list) {
-            // 将为null的字段处理为默认值
-            record.dealNullField();
-
+        for (${ClassName} recordTemp : list) {
             vo = ${ClassName}Proto.${ClassName}VO.newBuilder();
-            BeanUtils.copyProperties(record, vo);
+            build${ClassName}VO(recordTemp, vo);
             response.addList(vo);
         }
         response.setTotalCount(page.getTotal());
@@ -92,10 +86,27 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
         return response.build();
     }
 
-    @Override
-    public ${ClassName}Proto.${ClassName}AddResponse add{ClassName}(${ClassName}Proto.${ClassName}AddRequest request) {
+    /**
+     * 构建${functionName}VO参数
+     */
+    private void build${ClassName}VO(${ClassName} record, ${ClassName}Proto.${ClassName}VO.Builder vo) {
+        // 将为null的字段处理为默认值
+        record.dealNullField();
 
-#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        BeanUtils.copyProperties(record, vo);
+#foreach($column in $columns)
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaType == 'Date')
+        vo.set$AttrName(null != record.get$AttrName() ? record.get$AttrName().getTime() : 0L);
+#elseif($column.javaType == 'BigDecimal')
+        vo.set$AttrName(record.get$AttrName().doubleValue());
+#end
+#end
+    }
+
+    @Override
+    public ${ClassName}Proto.${ClassName}AddResponse add${ClassName}(${ClassName}Proto.${ClassName}AddRequest request) {
+#set($PkAttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
         ${ClassName} record = new ${ClassName}();
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
@@ -105,7 +116,13 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
         record.setUpdateTime(new Date());
 #else
 #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaType == 'Date')
+        if (request.get$AttrName() > 0) {
+            record.set$AttrName(new Date(request.get$AttrName()));
+        }
+#else
         record.set$AttrName(request.get$AttrName());
+#end
 #end
 #end
 #end
@@ -116,7 +133,7 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
         }
 
         ${ClassName}Proto.${ClassName}AddResponse.Builder response = ${ClassName}Proto.${ClassName}AddResponse.newBuilder();
-        response.set$AttrName(record.get$AttrName();
+        response.set$PkAttrName(record.get$PkAttrName());
         response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
         response.setMsg("ok");
         return response.build();
@@ -124,9 +141,8 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
 
     @Override
     public ${ClassName}Proto.BaseResponse update${ClassName}(${ClassName}Proto.${ClassName}UpdateRequest request) {
-
 #set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
-        if (null == request.get${AttrName}()) {
+        if (request.get${AttrName}() <= 0) {
             throw new BizException("${functionName}ID不能为空");
         }
 
@@ -143,7 +159,13 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
         record.setUpdateTime(new Date());
 #else
 #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaType == 'Date')
+        if (request.get$AttrName() > 0) {
+            record.set$AttrName(new Date(request.get$AttrName()));
+        }
+#else
         record.set$AttrName(request.get$AttrName());
+#end
 #end
 #end
 
@@ -160,39 +182,34 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
 
     @Override
     public ${ClassName}Proto.BaseResponse delete${ClassName}ById(${ClassName}Proto.${ClassName}DelRequest request) {
-
 #set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
-        if (null == request.get${AttrName}()) {
+        if (request.get${AttrName}() <= 0) {
             throw new BizException("${functionName}ID不能为空");
         }
-
         int rslt = ${className}Mapper.deleteByPrimaryKey(request.get${AttrName}());
-        if (rslt != 1) {
-            throw new BizException("删除${functionName}失败，受影响行数为" + rslt);
-        }
 
         ${ClassName}Proto.BaseResponse.Builder response = ${ClassName}Proto.BaseResponse.newBuilder();
-        response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
-        response.setMsg("ok");
+        if (rslt == 1) {
+            response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
+            response.setMsg("ok");
+        } else {
+            response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_FAILED);
+            response.setMsg("删除${functionName}失败，受影响行数为" + rslt);
+        }
         return response.build();
     }
 
     @Override
     public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(${ClassName}Proto.${ClassName}DelRequest request) {
-
-#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
-        if (CollectionUtils.isEmpty(request.get${AttrName}List())) {
+        if (CollectionUtils.isEmpty(request.getIdListList())) {
             throw new BizException("${functionName}ID集合不能为空");
         }
 
-        int rslt = ${className}Mapper.deleteByPrimaryKey(request.get${AttrName}List());
-        if (rslt != 1) {
-            throw new BizException("批量删除${functionName}失败，受影响行数为" + rslt);
-        }
+        int rslt = ${className}Mapper.batchDeleteByPrimaryKey(request.getIdListList());
 
         ${ClassName}Proto.BaseResponse.Builder response = ${ClassName}Proto.BaseResponse.newBuilder();
         response.setCode(${ClassName}Proto.ResponseCode.RESP_CODE_SUCCESS);
-        response.setMsg("ok");
+        response.setMsg("批量删除${functionName}成功，删除行数为" + rslt);
         return response.build();
     }
 

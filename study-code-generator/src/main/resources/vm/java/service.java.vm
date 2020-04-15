@@ -1,9 +1,5 @@
 package ${packageName}.service;
 
-import java.util.List;
-import com.hs.platform.common.dto.ServiceResult;
-import com.hs.platform.common.dto.PageResult;
-import ${packageName}.dao.entity.${ClassName};
 import ${packageName}.proto.${ClassName}Proto;
 
 /**
@@ -24,7 +20,6 @@ public interface ${ClassName}Service  {
     /**
      * 查询${functionName}列表
      *
-     * @param ${className} ${functionName}
      * @gen ${datetime}
      */
     public ${ClassName}Proto.${ClassName}QueryListResponse query${ClassName}List(${ClassName}Proto.${ClassName}QueryListRequest request);
@@ -32,7 +27,6 @@ public interface ${ClassName}Service  {
     /**
      * 新增${functionName}
      *
-     * @param ${className} ${functionName}
      * @gen ${datetime}
      */
     public ${ClassName}Proto.${ClassName}AddResponse add${ClassName}(${ClassName}Proto.${ClassName}AddRequest request);
@@ -40,7 +34,6 @@ public interface ${ClassName}Service  {
     /**
      * 修改${functionName}
      *
-     * @param ${className} ${functionName}
      * @gen ${datetime}
      */
     public ${ClassName}Proto.BaseResponse update${ClassName}(${ClassName}Proto.${ClassName}UpdateRequest request);
@@ -48,7 +41,6 @@ public interface ${ClassName}Service  {
     /**
      * 删除${functionName}
      *
-     * @param ${pkColumn.javaField} ${functionName}ID
      * @gen ${datetime}
      */
     public ${ClassName}Proto.BaseResponse delete${ClassName}ById(${ClassName}Proto.${ClassName}DelRequest request);
@@ -56,7 +48,6 @@ public interface ${ClassName}Service  {
     /**
      * 批量删除${functionName}
      *
-     * @param ${pkColumn.javaField}List 主键列表
      * @gen ${datetime}
      */
     public ${ClassName}Proto.BaseResponse delete${ClassName}ByIdList(${ClassName}Proto.${ClassName}DelRequest request);

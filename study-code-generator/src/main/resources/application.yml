@@ -10,13 +10,15 @@ gen:
   # 作者
   author: chenck
   # 服务名
-  serviceName: aftersale-service
+  serviceName: hx-card-service
+  # 服务端口
+  servicePort: 10015
   # 默认生成包路径 system 需改成自己的模块名称 如 system monitor tool
-  packageName: com.hs.aftersale
+  packageName: com.hx.card.service
   # 自动去除表前缀，默认是true
   autoRemovePre: true
   # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
-  tablePrefix: t_
+  tablePrefix: hx_
 
 # 日志配置
 logging:

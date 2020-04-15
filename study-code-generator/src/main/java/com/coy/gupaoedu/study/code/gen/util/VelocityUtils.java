@@ -18,6 +18,7 @@ public class VelocityUtils {
      * 项目空间路径
      */
     private static final String PROJECT_PATH = "main/java";
+    private static final String PROJECT_TEST_PATH = "test/java";
 
     /**
      * mybatis空间路径
@@ -42,6 +43,7 @@ public class VelocityUtils {
 
         VelocityContext velocityContext = new VelocityContext();
         velocityContext.put("serviceName", GenConfig.getServiceName());
+        velocityContext.put("servicePort", GenConfig.getServicePort());
         velocityContext.put("tplCategory", genTable.getTplCategory());
         velocityContext.put("tableName", genTable.getTableName());
         velocityContext.put("functionName", StringUtils.isNotEmpty(functionName) ? functionName : "【请填写功能名称】");
@@ -98,6 +100,7 @@ public class VelocityUtils {
         templates.add("vm/java/service.java.vm");
         templates.add("vm/java/serviceImpl.java.vm");
         templates.add("vm/java/controller.java.vm");
+        templates.add("vm/java/controllerTest.java.vm");
         return templates;
     }
 
@@ -116,14 +119,17 @@ public class VelocityUtils {
         // 业务名称
         String businessName = genTable.getBusinessName();
 
-        String javaPath = PROJECT_PATH + "/" + StringUtils.replace(packageName, ".", "/");
-        String mybatisPath = MYBATIS_PATH + "/" + moduleName;
+        String packagePath = StringUtils.replace(packageName, ".", "/");
+        String javaPath = PROJECT_PATH + "/" + packagePath;
+        String javaTestPath = PROJECT_TEST_PATH + "/" + packagePath;
+        //String mybatisPath = MYBATIS_PATH + "/" + moduleName;
+        String mybatisPath = MYBATIS_PATH;
         String vuePath = "vue";
 
         if (template.contains("entity.java.vm")) {
-            fileName = String.format("%s/dao.entity/%s.java", javaPath, className);
+            fileName = String.format("%s/dao/entity/%s.java", javaPath, className);
         } else if (template.contains("mapper.java.vm")) {
-            fileName = String.format("%s/dao.mapper/%sMapper.java", javaPath, className);
+            fileName = String.format("%s/dao/mapper/%sMapper.java", javaPath, className);
         } else if (template.contains("service.java.vm")) {
             fileName = String.format("%s/service/%sService.java", javaPath, className);
         } else if (template.contains("serviceImpl.java.vm")) {
@@ -142,6 +148,8 @@ public class VelocityUtils {
             fileName = String.format("%s/views/%s/%s/index.vue", vuePath, moduleName, businessName);
         } else if (template.contains("proto.proto.vm")) {
             fileName = String.format("%s/%sProto.proto", PROTO_PATH, className);
+        } else if (template.contains("controllerTest.java.vm")) {
+            fileName = String.format("%s/%sControllerTest.java", javaTestPath, className);
         }
         return fileName;
     }
