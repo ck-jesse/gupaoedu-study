@@ -50,7 +50,7 @@ message ${ClassName}QueryListResponse {
     string errMsg = 3; // 响应错误描述
     uint32 pageNum = 4; // 当前页码
     uint32 pageSize = 5; // 每页大小
-    uint32 totalPage = 6; // 总页数-该字段暂不设置
+    uint32 totalPage = 6; // 总页数
     uint64 totalCount = 7; // 总记录数
     repeated ${ClassName}VO list = 8; // ${functionName}列表
 }

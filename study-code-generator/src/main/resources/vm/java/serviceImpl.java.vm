@@ -66,8 +66,7 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service {
 #end
 
         // 分页
-        Page page = PageHelper.startPage(PageUtil.getPageNum(request.getPageNum()),
-        PageUtil.getPageSize(request.getPageSize()));
+        Page page = PageHelper.startPage(PageUtil.getPageNum(request.getPageNum()), PageUtil.getPageSize(request.getPageSize()));
         List<${ClassName}> list = ${className}Mapper.selectList(record);
 
         ${ClassName}Proto.${ClassName}QueryListResponse.Builder response = ${ClassName}Proto.${ClassName}QueryListResponse.newBuilder();
