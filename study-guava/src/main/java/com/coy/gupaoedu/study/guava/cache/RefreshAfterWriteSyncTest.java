@@ -22,6 +22,7 @@ public class RefreshAfterWriteSyncTest {
     // 只有真正获取缓存的线程才会进入CacheLoader中
     private static LoadingCache<String, String> cache = CacheBuilder.newBuilder()
             .refreshAfterWrite(1, TimeUnit.SECONDS)
+            .recordStats() // 开启统计信息
             .build(new CacheLoader<String, String>() {
 
                 @Override

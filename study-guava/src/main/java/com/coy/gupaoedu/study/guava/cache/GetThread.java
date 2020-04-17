@@ -19,6 +19,7 @@ public class GetThread {
             @Override
             public void run() {
                 try {
+                    System.out.println("cache 统计信息=" + cache.stats());
                     System.out.println(Thread.currentThread().getName() + " begin");
                     latch.await();
                     Stopwatch watch = Stopwatch.createStarted();

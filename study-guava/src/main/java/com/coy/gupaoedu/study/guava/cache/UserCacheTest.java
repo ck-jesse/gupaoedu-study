@@ -35,6 +35,7 @@ public class UserCacheTest {
     public static LoadingCache<String, User> cache = CacheBuilder.newBuilder()
             .maximumSize(5)// 最多5个
             .expireAfterWrite(5, TimeUnit.SECONDS)// 缓存项在给定时间内没有被写访问(创建或覆盖),则回收
+            .recordStats() // 开启统计信息
             .removalListener(removalListener)
             .build(new CacheLoader<String, User>() {
                 @Override
@@ -77,6 +78,7 @@ public class UserCacheTest {
             @Override
             public void run() {
                 while (true) {
+                    System.out.println(cache.stats());
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
