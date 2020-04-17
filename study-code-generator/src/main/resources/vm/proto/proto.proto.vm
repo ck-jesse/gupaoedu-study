@@ -66,9 +66,14 @@ message ${ClassName}VO {
 message ${ClassName}AddRequest {
     string operatorId = 1; //操作人id
     string operatorName = 2; //操作人姓名
+#set($num=2)
 #foreach ($column in $columns)
-    #set($num=$velocityCount + 2)
+#if($column.columnName != $pkColumn.columnName)
+#if($column.javaField != 'createTime' && $column.javaField != 'updateTime' && $column.javaField != 'delFlag')
+    #set($num=$num + 1)
     $column.protoType $column.javaField = $num; // $column.columnComment
+#end
+#end
 #end
 }
 
@@ -84,9 +89,12 @@ message ${ClassName}AddResponse {
 message ${ClassName}UpdateRequest {
     string operatorId = 1; //操作人id
     string operatorName = 2; //操作人姓名
+#set($num=2)
 #foreach ($column in $columns)
-    #set($num=$velocityCount + 2)
+#if($column.javaField != 'createTime' && $column.javaField != 'updateTime' && $column.javaField != 'delFlag')
+    #set($num=$num + 1)
     $column.protoType $column.javaField = $num; // $column.columnComment
+#end
 #end
 }
 
