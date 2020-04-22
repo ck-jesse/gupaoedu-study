@@ -987,6 +987,7 @@ public abstract class AbstractQueuedSynchronizer
         boolean failed = true;
         try {
             boolean interrupted = false;
+            // 自旋
             for (; ; ) {
                 // 获取节点的前置节点
                 final Node p = node.predecessor();
@@ -1001,6 +1002,10 @@ public abstract class AbstractQueuedSynchronizer
                     return interrupted;
                 }
                 // 检查当前线程是否应该阻塞，若返回true表示需要阻塞，则执行parkAndCheckInterrupt()使线程阻塞
+                // 通过释放方法 AbstractQueuedSynchronizer.release()唤醒阻塞的线程，唤醒后继节点
+                // AbstractQueuedSynchronizer.unparkSuccessor
+                // 本质为通过 LockSupport.park(this) 来阻塞线程
+                // 本质为通过 LockSupport.unpark(thread) 来唤醒线程
                 if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
                     interrupted = true;
             }
@@ -1435,7 +1440,7 @@ public abstract class AbstractQueuedSynchronizer
         if (tryRelease(arg)) {
             Node h = head;
             if (h != null && h.waitStatus != 0)
-                // 唤醒head节点的后继节点
+                // 唤醒head节点的后继节点，只唤醒一个节点
                 unparkSuccessor(h);
             return true;
         }
@@ -1704,6 +1709,7 @@ public abstract class AbstractQueuedSynchronizer
         Node t = tail; // Read fields in reverse initialization order
         Node h = head;
         Node s;
+        // 如果当前线程前面有排队的线程，并且如果当前线程在队列的开头或队列是空的，则返回true
         return h != t &&
                 ((s = h.next) == null || s.thread != Thread.currentThread());
     }

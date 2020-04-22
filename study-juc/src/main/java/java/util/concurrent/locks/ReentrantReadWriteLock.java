@@ -710,6 +710,7 @@ public class ReentrantReadWriteLock
          * @throws NullPointerException if the lock is null
          */
         protected ReadLock(ReentrantReadWriteLock lock) {
+            // 与WriteLock持有的是同一个sync对象
             sync = lock.sync;
         }
 

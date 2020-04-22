@@ -163,7 +163,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             if (Thread.currentThread() != getExclusiveOwnerThread())
                 throw new IllegalMonitorStateException();
             boolean free = false;
-            // 同步状态为0，则表示可以释放锁，大于0的场景是因为存在同一个线程的锁重入，没次重入该同步状态都会加1，所以当同步状态大于0时先不释放锁
+            // 同步状态为0，则表示可以释放锁，大于0的场景是因为存在同一个线程的锁重入，每次重入该同步状态都会加1，所以当同步状态大于0时先不释放锁
             if (c == 0) {
                 free = true;
                 // 将锁的持有线程设置为null
@@ -244,6 +244,8 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         }
 
         /**
+         * 尝试获取
+         * true 表示尝试获取成功，false 表示尝试获取失败
          * Fair version of tryAcquire.  Don't grant access unless
          * recursive call or no waiters or is first.
          */
@@ -251,12 +253,16 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             final Thread current = Thread.currentThread();
             int c = getState();
             if (c == 0) {
-                if (!hasQueuedPredecessors() &&
-                        compareAndSetState(0, acquires)) {
+                // hasQueuedPredecessors() 判断是否有排队的线程；如果当前线程前面有排队的线程，并且如果当前线程在队列的开头或队列是空的
+                if (!hasQueuedPredecessors() && compareAndSetState(0, acquires)) {
+                    // 设置独占锁的当前持有线程
                     setExclusiveOwnerThread(current);
                     return true;
                 }
-            } else if (current == getExclusiveOwnerThread()) {
+            }
+            // 当前线程=独占锁持有线程，实际为线程重入
+            else if (current == getExclusiveOwnerThread()) {
+                // 线程重入，c 记录重入的次数
                 int nextc = c + acquires;
                 if (nextc < 0)
                     throw new Error("Maximum lock count exceeded");

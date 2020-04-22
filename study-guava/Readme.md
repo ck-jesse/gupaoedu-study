@@ -39,3 +39,35 @@
 > com.google.common.cache.LocalCache.Segment#removeValueFromChain
 >
 注：基于ReferenceQueue引用队列，实现在缓存对象被垃圾回收器回收后，将对应的Reference引用对象添加到引用队列中，然后将清除缓存队列中被回收的key和value
+
+
+## RateLimiter 分析
+
+com.google.common.util.concurrent.RateLimiter
+```
+acquire() // 从RateLimiter获取一个许可，该方法会被阻塞直到获取到请求。返回获取许可的睡眠时间
+tryAcquire() // 从RateLimiter 获取许可，如果该许可可以在无延迟下的情况下立即获取得到的话。
+tryAcquire(int permits) // 从RateLimiter 获取许可数，如果该许可数可以在无延迟下的情况下立即获取得到的话。
+tryAcquire(long timeout,TimeUnit unit) // 从RateLimiter获取许可如果该许可可以在不超过timeout的时间内获取得到的话，或者如果无法在timeout 过期之前获取得到许可的话，那么立即返回false（无需等待）。
+```
+
+com.google.common.base.Ticker
+```
+read() // 读取系统当前时间(纳秒)
+```
+
+com.google.common.base.Stopwatch
+```
+startTick // 开始时间
+elapsedNanos // 实耗时间(默认0)(通过源码发现只有在执行stop()后才会赋值)
+elapsed(java.util.concurrent.TimeUnit.MICROSECONDS) // 获取实耗时间(微秒)（当前时间 - 开始时间 + 实耗时间）
+toString() // 返回当前运行时间的字符串表示形式
+```
+
+com.google.common.util.concurrent.SmoothRateLimiter
+```
+storedPermits // 当前存储的许可证
+nextFreeTicketMicros // 下一个免费令牌微秒
+resync() // 基于当前时间更新 storedPermits 和 nextFreeTicketMicros
+```
+
