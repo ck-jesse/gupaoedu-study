@@ -19,7 +19,7 @@ public class Test {
         // permitsPerSecond 每秒许可数，根据指定的稳定吞吐率创建RateLimiter，这里的吞吐率是指每秒多少许可数（通常是指QPS，每秒多少查询）。
         // RateLimiter 并不提供公平性的保证。
         // 速率是每秒两个许可
-        RateLimiter rateLimiter = RateLimiter.create(3.0);
+        RateLimiter rateLimiter = RateLimiter.create(5.0);
 
         ExecutorService executor = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 10; i++) {

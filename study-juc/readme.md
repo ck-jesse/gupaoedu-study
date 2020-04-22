@@ -9,6 +9,7 @@
     1、AQS是 AbstractQueuedSynchronizer 的简称，他是一个队列同步器，被设计为一个基础同步器的框架；
     2、支持 共享锁模式 和 独占锁模式
     3、AQS本质上是一个双向链表队列，其中通过一个共享的同步状态、当前持有锁的线程来标记锁的状态、另外还含有 队列头部节点、尾部节点的字段，用来实现双向链表
+    http://ifeve.com/abstractqueuedsynchronizer-use/
 
 ## 问题2：ReentrantLock中公平锁和非公平锁的区别？
     分析：可通过源码来分析两者的区别
