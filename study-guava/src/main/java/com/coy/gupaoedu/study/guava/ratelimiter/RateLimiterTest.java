@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
  * @author chenck
  * @date 2020/4/20 20:07
  */
-public class Test {
+public class RateLimiterTest {
 
     @org.junit.Test
     public void testSample() {
