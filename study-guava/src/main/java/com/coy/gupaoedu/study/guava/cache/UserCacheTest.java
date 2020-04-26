@@ -26,6 +26,7 @@ public class UserCacheTest {
     // 监听器方法是在移除缓存是同步调用的，因为缓存的维护和请求响应通常是同时进行的,代价高昂的监听器方法在同步模式下会拖慢正常的缓存请求。
     // 在这种情况下,你可以使用 RemovalListeners.asynchronous(RemovalListener, Executor)把监听器装饰为异步操作。
     public static RemovalListener<String, User> removalListener = new RemovalListener<String, User>() {
+        @Override
         public void onRemoval(RemovalNotification<String, User> notification) {
             System.out.println(String.format("%s 触发移除，%s", DateUtils.getCurrentDateYYYYMMDDHHMMSS(), notification.getValue()));
         }

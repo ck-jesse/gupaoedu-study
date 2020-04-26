@@ -21,6 +21,7 @@ public class ExpireAfterWriteTest {
     // 这是一个本地缓存，guava提供的cache是一个简洁、高效，易于维护的。
     // 为什么这么说呢？因为并没有一个单独的线程用于刷新 OR 清理cache，对于cache的操作，都是通过访问/读写带来的，也就是说在读写中完成缓存的刷新操作！
     private static LoadingCache<Integer, AtomicInteger> cache = CacheBuilder.newBuilder()
+            .initialCapacity(10)
             .maximumSize(10)
             //.expireAfterAccess(5, TimeUnit.SECONDS)// 缓存项在给定时间内没有被读/写访问,则回收
             .expireAfterWrite(3, TimeUnit.SECONDS)// 缓存项在给定时间内没有被写访问(创建或覆盖),则回收

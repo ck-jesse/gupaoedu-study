@@ -1,3 +1,5 @@
+Guava Cache
+> Caffeine是一个基于Google开源的Guava设计理念的一个高性能内存缓存，使用java8开发，spring boot引入Caffeine后已经逐步废弃Guava的整合了。
 
 > 文档地址
 >
