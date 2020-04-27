@@ -21,6 +21,7 @@ public class CacheTest {
     public static void main(String[] args) throws InterruptedException {
 
         new Thread(new Runnable() {
+            @Override
             public void run() {
                 System.out.println("thread1");
                 try {
@@ -29,10 +30,11 @@ public class CacheTest {
                     // 如果缓存中不包含key对应的记录，Guava会启动一个线程执行Callable对象中的call方法，
                     // call方法的返回值会作为key对应的值被存储到缓存中，并且被get方法返回。
                     String value = cache.get("key", new Callable<String>() {
+                        @Override
                         public String call() throws Exception {
                             System.out.println("load1"); //加载数据线程执行标志
                             Thread.sleep(1000); //模拟加载时间
-                            return "auto load by Callable";
+                            return "auto load1 by Callable";
                         }
                     });
                     System.out.println("thread1 " + value);
@@ -43,14 +45,16 @@ public class CacheTest {
         }).start();
 
         new Thread(new Runnable() {
+            @Override
             public void run() {
                 System.out.println("thread2");
                 try {
                     String value = cache.get("key", new Callable<String>() {
+                        @Override
                         public String call() throws Exception {
                             System.out.println("load2"); //加载数据线程执行标志
                             Thread.sleep(1000); //模拟加载时间
-                            return "auto load by Callable";
+                            return "auto load2 by Callable";
                         }
                     });
                     System.out.println("thread2 " + value);
