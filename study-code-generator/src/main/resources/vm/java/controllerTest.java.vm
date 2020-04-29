@@ -70,6 +70,7 @@ public class ${ClassName}ControllerTest {
         ${ClassName}Proto.${ClassName}AddRequest.Builder request = ${ClassName}Proto.${ClassName}AddRequest.newBuilder();
 #foreach($column in $columns)
 #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaField != 'createTime' && $column.javaField != 'updateTime' && $column.javaField != 'delFlag')
 #if($column.javaField != $pkColumn.javaField)
 #if($column.protoType == 'uint64')
         request.set${AttrName}(0L);
@@ -77,6 +78,7 @@ public class ${ClassName}ControllerTest {
         request.set${AttrName}(0);
 #elseif($column.protoType == 'string')
         request.set${AttrName}("");
+#end
 #end
 #end
 #end
@@ -92,12 +94,14 @@ public class ${ClassName}ControllerTest {
         ${ClassName}Proto.${ClassName}UpdateRequest.Builder request = ${ClassName}Proto.${ClassName}UpdateRequest.newBuilder();
 #foreach($column in $columns)
 #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#if($column.javaField != 'createTime' && $column.javaField != 'updateTime' && $column.javaField != 'delFlag')
 #if($column.protoType == 'uint64')
         request.set${AttrName}(0L);
 #elseif($column.protoType == 'uint32')
         request.set${AttrName}(0);
 #elseif($column.protoType == 'string')
         request.set${AttrName}("");
+#end
 #end
 #end
 

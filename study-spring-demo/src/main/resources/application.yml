@@ -1,3 +1,8 @@
+server:
+  port: 8080
+  #servlet:
+  #  context-path: /study-spring-demo
+
 spring:
   application:
     name: study-spring-demo
@@ -6,12 +11,19 @@ spring:
     active: test
   # 缓存
   cache:
-    type: caffeine
-    caffeine:
-      spec: initialCapacity=10,maximumSize=200,expireAfterWrite=5s
+    # 一级缓存
+    #type: caffeine
+    #caffeine:
+    #  spec: initialCapacity=10,maximumSize=200,expireAfterWrite=5s
+    # 多级缓存
+    multi:
+      caffeine:
+        spec: initialCapacity=10,maximumSize=200,expireAfterWrite=5s
+      redis:
+        defaultTimeToLive: 1000
+        expires:
+          test1: 1000
+          test2: 2000
+          test3: 3000
 
-server:
-  port: 8080
-  #servlet:
-  #  context-path: /study-mybatis-plus
 

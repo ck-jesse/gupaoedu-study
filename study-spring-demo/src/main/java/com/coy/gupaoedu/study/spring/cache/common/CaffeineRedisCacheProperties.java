@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,13 +11,14 @@ import java.util.Map;
 
 /**
  * 一二级缓存属性配置
+ * 注：Caffeine 一级缓存，Redis 二级缓存
  *
  * @author chenck
  * @date 2020/4/26 20:44
  */
 @ConfigurationProperties(prefix = "spring.cache.multi")
 @Getter
-public class RedisCaffeineCacheProperties {
+public class CaffeineRedisCacheProperties {
 
     /**
      * 要创建的缓存名字
@@ -29,14 +29,11 @@ public class RedisCaffeineCacheProperties {
      * 是否存储空值，默认true，防止缓存穿透
      */
     private boolean allowNullValues = true;
+
     /**
      * 是否动态根据cacheName创建Cache的实现，默认true
      */
     private boolean dynamic = true;
-    /**
-     * 缓存key的前缀
-     */
-    private String cachePrefix;
 
     private final Caffeine caffeine = new Caffeine();
 
@@ -45,8 +42,13 @@ public class RedisCaffeineCacheProperties {
     /**
      * Caffeine specific cache properties.
      */
+    @Getter
+    @Setter
     public static class Caffeine {
-
+        /**
+         * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
+         */
+        private String spec;
     }
 
     /**
@@ -55,20 +57,14 @@ public class RedisCaffeineCacheProperties {
     @Getter
     @Setter
     public static class Redis {
-
         /**
          * 全局过期时间，单位毫秒，默认不过期
          * Entry expiration. By default the entries never expire.
          */
-        private Duration defaultTimeToLive;
+        private long defaultTimeToLive = 0L;
 
         /**
-         * Allow caching null values.
-         */
-        private boolean cacheNullValues = true;
-
-        /**
-         * Key prefix.
+         * 缓存Key prefix.
          */
         private String keyPrefix;
 
@@ -76,13 +72,15 @@ public class RedisCaffeineCacheProperties {
          * Whether to use the key prefix when writing to Redis.
          */
         private boolean useKeyPrefix = true;
+
         /**
          * 每个cacheName的过期时间，单位毫秒，优先级比defaultTimeToLive高
          */
         private Map<String, Long> expires = new HashMap<>();
+
         /**
          * 缓存更新时通知其他节点的topic名称
          */
-        private String topic = "cache:redis:caffeine:topic";
+        private String topic = "cache:caffeine:redis:topic";
     }
 }

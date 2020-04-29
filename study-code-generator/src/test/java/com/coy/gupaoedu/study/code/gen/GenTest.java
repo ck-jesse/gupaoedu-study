@@ -22,11 +22,11 @@ public class GenTest {
     GenTableService genTableService;
 
     String[] tableNames = {
-            "hx_banner_config",
-            "hx_card_catalog",
-            "hx_card_equity",
-            "hx_card_supplier",
-            "hx_popup_config",
+//            "hx_banner_config",
+//            "hx_card_catalog",
+//            "hx_card_equity",
+//            "hx_card_supplier",
+            "t_operate_log",
     };
 
     /**
@@ -60,6 +60,5 @@ public class GenTest {
             Map<String, String> dataMap = genTableService.previewCode(tableName);
         }
     }
-
 
 }
