@@ -63,15 +63,23 @@
         </dependency>
 
         <!-- 导入api包 -->
+        <!--产号服务服务-->
         <dependency>
             <groupId>com.hs.protosdk.platfrom-service</groupId>
             <artifactId>id-generator-service-api</artifactId>
             <version>0.0.5-SNAPSHOT</version>
         </dependency>
+        <!--秒杀商品服务-->
         <dependency>
             <groupId>com.hs.protosdk.platfrom-service</groupId>
             <artifactId>seckill-product-service-api</artifactId>
             <version>0.0.11-SNAPSHOT</version>
+        </dependency>
+        <!--权益卡服务-->
+        <dependency>
+            <groupId>com.hs.protosdk.platfrom-service</groupId>
+            <artifactId>hx-card-service-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <!--接口需要导入的包-->
