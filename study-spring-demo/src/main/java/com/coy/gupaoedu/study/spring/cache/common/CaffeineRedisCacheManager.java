@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.spring.cache.common;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import com.github.benmanes.caffeine.cache.Expiry;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,16 +17,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * 缓存管理器
+ *
  * @author chenck
  * @date 2020/4/28 19:54
  */
 public class CaffeineRedisCacheManager implements CacheManager {
-
+    // 缓存Map<cacheName, Cache>
     private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
     private boolean dynamic = true;
 
+    //
     private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
+
+    // 自定义过期策略，用于计算缓存项的过期时间
+    private Expiry<Object, Object> expiry;
 
     private RedisTemplate<Object, Object> redisTemplate;
 
@@ -121,12 +128,24 @@ public class CaffeineRedisCacheManager implements CacheManager {
     }
 
     /**
+     * Set the
+     * @param expiry the expiry to use in calculating the expiration time of cache entries
+     * @return void
+     */
+    public void setExpiry(Expiry<Object, Object> expiry) {
+        this.expiry = expiry;
+    }
+
+    /**
      * Create a native Caffeine Cache instance for the specified cache name.
      *
      * @param name the name of the cache
      * @return the native Caffeine Cache instance
      */
     protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
+        if (this.expiry != null) {
+            this.cacheBuilder.expireAfter(this.expiry);
+        }
         return this.cacheBuilder.build();
     }
 
