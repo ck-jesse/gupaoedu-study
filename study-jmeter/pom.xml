@@ -75,6 +75,13 @@
             <artifactId>seckill-product-service-api</artifactId>
             <version>0.0.11-SNAPSHOT</version>
         </dependency>
+        <!-- 商品服务 -->
+        <dependency>
+            <groupId>com.hs.protosdk.platfrom-service</groupId>
+            <artifactId>product-service-api</artifactId>
+            <version>1.0.2-SNAPSHOT</version>
+        </dependency>
+
         <!--权益卡服务-->
         <dependency>
             <groupId>com.hs.protosdk.platfrom-service</groupId>
