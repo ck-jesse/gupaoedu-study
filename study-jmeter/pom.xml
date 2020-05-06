@@ -79,7 +79,7 @@
         <dependency>
             <groupId>com.hs.protosdk.platfrom-service</groupId>
             <artifactId>hx-card-service-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.2-SNAPSHOT</version>
         </dependency>
 
         <!--接口需要导入的包-->
