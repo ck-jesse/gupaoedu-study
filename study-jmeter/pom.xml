@@ -96,7 +96,7 @@
     </dependencies>
 
     <build>
-        <finalName>id-generator-jmeter</finalName>
+        <finalName>hxcard-jmeter</finalName>
         <plugins>
             <!-- 配置将依赖包一并打入到项目的 jar 包中 -->
             <plugin>
