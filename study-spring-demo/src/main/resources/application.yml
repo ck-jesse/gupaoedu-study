@@ -3,12 +3,24 @@ server:
   #servlet:
   #  context-path: /study-spring-demo
 
+logging:
+  level:
+    root: info
+    # 日志级别指定到包或类
+    com.coy.gupaoedu.study.spring: debug
+
 spring:
   application:
     name: study-spring-demo
   profiles:
     # 注意: spring.profiles.active 配置在该配置文件中可能不生效，可在启动的环境变量中增加 spring.profiles.active=dev
     active: test
+  # spring boot redis配置
+  redis:
+    timeout: 3000
+    host: 127.0.0.1
+    port: 6379
+    password:
   # 缓存
   cache:
     # 一级缓存
@@ -17,13 +29,20 @@ spring:
     #  spec: initialCapacity=10,maximumSize=200,expireAfterWrite=5s
     # 多级缓存
     multi:
+      # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
+      #instanceId: a1
+      #
+      use:
+      # 一级缓存
       caffeine:
-        spec: initialCapacity=10,maximumSize=200,expireAfterWrite=5s
+         spec: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
+        # 高并发场景建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
+#        spec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s
+      # 二级缓存
       redis:
         defaultTimeToLive: 1000
+        # 设置缓存名称的过期时间(毫秒)
         expires:
-          test1: 1000
-          test2: 2000
-          test3: 3000
-
+          userCache: 30000
+          userCacheSync: 30000
 

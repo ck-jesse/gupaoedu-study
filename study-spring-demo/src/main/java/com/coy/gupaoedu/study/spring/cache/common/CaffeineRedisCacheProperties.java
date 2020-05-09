@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 一二级缓存属性配置
@@ -18,7 +19,13 @@ import java.util.Map;
  */
 @ConfigurationProperties(prefix = "spring.cache.multi")
 @Getter
+@Setter
 public class CaffeineRedisCacheProperties {
+
+    /**
+     * 缓存实例id（默认为UUID）
+     */
+    private String instanceId = UUID.randomUUID().toString().replaceAll("-", "");
 
     /**
      * 要创建的缓存名字

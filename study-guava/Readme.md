@@ -16,6 +16,11 @@ Guava Cache
 > 2、单机缓存，受机器内存限制，重启应用缓存数据会丢失，应用分布式部署会出现缓存数据不一致的情况
 
 
+```text
+expireAfterAccess=[duration]:指在指定时间内没有被读或写就回收
+expireAfterWrite=[duration]: 指在指定时间内没有被创建或覆盖就回收
+refreshAfterWrite=[duration]：指在指定时间内没有被创建/覆盖，则指定时间过后再次访问时会去刷新该缓存，在新值没有到来之前，始终返回旧值
+```
 
 ## LoadingCache#get 方法原理分析
 > com.google.common.cache.LoadingCache#get

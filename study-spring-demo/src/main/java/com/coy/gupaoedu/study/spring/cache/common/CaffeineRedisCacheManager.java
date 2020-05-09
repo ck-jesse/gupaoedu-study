@@ -1,5 +1,6 @@
 package com.coy.gupaoedu.study.spring.cache.common;
 
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
 import com.github.benmanes.caffeine.cache.Expiry;
@@ -33,6 +34,10 @@ public class CaffeineRedisCacheManager implements CacheManager {
 
     // 自定义过期策略，用于计算缓存项的过期时间
     private Expiry<Object, Object> expiry;
+
+    //
+    @Nullable
+    private CacheLoader<Object, Object> cacheLoader;
 
     private RedisTemplate<Object, Object> redisTemplate;
 
@@ -124,16 +129,32 @@ public class CaffeineRedisCacheManager implements CacheManager {
      * @return the Spring CaffeineCache adapter (or a decorator thereof)
      */
     protected Cache createCaffeineRedisCache(String name) {
-        return new CaffeineRedisCache(name, createNativeCaffeineCache(name), redisTemplate, caffeineRedisCacheProperties);
+        return new CaffeineRedisCache(name, createNativeCaffeineCache(name), redisTemplate, caffeineRedisCacheProperties, cacheLoader);
     }
 
     /**
-     * Set the
+     * Set the expiry for refreshAfterWrite
+     *
      * @param expiry the expiry to use in calculating the expiration time of cache entries
      * @return void
      */
     public void setExpiry(Expiry<Object, Object> expiry) {
         this.expiry = expiry;
+    }
+
+    /**
+     * Set the Caffeine CacheLoader to use for building each individual
+     * {@link CaffeineRedisCache} instance, turning it into a LoadingCache.
+     *
+     * @see #createNativeCaffeineCache
+     * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
+     * @see com.github.benmanes.caffeine.cache.LoadingCache
+     */
+    public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
+        if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
+            this.cacheLoader = cacheLoader;
+            refreshKnownCaches();
+        }
     }
 
     /**
@@ -145,6 +166,9 @@ public class CaffeineRedisCacheManager implements CacheManager {
     protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
         if (this.expiry != null) {
             this.cacheBuilder.expireAfter(this.expiry);
+        }
+        if (this.cacheLoader != null) {
+            return this.cacheBuilder.build(this.cacheLoader);
         }
         return this.cacheBuilder.build();
     }
@@ -176,5 +200,15 @@ public class CaffeineRedisCacheManager implements CacheManager {
 
         CaffeineRedisCache redisCaffeineCache = (CaffeineRedisCache) cache;
         redisCaffeineCache.clearLocalCache(key);
+    }
+
+    /**
+     * 判断是否为当前缓存实例
+     */
+    public boolean currentCacheInstance(String instanceId) {
+        if (caffeineRedisCacheProperties.getInstanceId().equals(instanceId)) {
+            return true;
+        }
+        return false;
     }
 }

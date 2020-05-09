@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @RestController
 @EnableCaching
-public class Application {
+public class Application1 {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(Application1.class, args);
     }
 
 }

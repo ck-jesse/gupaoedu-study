@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * refreshAfterWrite 同步刷新缓存：只阻塞加载数据的线程，其余线程返回旧数据。
+ * 注：缓存项只有在被检索时才会真正刷新
  *
  * @author chenck
  * @date 2019/10/16 18:10
@@ -53,7 +54,7 @@ public class RefreshAfterWriteSyncTest {
         cache.put(KEY, "coy");
         Thread.sleep(1500);
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 10; i++) {
             GetThread.startThread(i, KEY, cache);
         }
         // 让多个线程同时运行
@@ -62,7 +63,8 @@ public class RefreshAfterWriteSyncTest {
         // 模拟取最新的最新的值
         Thread.sleep(1500);
         System.out.println(Thread.currentThread().getName() + " value = " + cache.get(KEY));
-
+        Thread.sleep(2000);
+        GetThread.startThread(20, KEY, cache);
         // hold住主线程
         while (true) {
         }

@@ -19,12 +19,17 @@ public class CaffeineCacheController {
     CaffeineCacheService caffeineCacheService;
 
     @RequestMapping(value = "/queryUser")
-    public String queryUser(String userId) {
+    public User queryUser(String userId) {
         return caffeineCacheService.queryUser(userId);
     }
 
-    @RequestMapping(value = "/queryUserList")
-    public List<String> queryUserList(String userId) {
-        return caffeineCacheService.queryUserList(userId);
+    @RequestMapping(value = "/queryUserSync")
+    public User queryUserSync(String userId) {
+        return caffeineCacheService.queryUserSync(userId);
+    }
+
+    @RequestMapping(value = "/updateUser")
+    public List<User> updateUser(String userId) {
+        return caffeineCacheService.updateUser(userId);
     }
 }
