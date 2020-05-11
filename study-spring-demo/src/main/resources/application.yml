@@ -31,13 +31,15 @@ spring:
     multi:
       # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
       #instanceId: a1
-      #
-      use:
+      # 启用refreshAfterWrite，用于加载定义CustomCacheLoader或Expiry
+      enableRefreshAfterWrite: true
       # 一级缓存
       caffeine:
-         spec: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
-        # 高并发场景建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
-#        spec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s
+        # 高并发场景下建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
+        # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
+        spec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s
+        # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
+        # spec: initialCapacity=10,maximumSize=200,expireAfterWrite=30s,refreshAfterWrite=30s
       # 二级缓存
       redis:
         defaultTimeToLive: 1000

@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,7 @@ public class CacheAutoConfiguration {
      * 描述：因refreshAfterWrite必须使用LoadingCache,所以定义该默认的CacheLoader。
      */
     @Bean
+    @ConditionalOnProperty(value = "spring.cache.multi.enableRefreshAfterWrite", havingValue = "true")
     @ConditionalOnMissingBean
     public CustomCacheLoader cacheLoader() {
         return new CustomCacheLoader();
