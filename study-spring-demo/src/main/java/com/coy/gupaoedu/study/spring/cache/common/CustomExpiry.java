@@ -1,0 +1,70 @@
+package com.coy.gupaoedu.study.spring.cache.common;
+
+import com.alibaba.excel.util.DateUtils;
+import com.github.benmanes.caffeine.cache.Expiry;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 自定义过期策略 — 到期时间由 Expiry 实现独自计算，计算延长或缩短条目的生存时间
+ * 这个API和expireAfterWrite/expireAfterAccess两个API是互斥的，也就是只支持refreshAfterWrite
+ * 利用时间轮，来进行过期处理。时间轮一个高效的处理定时任务的结构，可以简单的将其看做是一个多维数组。
+ * 参考 https://www.cnblogs.com/liujinhua306/p/9808500.html
+ *
+ * @author chenck
+ * @date 2020/5/11 17:17
+ */
+public class CustomExpiry implements Expiry<Object, Object> {
+
+    private final Logger logger = LoggerFactory.getLogger(CustomExpiry.class);
+    private RedisTemplate<Object, Object> redisTemplate;
+    private CaffeineRedisCacheProperties caffeineRedisCacheProperties;
+
+    public CustomExpiry(RedisTemplate<Object, Object> redisTemplate, CaffeineRedisCacheProperties caffeineRedisCacheProperties) {
+        this.redisTemplate = redisTemplate;
+        this.caffeineRedisCacheProperties = caffeineRedisCacheProperties;
+    }
+
+    private String format(long nanoSeconds) {
+        return DateUtils.format(new Date(TimeUnit.NANOSECONDS.toMillis(nanoSeconds)), "yyyy-MM-dd HH:mm:ss.SSS");
+    }
+
+    // 返回创建后的过期时间
+    @Override
+    public long expireAfterCreate(@NonNull Object key, @NonNull Object value, long currentTime) {
+        Object redisKey = caffeineRedisCacheProperties.getRedis().getRedisKey("userCacheSync", key);
+        Long milliseconds = redisTemplate.opsForValue().getOperations().getExpire(redisKey, TimeUnit.MILLISECONDS);
+        // 当nanoSeconds==null时 会在事务或管道时
+        // 返回值为-1时 此键值没有设置过期日期
+        // 返回值为-2时 不存在此键
+        long time = currentTime + TimeUnit.MILLISECONDS.toNanos(milliseconds);
+        logger.info("[CustomExpiry] expireAfterCreate key={}, value={}, currentTime={}, milliseconds={}", key, value, format(currentTime),
+                format(time));
+
+        return time;
+    }
+
+    // 返回更新后的过期时间
+    @Override
+    public long expireAfterUpdate(@NonNull Object key, @NonNull Object value, long currentTime, @NonNegative long currentDuration) {
+        long duration = TimeUnit.NANOSECONDS.toSeconds(currentDuration - currentTime);
+        logger.info("[CustomExpiry] expireAfterUpdate key={}, value={}, currentTime={}, currentDuration={}, duration={}", key, value,
+                format(currentTime),
+                format(currentDuration), duration);
+        return currentDuration;
+    }
+
+    // 返回读取后的过期时间
+    @Override
+    public long expireAfterRead(@NonNull Object key, @NonNull Object value, long currentTime, @NonNegative long currentDuration) {
+        logger.info("[CustomExpiry] expireAfterRead key={}, value={}, currentTime={}, currentDuration={}", key, value, format(currentTime),
+                format(currentDuration));
+        return currentDuration;
+    }
+}

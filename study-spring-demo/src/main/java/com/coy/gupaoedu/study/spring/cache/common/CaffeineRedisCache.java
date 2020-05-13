@@ -101,7 +101,7 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
         if (this.caffeineCache instanceof LoadingCache) {
             if (null != this.cacheLoader && this.cacheLoader instanceof CustomCacheLoader) {
                 // 将valueLoader设置为null，保证load()直接返回null
-                ((CustomCacheLoader) this.cacheLoader).setValueLoader(null);
+                ((CustomCacheLoader) this.cacheLoader).addValueLoader(key, null);
             }
             Object value = ((LoadingCache<Object, Object>) this.caffeineCache).get(key);
             logger.debug("LoadingCache.get cache, key={}, value={}", key, value);
@@ -124,11 +124,8 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
             if (null != this.cacheLoader && this.cacheLoader instanceof CustomCacheLoader) {
                 // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
                 CustomCacheLoader customCacheLoader = ((CustomCacheLoader) this.cacheLoader);
-                customCacheLoader.setInstanceId(this.instanceId);
-                customCacheLoader.setName(this.name);
-                customCacheLoader.setRedisTemplate(this.redisTemplate);
                 customCacheLoader.setCaffeineRedisCache(this);
-                customCacheLoader.setValueLoader(valueLoader);
+                customCacheLoader.addValueLoader(key, valueLoader);
 
                 // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
                 Object value = ((LoadingCache<Object, Object>) this.caffeineCache).get(key);
@@ -226,9 +223,9 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
      */
     public Object getRedisKey(Object key) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.name).append(":");
-        if (this.redis.isUseKeyPrefix() && !StringUtils.isEmpty(this.redis.getKeyPrefix())) {
-            sb.append(this.redis.getKeyPrefix()).append(":");
+        sb.append(name).append(":");
+        if (redis.isUseKeyPrefix() && !StringUtils.isEmpty(redis.getKeyPrefix())) {
+            sb.append(redis.getKeyPrefix()).append(":");
         }
         sb.append(key.toString());
         return sb.toString();
@@ -238,7 +235,7 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
      * 获取过期时间
      */
     public long getRedisExpire() {
-        Long cacheNameExpire = redis.getExpires().get(this.name);
+        Long cacheNameExpire = redis.getExpires().get(name);
         if (null != cacheNameExpire) {
             return cacheNameExpire.longValue();
         }

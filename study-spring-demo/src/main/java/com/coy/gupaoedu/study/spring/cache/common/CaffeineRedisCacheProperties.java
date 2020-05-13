@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.spring.cache.common;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +27,11 @@ public class CaffeineRedisCacheProperties {
      * 缓存实例id（默认为UUID）
      */
     private String instanceId = UUID.randomUUID().toString().replaceAll("-", "");
+
+    /**
+     * 启用refreshAfterWrite，用于加载定义CustomCacheLoader或Expiry
+     */
+    private Boolean enableRefreshAfterWrite = false;
 
     /**
      * 要创建的缓存名字
@@ -55,7 +61,27 @@ public class CaffeineRedisCacheProperties {
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
          */
-        private String spec;
+        private String defaultSpec;
+
+        /**
+         * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
+         * <key,value>=<cacheName, spec>
+         */
+        private Map<String, String> specMap = new HashMap<>();
+
+        /**
+         * 获取 spec
+         */
+        public String getSpec(String cacheName) {
+            if (!StringUtils.hasText(cacheName)) {
+                return defaultSpec;
+            }
+            String spec = specMap.get(cacheName);
+            if (!StringUtils.hasText(spec)) {
+                return defaultSpec;
+            }
+            return spec;
+        }
     }
 
     /**
@@ -89,5 +115,19 @@ public class CaffeineRedisCacheProperties {
          * 缓存更新时通知其他节点的topic名称
          */
         private String topic = "cache:caffeine:redis:topic";
+
+        /**
+         * 获取redis key
+         */
+        public Object getRedisKey(String name, Object key) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(name).append(":");
+            if (this.isUseKeyPrefix() && !StringUtils.isEmpty(this.getKeyPrefix())) {
+                sb.append(this.getKeyPrefix()).append(":");
+            }
+            sb.append(key.toString());
+            return sb.toString();
+        }
+
     }
 }

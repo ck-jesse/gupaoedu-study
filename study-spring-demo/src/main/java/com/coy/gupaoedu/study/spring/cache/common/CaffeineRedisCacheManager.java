@@ -2,18 +2,16 @@ package com.coy.gupaoedu.study.spring.cache.common;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.CaffeineSpec;
-import com.github.benmanes.caffeine.cache.Expiry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,29 +22,30 @@ import java.util.concurrent.ConcurrentMap;
  * @date 2020/4/28 19:54
  */
 public class CaffeineRedisCacheManager implements CacheManager {
+
+    private final Logger logger = LoggerFactory.getLogger(CaffeineRedisCacheManager.class);
+
     // 缓存Map<cacheName, Cache>
     private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
     private boolean dynamic = true;
 
-    //
-    private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
-
-    // 自定义过期策略，用于计算缓存项的过期时间
-    private Expiry<Object, Object> expiry;
-
-    //
-    @Nullable
-    private CacheLoader<Object, Object> cacheLoader;
+    private Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
 
     private RedisTemplate<Object, Object> redisTemplate;
 
     private CaffeineRedisCacheProperties caffeineRedisCacheProperties;
 
+    private CaffeineRedisCacheProperties.Caffeine caffeine;
+
+    private CaffeineRedisCacheProperties.Redis redis;
+
     public CaffeineRedisCacheManager(RedisTemplate<Object, Object> redisTemplate, CaffeineRedisCacheProperties caffeineRedisCacheProperties) {
         this.redisTemplate = redisTemplate;
         this.dynamic = caffeineRedisCacheProperties.isDynamic();
         this.caffeineRedisCacheProperties = caffeineRedisCacheProperties;
+        this.caffeine = caffeineRedisCacheProperties.getCaffeine();
+        this.redis = caffeineRedisCacheProperties.getRedis();
     }
 
     @Override
@@ -88,73 +87,14 @@ public class CaffeineRedisCacheManager implements CacheManager {
     }
 
     /**
-     * Set the Caffeine to use for building each individual
-     * {@link CaffeineRedisCache} instance.
-     *
-     * @see #createNativeCaffeineCache
-     * @see com.github.benmanes.caffeine.cache.Caffeine#build()
-     */
-    public void setCaffeine(Caffeine<Object, Object> caffeine) {
-        Assert.notNull(caffeine, "Caffeine must not be null");
-        doSetCaffeine(caffeine);
-    }
-
-    /**
-     * Set the {@link CaffeineSpec} to use for building each individual
-     * {@link CaffeineRedisCache} instance.
-     *
-     * @see #createNativeCaffeineCache
-     * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
-     */
-    public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
-        doSetCaffeine(Caffeine.from(caffeineSpec));
-    }
-
-    /**
-     * Set the Caffeine cache specification String to use for building each
-     * individual {@link CaffeineRedisCache} instance. The given value needs to
-     * comply with Caffeine's {@link CaffeineSpec} (see its javadoc).
-     *
-     * @see #createNativeCaffeineCache
-     * @see com.github.benmanes.caffeine.cache.Caffeine#from(String)
-     */
-    public void setCacheSpecification(String cacheSpecification) {
-        doSetCaffeine(Caffeine.from(cacheSpecification));
-    }
-
-    /**
      * Create a new CaffeineRedisCache instance for the specified cache name.
      *
      * @param name the name of the cache
      * @return the Spring CaffeineCache adapter (or a decorator thereof)
      */
     protected Cache createCaffeineRedisCache(String name) {
-        return new CaffeineRedisCache(name, createNativeCaffeineCache(name), redisTemplate, caffeineRedisCacheProperties, cacheLoader);
-    }
-
-    /**
-     * Set the expiry for refreshAfterWrite
-     *
-     * @param expiry the expiry to use in calculating the expiration time of cache entries
-     * @return void
-     */
-    public void setExpiry(Expiry<Object, Object> expiry) {
-        this.expiry = expiry;
-    }
-
-    /**
-     * Set the Caffeine CacheLoader to use for building each individual
-     * {@link CaffeineRedisCache} instance, turning it into a LoadingCache.
-     *
-     * @see #createNativeCaffeineCache
-     * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
-     * @see com.github.benmanes.caffeine.cache.LoadingCache
-     */
-    public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
-        if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
-            this.cacheLoader = cacheLoader;
-            refreshKnownCaches();
-        }
+        Tuple2<com.github.benmanes.caffeine.cache.Cache<Object, Object>, CacheLoader> tuple2 = createNativeCaffeineCache(name);
+        return new CaffeineRedisCache(name, tuple2.getT1(), redisTemplate, caffeineRedisCacheProperties, tuple2.getT2());
     }
 
     /**
@@ -163,34 +103,30 @@ public class CaffeineRedisCacheManager implements CacheManager {
      * @param name the name of the cache
      * @return the native Caffeine Cache instance
      */
-    protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
-        if (this.expiry != null) {
-            this.cacheBuilder.expireAfter(this.expiry);
+    protected Tuple2<com.github.benmanes.caffeine.cache.Cache<Object, Object>, CacheLoader> createNativeCaffeineCache(String name) {
+        String spec = caffeine.getSpec(name);
+        logger.info("create native caffiene cache, name={}, spec={}", name, spec);
+        if (!StringUtils.hasText(spec)) {
+            return Tuple2.of(defaultCacheBuilder.build(), null);
         }
-        if (this.cacheLoader != null) {
-            return this.cacheBuilder.build(this.cacheLoader);
-        }
-        return this.cacheBuilder.build();
-    }
 
-    private void doSetCaffeine(Caffeine<Object, Object> cacheBuilder) {
-        if (!ObjectUtils.nullSafeEquals(this.cacheBuilder, cacheBuilder)) {
-            this.cacheBuilder = cacheBuilder;
-            refreshKnownCaches();
-        }
-    }
+        // 解析spec
+        CustomCaffeineSpec customCaffeineSpec = CustomCaffeineSpec.parse(spec);
+        Caffeine<Object, Object> cacheBuilder = customCaffeineSpec.toBuilder();
 
-    /**
-     * Create the known caches again with the current state of this manager.
-     */
-    private void refreshKnownCaches() {
-        for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
-            entry.setValue(createCaffeineRedisCache(entry.getKey()));
+        if ("refreshAfterWrite".equals(customCaffeineSpec.getExpireStrategy())) {
+            // TODO
+            cacheBuilder.expireAfter(new CustomExpiry(redisTemplate, caffeineRedisCacheProperties));
+
+            CustomCacheLoader cacheLoader = new CustomCacheLoader(caffeineRedisCacheProperties.getInstanceId(), name, redisTemplate);
+
+            return Tuple2.of(cacheBuilder.build(cacheLoader), cacheLoader);
         }
+        return Tuple2.of(cacheBuilder.build(), null);
     }
 
     /**
-     *
+     * 清理本地缓存
      */
     public void clearLocalCache(String cacheName, Object key) {
         Cache cache = cacheMap.get(cacheName);

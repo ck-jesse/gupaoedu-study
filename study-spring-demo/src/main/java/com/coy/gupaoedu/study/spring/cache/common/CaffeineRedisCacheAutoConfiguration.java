@@ -1,10 +1,6 @@
 package com.coy.gupaoedu.study.spring.cache.common;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.CaffeineSpec;
-import com.github.benmanes.caffeine.cache.Expiry;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -18,7 +14,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -39,52 +34,18 @@ public class CaffeineRedisCacheAutoConfiguration {
 
     private final CacheManagerCustomizers customizers;
 
-    private final Caffeine<Object, Object> caffeine;
-
-    private final CaffeineSpec caffeineSpec;
-
-    private final CacheLoader<Object, Object> cacheLoader;
-
-    // Caffeine 的 Expiry 只支持 refreshAfterWrite 策略
-    private final Expiry<Object, Object> expiry;
-
     // 构造器注入
     CaffeineRedisCacheAutoConfiguration(RedisTemplate<Object, Object> redisTemplate,
                                         CaffeineRedisCacheProperties caffeineRedisCacheProperties,
-                                        CacheManagerCustomizers customizers,
-                                        ObjectProvider<Caffeine<Object, Object>> caffeine,
-                                        ObjectProvider<CaffeineSpec> caffeineSpec,
-                                        ObjectProvider<Expiry<Object, Object>> expiry,
-                                        ObjectProvider<CacheLoader<Object, Object>> cacheLoader) {
+                                        CacheManagerCustomizers customizers) {
         this.redisTemplate = redisTemplate;
         this.caffeineRedisCacheProperties = caffeineRedisCacheProperties;
         this.customizers = customizers;
-        this.caffeine = caffeine.getIfAvailable();
-        this.caffeineSpec = caffeineSpec.getIfAvailable();
-        this.expiry = expiry.getIfAvailable();
-        this.cacheLoader = cacheLoader.getIfAvailable();
     }
 
     @Bean
     public CaffeineRedisCacheManager cacheManager() {
         CaffeineRedisCacheManager cacheManager = new CaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
-        // cache 构建
-        String specification = this.caffeineRedisCacheProperties.getCaffeine().getSpec();
-        if (StringUtils.hasText(specification)) {
-            cacheManager.setCacheSpecification(specification);
-        } else if (this.caffeineSpec != null) {
-            cacheManager.setCaffeineSpec(this.caffeineSpec);
-        } else if (this.caffeine != null) {
-            cacheManager.setCaffeine(this.caffeine);
-        }
-
-        if (this.expiry != null) {
-            cacheManager.setExpiry(expiry);
-        }
-
-        if (this.cacheLoader != null) {
-            cacheManager.setCacheLoader(this.cacheLoader);
-        }
 
         List<String> cacheNames = this.caffeineRedisCacheProperties.getCacheNames();
         if (!CollectionUtils.isEmpty(cacheNames)) {

@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -24,18 +26,29 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     private final Logger logger = LoggerFactory.getLogger(CustomCacheLoader.class);
 
+    /**
+     * <key, Callable>
+     * 用户保证并发场景下对于不同的key找到对应的Callable进行数据加载
+     */
+    private static final Map<Object, Callable> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
+
     private String instanceId;
     private String name;
     private RedisTemplate<Object, Object> redisTemplate;
     private CaffeineRedisCache caffeineRedisCache;
-    @Nullable
-    private Callable<?> valueLoader;
+
+    public CustomCacheLoader(String instanceId, String name, RedisTemplate<Object, Object> redisTemplate) {
+        this.instanceId = instanceId;
+        this.name = name;
+        this.redisTemplate = redisTemplate;
+    }
 
     @Nullable
     @Override
     public Object load(@NonNull Object key) throws Exception {
 
         // 直接返回null，目的是使后续逻辑去执行具体的加载数据方法，然后put到缓存
+        Callable<?> valueLoader = VALUE_LOADER_CACHE.get(key);
         if (null == valueLoader) {
             logger.info("[CustomCacheLoader] direct return, key={}, value=null", key);
             return null;
@@ -63,7 +76,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
             return value;
         } catch (Exception ex) {
-            throw new Cache.ValueRetrievalException(key, this.valueLoader, ex);
+            throw new Cache.ValueRetrievalException(key, valueLoader, ex);
         }
 
     }
@@ -96,8 +109,10 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      * 设置加载数据的处理器
      * 注：在获取缓存时动态设置valueLoader，来达到实现不同缓存调用不同的加载数据逻辑的目的。
      */
-    public void setValueLoader(Callable valueLoader) {
-        this.valueLoader = valueLoader;
+    public void addValueLoader(Object key, Callable valueLoader) {
+        if (VALUE_LOADER_CACHE.containsKey(key)) {
+            VALUE_LOADER_CACHE.put(key, valueLoader);
+        }
     }
 
     public void setCaffeineRedisCache(CaffeineRedisCache caffeineRedisCache) {
