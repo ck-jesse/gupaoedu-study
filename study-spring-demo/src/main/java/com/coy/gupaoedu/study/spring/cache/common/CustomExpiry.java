@@ -16,10 +16,17 @@ import java.util.concurrent.TimeUnit;
  * 这个API和expireAfterWrite/expireAfterAccess两个API是互斥的，也就是只支持refreshAfterWrite
  * 利用时间轮，来进行过期处理。时间轮一个高效的处理定时任务的结构，可以简单的将其看做是一个多维数组。
  * 参考 https://www.cnblogs.com/liujinhua306/p/9808500.html
+ * <p>
+ * 注：不建议使用该方式来控制分布式缓存的一致性
+ * 1、只能控制refreshAfterWrite策略下的一致性
+ * 2、Expiry有一个缺陷，验证下来发现，如果使用CustomExpiry，获取过期缓存项时会阻塞所有线程，未使用到refreshAfterWrite的特性
+ * <p>
+ * 采用定时刷新的方式
  *
  * @author chenck
  * @date 2020/5/11 17:17
  */
+@Deprecated
 public class CustomExpiry implements Expiry<Object, Object> {
 
     private final Logger logger = LoggerFactory.getLogger(CustomExpiry.class);
@@ -65,7 +72,7 @@ public class CustomExpiry implements Expiry<Object, Object> {
     public long expireAfterUpdate(@NonNull Object key, @NonNull Object value, long currentTime, @NonNegative long currentDuration) {
         logger.info("[CustomExpiry] expireAfterUpdate key={}, currentTime={}, currentDuration={}", key,
                 format(currentTime), format(currentDuration));
-        return expireTime;
+        return currentDuration;
     }
 
     // 返回读取后的过期时间

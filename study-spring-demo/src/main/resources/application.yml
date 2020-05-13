@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
   #servlet:
   #  context-path: /study-spring-demo
 
@@ -42,7 +42,7 @@ spring:
         # defaultSpec: initialCapacity=10,maximumSize=200,expireAfterWrite=30s,refreshAfterWrite=30s
         specs:
           userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
-          userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s
+          userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
       # 二级缓存
       redis:
         topic: 1000

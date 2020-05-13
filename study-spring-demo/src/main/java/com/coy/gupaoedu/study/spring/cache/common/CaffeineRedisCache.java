@@ -142,7 +142,6 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
                 logger.debug("LoadingCache.get(key, callable) cache, key={}, value={}", key, value);
                 return (T) fromStoreValue(value);
             }
-            logger.debug("get(key, callable) cache, key={}", key);
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
