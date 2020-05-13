@@ -64,9 +64,7 @@ message ${ClassName}VO {
 
 // 新增${functionName}
 message ${ClassName}AddRequest {
-    string operatorId = 1; //操作人id
-    string operatorName = 2; //操作人姓名
-#set($num=2)
+#set($num=0)
 #foreach ($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
 #if($column.javaField != 'createTime' && $column.javaField != 'updateTime' && $column.javaField != 'delFlag')
@@ -87,9 +85,7 @@ message ${ClassName}AddResponse {
 
 // 修改${functionName}
 message ${ClassName}UpdateRequest {
-    string operatorId = 1; //操作人id
-    string operatorName = 2; //操作人姓名
-#set($num=2)
+#set($num=0)
 #foreach ($column in $columns)
 #if($column.javaField != 'createTime' && $column.javaField != 'updateTime' && $column.javaField != 'delFlag')
     #set($num=$num + 1)

@@ -26,7 +26,12 @@ public class GenTest {
 //            "hx_card_catalog",
 //            "hx_card_equity",
 //            "hx_card_supplier",
-            "t_operate_log",
+//            "t_operate_log",
+            "t_sync_order_err_log",
+            "t_sync_order_detail",
+            "t_sync_order_delivery_address",
+            "t_sync_order_all_commission_detail",
+            "t_sync_order",
     };
 
     /**

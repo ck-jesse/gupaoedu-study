@@ -48,7 +48,7 @@ public class ${ClassName} implements Serializable {
 #elseif($column.javaType == "Integer")
             $column.javaField = 0;
 #elseif($column.javaType == "Double")
-            $column.javaField = 0;
+            $column.javaField = 0.0;
 #elseif($column.javaType == "BigDecimal")
             $column.javaField = BigDecimal.ZERO;
 #end
