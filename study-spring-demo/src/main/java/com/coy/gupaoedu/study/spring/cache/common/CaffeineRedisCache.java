@@ -59,6 +59,11 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
     private final CaffeineRedisCacheProperties.Redis redis;
 
     /**
+     * 过期时间(ms)
+     */
+    private long expireTime = 0L;
+
+    /**
      * Create a {@link CaffeineRedisCache} instance with the specified name and the
      * given internal {@link com.github.benmanes.caffeine.cache.Cache} to use.
      *
@@ -68,7 +73,8 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
      * @param caffeineRedisCacheProperties the properties for this cache
      */
     public CaffeineRedisCache(String name, Cache<Object, Object> caffeineCache, RedisTemplate<Object, Object> redisTemplate,
-                              CaffeineRedisCacheProperties caffeineRedisCacheProperties, CacheLoader<Object, Object> cacheLoader) {
+                              CaffeineRedisCacheProperties caffeineRedisCacheProperties, CacheLoader<Object, Object> cacheLoader,
+                              long expireTime) {
         super(caffeineRedisCacheProperties.isAllowNullValues());
         Assert.notNull(caffeineRedisCacheProperties.getInstanceId(), "Instance Id must not be null");
         Assert.notNull(name, "Name must not be null");
@@ -81,6 +87,7 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
         this.caffeine = caffeineRedisCacheProperties.getCaffeine();
         this.redis = caffeineRedisCacheProperties.getRedis();
         this.cacheLoader = cacheLoader;
+        this.expireTime = expireTime;
     }
 
     @Override
@@ -93,8 +100,10 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
         return this.caffeineCache;
     }
 
-    // @Cacheable(sync=false) 进入此方法
-    // 并发场景：未做同步控制，所以存在多个线程同时加载数据的情况，即可能存在缓存击穿的情况
+    /**
+     * @Cacheable(sync=false) 进入此方法
+     * 并发场景：未做同步控制，所以存在多个线程同时加载数据的情况，即可能存在缓存击穿的情况
+     */
     @Override
     @Nullable
     public ValueWrapper get(Object key) {
@@ -113,13 +122,14 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
         return value;
     }
 
-    // @Cacheable(sync=true) 进入此方法
-    // 并发场景：仅一个线程加载数据，其他线程均阻塞
-    // 注：借助Callable入参，可以实现不同缓存调用不同的加载数据逻辑的目的。
+    /**
+     * @Cacheable(sync=true) 进入此方法
+     * 并发场景：仅一个线程加载数据，其他线程均阻塞
+     * 注：借助Callable入参，可以实现不同缓存调用不同的加载数据逻辑的目的。
+     */
     @Override
     @Nullable
     public <T> T get(Object key, final Callable<T> valueLoader) {
-        // 通过 CustomCacheLoader + refreshAfterWrite 实现不同缓存调用不同的加载数据逻辑的目的。
         if (this.caffeineCache instanceof LoadingCache) {
             if (null != this.cacheLoader && this.cacheLoader instanceof CustomCacheLoader) {
                 // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
@@ -150,11 +160,10 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
             return value;
         }
 
-        Object redisKey = getRedisKey(key);
-        value = redisTemplate.opsForValue().get(redisKey);
+        value = getRedisValue(key);
 
         if (value != null) {
-            logger.debug("lookup get cache from redis and put in caffeine, the key is : {}", redisKey);
+            logger.debug("lookup get cache from redis and put in caffeine, key={}", key);
             caffeineCache.put(key, value);
         }
         return value;
@@ -164,7 +173,8 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
     public void put(Object key, @Nullable Object value) {
         logger.debug("put cache, key={}, value={}", key, value);
         Object userValue = toStoreValue(value);
-        redisTemplate.opsForValue().set(getRedisKey(key), userValue, getRedisExpire(), TimeUnit.MILLISECONDS);
+
+        setRedisValue(key, userValue);
 
         cacheChangePush(new CacheMessage(this.instanceId, this.name, key));
 
@@ -176,14 +186,12 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
     public ValueWrapper putIfAbsent(Object key, @Nullable final Object value) {
         logger.debug("putIfAbsent cache, key={}, value={}", key, value);
         Object userValue = toStoreValue(value);
-        Object redisKey = getRedisKey(key);
         // 如果不存在，则设置
-        boolean flag = this.redisTemplate.opsForValue().setIfAbsent(redisKey, userValue, getRedisExpire(), TimeUnit.MILLISECONDS);
+        boolean flag = this.redisTemplate.opsForValue().setIfAbsent(getRedisKey(key), userValue, getRedisExpireTime(), TimeUnit.MILLISECONDS);
 
         if (!flag) {
             // key存在，则取原值并返回
-            Object oldValue = redisTemplate.opsForValue().get(redisKey);
-            return toValueWrapper(oldValue);
+            return toValueWrapper(getRedisValue(key));
         }
 
         cacheChangePush(new CacheMessage(this.instanceId, this.name, key));
@@ -218,6 +226,14 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
         this.caffeineCache.invalidateAll();
     }
 
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public RedisTemplate<Object, Object> getRedisTemplate() {
+        return redisTemplate;
+    }
+
     /**
      * 获取redis key
      */
@@ -232,14 +248,18 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
     }
 
     /**
-     * 获取过期时间
+     * 获取过期时间(ms)
      */
-    public long getRedisExpire() {
-        Long cacheNameExpire = redis.getExpires().get(name);
-        if (null != cacheNameExpire) {
-            return cacheNameExpire.longValue();
-        }
-        return redis.getDefaultTimeToLive();
+    public long getRedisExpireTime() {
+        return expireTime;
+    }
+
+    public Object getRedisValue(Object key) {
+        return redisTemplate.opsForValue().get(getRedisKey(key));
+    }
+
+    public void setRedisValue(Object key, Object value) {
+        redisTemplate.opsForValue().set(getRedisKey(key), value, getRedisExpireTime(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -253,7 +273,7 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
      * 清理本地缓存
      */
     public void clearLocalCache(Object key) {
-        logger.info("clear local cache, key={}", key);
+        logger.info("clear local cache, name={}, key={}", this.name, key);
         if (key == null) {
             caffeineCache.invalidateAll();
         } else {
@@ -295,7 +315,7 @@ public class CaffeineRedisCache extends AbstractValueAdaptingCache {
                 value = toStoreValue(this.valueLoader.call());
                 logger.debug("[LoadFunction] load cache, key={}, value={}", key, value);
 
-                redisTemplate.opsForValue().set(getRedisKey(key), value, getRedisExpire(), TimeUnit.MILLISECONDS);
+                redisTemplate.opsForValue().set(getRedisKey(key), value, getRedisExpireTime(), TimeUnit.MILLISECONDS);
 
                 cacheChangePush(new CacheMessage(this.instanceId, this.name, key));
 

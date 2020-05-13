@@ -1,5 +1,9 @@
 package com.coy.gupaoedu.study.spring.cache.common;
 
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.RemovalListener;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -30,6 +34,21 @@ public class CacheAutoConfiguration {
     }
 
     /**
+     * 移除监听器
+     */
+    @Bean
+    public RemovalListener<Object, Object> removalListener() {
+        return new RemovalListener<Object, Object>() {
+            private final Logger logger = LoggerFactory.getLogger(RemovalListener.class);
+
+            @Override
+            public void onRemoval(@Nullable Object key, @Nullable Object value, @NonNull RemovalCause cause) {
+                logger.debug("[RemovalListener] key={}, value={}", key, value);
+            }
+        };
+    }
+
+    /**
      * 自定义CacheLoader
      * 描述：因refreshAfterWrite必须使用LoadingCache,所以定义该默认的CacheLoader。
      */
@@ -49,5 +68,4 @@ public class CacheAutoConfiguration {
     public CustomExpiry expiry(RedisTemplate<Object, Object> redisTemplate, CaffeineRedisCacheProperties caffeineRedisCacheProperties) {
         return new CustomExpiry(redisTemplate, caffeineRedisCacheProperties);
     }*/
-
 }

@@ -26,9 +26,18 @@ public class CustomExpiry implements Expiry<Object, Object> {
     private RedisTemplate<Object, Object> redisTemplate;
     private CaffeineRedisCacheProperties caffeineRedisCacheProperties;
 
-    public CustomExpiry(RedisTemplate<Object, Object> redisTemplate, CaffeineRedisCacheProperties caffeineRedisCacheProperties) {
+    private String name;
+    /**
+     * 过期时间(ms)
+     */
+    private long expireTime = 0L;
+
+    public CustomExpiry(RedisTemplate<Object, Object> redisTemplate, CaffeineRedisCacheProperties caffeineRedisCacheProperties,
+                        String name, long expireTime) {
         this.redisTemplate = redisTemplate;
         this.caffeineRedisCacheProperties = caffeineRedisCacheProperties;
+        this.name = name;
+        this.expireTime = expireTime;
     }
 
     private String format(long nanoSeconds) {
@@ -38,33 +47,32 @@ public class CustomExpiry implements Expiry<Object, Object> {
     // 返回创建后的过期时间
     @Override
     public long expireAfterCreate(@NonNull Object key, @NonNull Object value, long currentTime) {
-        Object redisKey = caffeineRedisCacheProperties.getRedis().getRedisKey("userCacheSync", key);
+        Object redisKey = caffeineRedisCacheProperties.getRedis().getRedisKey(name, key);
         Long milliseconds = redisTemplate.opsForValue().getOperations().getExpire(redisKey, TimeUnit.MILLISECONDS);
         // 当nanoSeconds==null时 会在事务或管道时
         // 返回值为-1时 此键值没有设置过期日期
         // 返回值为-2时 不存在此键
-        long time = currentTime + TimeUnit.MILLISECONDS.toNanos(milliseconds);
-        logger.info("[CustomExpiry] expireAfterCreate key={}, value={}, currentTime={}, milliseconds={}", key, value, format(currentTime),
-                format(time));
+        if (null == milliseconds || -1 == milliseconds || -2 == milliseconds) {
+            return expireTime;
+        }
+        logger.info("[CustomExpiry] expireAfterCreate key={}, currentTime={}, milliseconds={}", key, format(currentTime), milliseconds);
 
-        return time;
+        return TimeUnit.MILLISECONDS.toNanos(milliseconds);
     }
 
     // 返回更新后的过期时间
     @Override
     public long expireAfterUpdate(@NonNull Object key, @NonNull Object value, long currentTime, @NonNegative long currentDuration) {
-        long duration = TimeUnit.NANOSECONDS.toSeconds(currentDuration - currentTime);
-        logger.info("[CustomExpiry] expireAfterUpdate key={}, value={}, currentTime={}, currentDuration={}, duration={}", key, value,
-                format(currentTime),
-                format(currentDuration), duration);
-        return currentDuration;
+        logger.info("[CustomExpiry] expireAfterUpdate key={}, currentTime={}, currentDuration={}", key,
+                format(currentTime), format(currentDuration));
+        return expireTime;
     }
 
     // 返回读取后的过期时间
     @Override
     public long expireAfterRead(@NonNull Object key, @NonNull Object value, long currentTime, @NonNegative long currentDuration) {
-        logger.info("[CustomExpiry] expireAfterRead key={}, value={}, currentTime={}, currentDuration={}", key, value, format(currentTime),
-                format(currentDuration));
+        // 返回currentDuration，则不修改缓存的过期时间
+        // The {@code currentDuration} may be returned to not modify the expiration time
         return currentDuration;
     }
 }

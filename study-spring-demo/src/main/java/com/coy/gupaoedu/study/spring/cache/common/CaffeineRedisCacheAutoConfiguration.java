@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring.cache.common;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -34,19 +35,26 @@ public class CaffeineRedisCacheAutoConfiguration {
 
     private final CacheManagerCustomizers customizers;
 
+    private final RemovalListener<Object, Object> removalListener;
+
     // 构造器注入
     CaffeineRedisCacheAutoConfiguration(RedisTemplate<Object, Object> redisTemplate,
                                         CaffeineRedisCacheProperties caffeineRedisCacheProperties,
-                                        CacheManagerCustomizers customizers) {
+                                        CacheManagerCustomizers customizers,
+                                        RemovalListener<Object, Object> removalListener) {
         this.redisTemplate = redisTemplate;
         this.caffeineRedisCacheProperties = caffeineRedisCacheProperties;
         this.customizers = customizers;
+        this.removalListener = removalListener;
     }
 
     @Bean
     public CaffeineRedisCacheManager cacheManager() {
         CaffeineRedisCacheManager cacheManager = new CaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
 
+        if (null != this.removalListener) {
+            cacheManager.setRemovalListener(this.removalListener);
+        }
         List<String> cacheNames = this.caffeineRedisCacheProperties.getCacheNames();
         if (!CollectionUtils.isEmpty(cacheNames)) {
             cacheManager.setCacheNames(cacheNames);

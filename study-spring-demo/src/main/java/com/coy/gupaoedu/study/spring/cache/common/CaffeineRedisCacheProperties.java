@@ -58,6 +58,12 @@ public class CaffeineRedisCacheProperties {
     @Getter
     @Setter
     public static class Caffeine {
+
+        /**
+         * true 表示构建异步缓存
+         */
+        private boolean asyncCache = true;
+
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
          */
@@ -67,7 +73,7 @@ public class CaffeineRedisCacheProperties {
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
          * <key,value>=<cacheName, spec>
          */
-        private Map<String, String> specMap = new HashMap<>();
+        private Map<String, String> specs = new HashMap<>();
 
         /**
          * 获取 spec
@@ -76,7 +82,7 @@ public class CaffeineRedisCacheProperties {
             if (!StringUtils.hasText(cacheName)) {
                 return defaultSpec;
             }
-            String spec = specMap.get(cacheName);
+            String spec = specs.get(cacheName);
             if (!StringUtils.hasText(spec)) {
                 return defaultSpec;
             }
@@ -90,11 +96,6 @@ public class CaffeineRedisCacheProperties {
     @Getter
     @Setter
     public static class Redis {
-        /**
-         * 全局过期时间，单位毫秒，默认不过期
-         * Entry expiration. By default the entries never expire.
-         */
-        private long defaultTimeToLive = 0L;
 
         /**
          * 缓存Key prefix.
@@ -105,11 +106,6 @@ public class CaffeineRedisCacheProperties {
          * Whether to use the key prefix when writing to Redis.
          */
         private boolean useKeyPrefix = true;
-
-        /**
-         * 每个cacheName的过期时间，单位毫秒，优先级比defaultTimeToLive高
-         */
-        private Map<String, Long> expires = new HashMap<>();
 
         /**
          * 缓存更新时通知其他节点的topic名称

@@ -6,12 +6,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 自定义CacheLoader
@@ -32,16 +30,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      */
     private static final Map<Object, Callable> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
 
-    private String instanceId;
-    private String name;
-    private RedisTemplate<Object, Object> redisTemplate;
     private CaffeineRedisCache caffeineRedisCache;
-
-    public CustomCacheLoader(String instanceId, String name, RedisTemplate<Object, Object> redisTemplate) {
-        this.instanceId = instanceId;
-        this.name = name;
-        this.redisTemplate = redisTemplate;
-    }
 
     @Nullable
     @Override
@@ -50,7 +39,12 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         // 直接返回null，目的是使后续逻辑去执行具体的加载数据方法，然后put到缓存
         Callable<?> valueLoader = VALUE_LOADER_CACHE.get(key);
         if (null == valueLoader) {
-            logger.info("[CustomCacheLoader] direct return, key={}, value=null", key);
+            logger.info("[CustomCacheLoader] valueLoader is null direct return, key={}, value=null", key);
+            return null;
+        }
+
+        if (null == caffeineRedisCache) {
+            logger.info("[CustomCacheLoader] caffeineRedisCache is null direct return, key={}, value=null", key);
             return null;
         }
 
@@ -58,27 +52,26 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         try {
             logger.debug("[CustomCacheLoader] load cache, key={}", key);
             // 走到此处，表明已经从本地缓存中没有获取到数据，所以先从redis中获取数据
-            Object redisKey = caffeineRedisCache.getRedisKey(key);
-            Object value = redisTemplate.opsForValue().get(redisKey);
+            Object value = caffeineRedisCache.getRedisValue(key);
 
             if (value != null) {
-                logger.info("[CustomCacheLoader] get cache from redis, key={}, value={}", redisKey, value);
+                logger.info("[CustomCacheLoader] get cache from redis, key={}, value={}", key, value);
                 // 从redis中获取到数据后不需要显示设置到本地缓存，利用Caffeine本身的机制进行设置
                 return value;
             }
+
             // 执行业务方法获取数据
             value = valueLoader.call();
             logger.info("[CustomCacheLoader] load data from method, key={}, value={}", key, value);
 
-            redisTemplate.opsForValue().set(redisKey, value, caffeineRedisCache.getRedisExpire(), TimeUnit.MILLISECONDS);
+            caffeineRedisCache.setRedisValue(key, value);
 
-            caffeineRedisCache.cacheChangePush(new CacheMessage(this.instanceId, this.name, key));
+            caffeineRedisCache.cacheChangePush(new CacheMessage(caffeineRedisCache.getInstanceId(), caffeineRedisCache.getName(), key));
 
             return value;
         } catch (Exception ex) {
             throw new Cache.ValueRetrievalException(key, valueLoader, ex);
         }
-
     }
 
     /**
@@ -93,24 +86,13 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      * }
      */
 
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setRedisTemplate(RedisTemplate<Object, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
-
     /**
      * 设置加载数据的处理器
      * 注：在获取缓存时动态设置valueLoader，来达到实现不同缓存调用不同的加载数据逻辑的目的。
      */
     public void addValueLoader(Object key, Callable valueLoader) {
-        if (VALUE_LOADER_CACHE.containsKey(key)) {
+        Callable oldCallable = VALUE_LOADER_CACHE.get(key);
+        if (null == oldCallable) {
             VALUE_LOADER_CACHE.put(key, valueLoader);
         }
     }

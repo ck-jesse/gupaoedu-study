@@ -404,6 +404,22 @@ public class CustomCaffeineSpec {
         return "";
     }
 
+    /**
+     * 获取过期时间
+     */
+    public long getExpireTime() {
+        if (expireAfterAccessTimeUnit != null) {
+            return expireAfterAccessTimeUnit.toMillis(expireAfterAccessDuration);
+        }
+        if (expireAfterWriteTimeUnit != null) {
+            return expireAfterWriteTimeUnit.toMillis(expireAfterWriteDuration);
+        }
+        if (refreshAfterWriteTimeUnit != null) {
+            return refreshAfterWriteTimeUnit.toMillis(refreshAfterWriteDuration);
+        }
+        return UNSET_INT;
+    }
+
     public String getSpecification() {
         return specification;
     }
