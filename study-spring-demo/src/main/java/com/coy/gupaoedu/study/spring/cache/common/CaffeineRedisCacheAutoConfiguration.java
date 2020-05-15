@@ -14,16 +14,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.util.CollectionUtils;
-
-import java.util.List;
 
 /**
  * @author chenck
  * @date 2020/4/29 10:58
  */
 @Configuration
-@ConditionalOnClass({Caffeine.class, CaffeineRedisCacheManager.class})
+@ConditionalOnClass({Caffeine.class, CaffeineRedisCacheManager.class, AsyncCaffeineRedisCacheManager.class})
 @ConditionalOnMissingBean(CacheManager.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @EnableConfigurationProperties(CaffeineRedisCacheProperties.class)
@@ -48,16 +45,21 @@ public class CaffeineRedisCacheAutoConfiguration {
         this.removalListener = removalListener;
     }
 
+    /**
+     * 定义同步Caffeine
+     */
     @Bean
-    public CaffeineRedisCacheManager cacheManager() {
-        CaffeineRedisCacheManager cacheManager = new CaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
+    @ConditionalOnMissingBean
+    public ExtendCacheManager cacheManager() {
+        ExtendCacheManager cacheManager = null;
+        if (caffeineRedisCacheProperties.getCaffeine().isAsyncCache()) {
+            cacheManager = new AsyncCaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
+        } else {
+            cacheManager = new CaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
+        }
 
         if (null != this.removalListener) {
             cacheManager.setRemovalListener(this.removalListener);
-        }
-        List<String> cacheNames = this.caffeineRedisCacheProperties.getCacheNames();
-        if (!CollectionUtils.isEmpty(cacheNames)) {
-            cacheManager.setCacheNames(cacheNames);
         }
 
         // 扩展点，源码中有很多可以借鉴的点
@@ -66,10 +68,10 @@ public class CaffeineRedisCacheAutoConfiguration {
 
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisTemplate<Object, Object> redisTemplate,
-                                                                       CaffeineRedisCacheManager caffeineRedisCacheManager) {
+                                                                       ExtendCacheManager extendCacheManager) {
         RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
         redisMessageListenerContainer.setConnectionFactory(redisTemplate.getConnectionFactory());
-        CacheMessageListener cacheMessageListener = new CacheMessageListener(redisTemplate, caffeineRedisCacheManager);
+        CacheMessageListener cacheMessageListener = new CacheMessageListener(redisTemplate, extendCacheManager);
         redisMessageListenerContainer.addMessageListener(cacheMessageListener, new ChannelTopic(caffeineRedisCacheProperties.getRedis().getTopic()));
         return redisMessageListenerContainer;
     }

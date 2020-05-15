@@ -17,24 +17,24 @@ public class CacheMessageListener implements MessageListener {
 
     private RedisTemplate<Object, Object> redisTemplate;
 
-    private CaffeineRedisCacheManager caffeineRedisCacheManager;
+    private ExtendCacheManager extendCacheManager;
 
-    public CacheMessageListener(RedisTemplate<Object, Object> redisTemplate, CaffeineRedisCacheManager redisCaffeineCacheManager) {
+    public CacheMessageListener(RedisTemplate<Object, Object> redisTemplate, ExtendCacheManager extendCacheManager) {
         super();
         this.redisTemplate = redisTemplate;
-        this.caffeineRedisCacheManager = redisCaffeineCacheManager;
+        this.extendCacheManager = extendCacheManager;
     }
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
         CacheMessage cacheMessage = (CacheMessage) redisTemplate.getValueSerializer().deserialize(message.getBody());
-        if (caffeineRedisCacheManager.currentCacheInstance(cacheMessage.getInstanceId())) {
+        if (extendCacheManager.currentCacheInstance(cacheMessage.getInstanceId())) {
             logger.info("[RedisTopicMessage] the same instanceId not clear local cache, instanceId={}, cacheName={}, key={}",
                     cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey());
             return;
         }
         logger.info("[RedisTopicMessage] clear local cache, instanceId={}, cacheName={}, key={}",
                 cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey());
-        caffeineRedisCacheManager.clearLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
+        extendCacheManager.clearLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
     }
 }

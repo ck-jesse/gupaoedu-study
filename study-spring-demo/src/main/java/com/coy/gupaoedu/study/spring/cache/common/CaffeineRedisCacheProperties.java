@@ -2,12 +2,12 @@ package com.coy.gupaoedu.study.spring.cache.common;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,16 +27,6 @@ public class CaffeineRedisCacheProperties {
      * 缓存实例id（默认为UUID）
      */
     private String instanceId = UUID.randomUUID().toString().replaceAll("-", "");
-
-    /**
-     * 启用refreshAfterWrite，用于加载定义CustomCacheLoader或Expiry
-     */
-    private Boolean enableRefreshAfterWrite = false;
-
-    /**
-     * 要创建的缓存名字
-     */
-    private List<String> cacheNames = new ArrayList<>();
 
     /**
      * 是否存储空值，默认true，防止缓存穿透
@@ -59,10 +49,22 @@ public class CaffeineRedisCacheProperties {
     @Setter
     public static class Caffeine {
 
+        private final Logger logger = LoggerFactory.getLogger(Caffeine.class);
+
         /**
-         * true 表示构建异步缓存
+         * true 表示构建异步缓存Caffeine false 表示构建同步缓存Caffeine
          */
         private boolean asyncCache = true;
+
+        /**
+         * 缓存刷新调度线程池的大小
+         */
+        private Integer refreshPoolSize = 2;
+
+        /**
+         * 缓存刷新的频率(秒)
+         */
+        private Long refreshPeriod = 3L;
 
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
@@ -87,6 +89,18 @@ public class CaffeineRedisCacheProperties {
                 return defaultSpec;
             }
             return spec;
+        }
+
+        /**
+         * 获取自定义的CaffeineSpec
+         */
+        public CustomCaffeineSpec getCaffeineSpec(String name) {
+            String spec = this.getSpec(name);
+            logger.info("create native caffiene cache, name={}, spec={}", name, spec);
+            if (!StringUtils.hasText(spec)) {
+                return null;
+            }
+            return CustomCaffeineSpec.parse(spec);
         }
     }
 
