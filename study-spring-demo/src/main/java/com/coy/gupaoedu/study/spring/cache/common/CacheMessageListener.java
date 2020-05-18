@@ -29,12 +29,16 @@ public class CacheMessageListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         CacheMessage cacheMessage = (CacheMessage) redisTemplate.getValueSerializer().deserialize(message.getBody());
         if (extendCacheManager.currentCacheInstance(cacheMessage.getInstanceId())) {
-            logger.info("[RedisCacheTopicMessage] the same instanceId not refresh local cache, instanceId={}, cacheName={}, key={}",
-                    cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey());
+            logger.info("[RedisCacheTopicMessage] the same instanceId not deal local cache, instanceId={}, cacheName={}, key={}, optType={}",
+                    cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey(), cacheMessage.getOptType());
             return;
         }
-        logger.info("[RedisCacheTopicMessage] refresh local cache, instanceId={}, cacheName={}, key={}",
-                cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey());
-        extendCacheManager.refreshLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
+        logger.info("[RedisCacheTopicMessage] deal local cache, instanceId={}, cacheName={}, key={}, optType={}",
+                cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey(), cacheMessage.getOptType());
+        if (CacheConsts.CACHE_REFRESH.equals(cacheMessage.getOptType())) {
+            extendCacheManager.refreshLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
+        } else {
+            extendCacheManager.clearLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
+        }
     }
 }

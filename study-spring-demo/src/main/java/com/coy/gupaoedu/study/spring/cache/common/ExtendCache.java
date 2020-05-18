@@ -37,8 +37,11 @@ public interface ExtendCache extends Cache {
 
     /**
      * 缓存变更时通知其他节点清理本地缓存
+     *
+     * @param key
+     * @param optType 操作类型 refresh/clear
      */
-    void cacheChangePush(@NonNull Object key);
+    void cacheChangePush(@NonNull Object key, String optType);
 
     /**
      * 清理本地缓存
@@ -58,8 +61,14 @@ public interface ExtendCache extends Cache {
     void refreshAll();
 
     /**
+     * 刷新过期缓存
+     * 注：通过LoadingCache.get(key)来刷新过期缓存，若缓存未到过期时间则不刷新
+     */
+    void refreshExpireCache(@NonNull Object key);
+
+    /**
      * 刷新所有过期的缓存
-     * 注：通过LoadingCache.get(key)来刷新过期缓存
+     * 注：通过LoadingCache.get(key)来刷新过期缓存，若缓存未到过期时间则不刷新
      */
     void refreshAllExpireCache();
 }

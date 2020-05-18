@@ -161,6 +161,7 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
     @Override
     public void refresh(@NonNull Object key) {
         if (this.caffeineCache instanceof AsyncLoadingCache) {
+            // 注：refresh方法会重新加载数据
             logger.info("refresh cache, name={}, key={}", this.getName(), key);
             AsyncLoadingCache loadingCache = (AsyncLoadingCache) caffeineCache;
             loadingCache.synchronous().refresh(key);
@@ -175,6 +176,15 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
                 logger.debug("refreshAll cache, name={}, key={}", this.getName(), key);
                 loadingCache.synchronous().refresh(key);
             }
+        }
+    }
+
+    @Override
+    public void refreshExpireCache(@NonNull Object key) {
+        if (this.caffeineCache instanceof AsyncLoadingCache) {
+            logger.debug("refreshExpireCache cache, name={}, key={}", this.getName(), key);
+            // 通过LoadingCache.get(key)来刷新过期缓存
+            ((AsyncLoadingCache) caffeineCache).synchronous().get(key);
         }
     }
 

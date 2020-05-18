@@ -40,31 +40,31 @@ public class CaffeineCacheService {
      * 建议：设置@Cacheable的sync=true，可以利用Caffeine的特性，防止缓存击穿（方式同一个key和不同key）
      */
     @Cacheable(value = "userCacheSync", key = "#userId", sync = true)
-    public User queryUserSync(String userId) {
-        User user = new User(userId, "addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+    public List<User> queryUserSync(String userId) {
+        List<User> list = new ArrayList<>();
+        list.add(new User(userId, "addr1"));
+        list.add(new User(userId, "addr2"));
+        list.add(new User(userId, "addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
-                "-addr-addr-addr-addr-addr-addr");
+                "-addr-addr-addr-addr-addr-addr"));
         try {
             Thread.sleep(2000);// 模拟加载数据的耗时
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        logger.info("加载数据:{}", user);
-        return user;
+        logger.info("加载数据:{}", list);
+        return list;
     }
 
     /**
      * 淘汰缓存
      */
-    @CacheEvict(value = "userCache", key = "#userId")
-    public List<User> updateUser(String userId) {
-        List<User> list = new ArrayList<>();
-        list.add(new User(userId, "addr1"));
-        list.add(new User(userId, "addr2"));
-        return list;
+    @CacheEvict(value = "userCacheSync", key = "#userId")
+    public String evictUserSync(String userId) {
+        return userId;
     }
 }

@@ -102,7 +102,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
 
         setRedisValue(key, userValue);
 
-        cacheChangePush(key);
+        cacheChangePush(key, CacheConsts.CACHE_REFRESH);
 
         put0(key, value);
     }
@@ -120,7 +120,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
             return toValueWrapper(getRedisValue(key));
         }
 
-        cacheChangePush(key);
+        cacheChangePush(key, CacheConsts.CACHE_REFRESH);
 
         put0(key, value);
 
@@ -133,7 +133,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
         // 先清除redis中缓存数据，然后清除caffeine中的缓存，避免短时间内如果先清除caffeine缓存后其他请求会再从redis里加载到caffeine中
         this.redisTemplate.delete(getRedisKey(key));
 
-        cacheChangePush(key);
+        cacheChangePush(key, CacheConsts.CACHE_CLEAR);
 
         evict0(key);
     }
@@ -147,7 +147,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
             redisTemplate.delete(key);
         }
 
-        cacheChangePush(null);
+        cacheChangePush(null, CacheConsts.CACHE_CLEAR);
 
         clear0();
     }
@@ -184,8 +184,8 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
     }
 
     @Override
-    public void cacheChangePush(Object key) {
-        redisTemplate.convertAndSend(redis.getTopic(), new CacheMessage(this.instanceId, this.name, key));
+    public void cacheChangePush(Object key, String optType) {
+        redisTemplate.convertAndSend(redis.getTopic(), new CacheMessage(this.instanceId, this.name, key, optType));
     }
 
     // the abstract method of operate native cache

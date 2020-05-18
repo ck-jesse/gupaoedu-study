@@ -18,16 +18,18 @@ public class CacheMessage implements Serializable {
     private String instanceId;// 缓存实例id
     private String cacheName;// 缓存名称
     private Object key;// 缓存key
+    private String optType;// 操作类型 refresh/clear
 
     public CacheMessage() {
 
     }
 
-    public CacheMessage(String instanceId, String cacheName, Object key) {
+    public CacheMessage(String instanceId, String cacheName, Object key, String optType) {
         super();
         this.instanceId = instanceId;
         this.cacheName = cacheName;
         this.key = key;
+        this.optType = optType;
     }
 
 }

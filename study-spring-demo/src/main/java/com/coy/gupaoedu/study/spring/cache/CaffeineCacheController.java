@@ -1,5 +1,7 @@
 package com.coy.gupaoedu.study.spring.cache;
 
+import com.coy.gupaoedu.study.spring.cache.common.CacheConsts;
+import com.coy.gupaoedu.study.spring.cache.common.ExtendCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,18 +20,34 @@ public class CaffeineCacheController {
     @Autowired
     CaffeineCacheService caffeineCacheService;
 
+    @Autowired
+    ExtendCacheManager extendCacheManager;
+
     @RequestMapping(value = "/queryUser")
     public User queryUser(String userId) {
         return caffeineCacheService.queryUser(userId);
     }
 
     @RequestMapping(value = "/queryUserSync")
-    public User queryUserSync(String userId) {
+    public List<User> queryUserSync(String userId) {
         return caffeineCacheService.queryUserSync(userId);
     }
 
-    @RequestMapping(value = "/updateUser")
-    public List<User> updateUser(String userId) {
-        return caffeineCacheService.updateUser(userId);
+    @RequestMapping(value = "/evictUserSync")
+    public String evictUserSync(String userId) {
+        return caffeineCacheService.evictUserSync(userId);
+    }
+
+    /**
+     * 清除缓存
+     */
+    @RequestMapping(value = "/evictCache")
+    public String evictCache(String cacheName, String key, String optType) {
+        if (CacheConsts.CACHE_REFRESH.equals(optType)) {
+            extendCacheManager.refreshLocalCache(cacheName, key);
+        } else {
+            extendCacheManager.clearLocalCache(cacheName, key);
+        }
+        return "success";
     }
 }

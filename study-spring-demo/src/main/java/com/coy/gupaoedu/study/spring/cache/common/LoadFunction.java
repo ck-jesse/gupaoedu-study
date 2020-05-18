@@ -43,7 +43,7 @@ public class LoadFunction implements Function<Object, Object> {
 
             extendCache.setRedisValue(key, value);
 
-            extendCache.cacheChangePush(key);
+            extendCache.cacheChangePush(key, CacheConsts.CACHE_REFRESH);
 
             return value;
         } catch (Exception ex) {

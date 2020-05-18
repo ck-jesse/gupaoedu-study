@@ -139,6 +139,15 @@ public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
     }
 
     @Override
+    public void refreshExpireCache(@NonNull Object key) {
+        if (this.caffeineCache instanceof LoadingCache) {
+            logger.debug("refreshExpireCache cache, name={}, key={}", this.getName(), key);
+            // 通过LoadingCache.get(key)来刷新过期缓存
+            ((LoadingCache) caffeineCache).get(key);
+        }
+    }
+
+    @Override
     public void refreshAllExpireCache() {
         if (this.caffeineCache instanceof LoadingCache) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
