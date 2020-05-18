@@ -44,12 +44,12 @@ public class CaffeineCacheService {
         List<User> list = new ArrayList<>();
         list.add(new User(userId, "addr1"));
         list.add(new User(userId, "addr2"));
-        list.add(new User(userId, "addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+        list.add(new User(userId, /*"addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
                 "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
-                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +*/
                 "-addr-addr-addr-addr-addr-addr"));
         try {
             Thread.sleep(2000);// 模拟加载数据的耗时

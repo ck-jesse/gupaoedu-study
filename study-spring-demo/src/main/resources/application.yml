@@ -7,7 +7,7 @@ logging:
   level:
     root: info
     # 日志级别指定到包或类
-    com.coy.gupaoedu.study.spring: debug
+    com.coy.gupaoedu.study.spring: info
 
 spring:
   application:
