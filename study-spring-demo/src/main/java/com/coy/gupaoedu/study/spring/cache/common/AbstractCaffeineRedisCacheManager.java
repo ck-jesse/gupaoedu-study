@@ -99,6 +99,17 @@ public abstract class AbstractCaffeineRedisCacheManager implements ExtendCacheMa
     }
 
     @Override
+    public void refreshLocalCache(String cacheName, Object key) {
+        Cache cache = cacheMap.get(cacheName);
+        if (cache == null) {
+            return;
+        }
+
+        AsyncCaffeineRedisCache redisCaffeineCache = (AsyncCaffeineRedisCache) cache;
+        redisCaffeineCache.refresh(key);
+    }
+
+    @Override
     public boolean currentCacheInstance(String instanceId) {
         return caffeineRedisCacheProperties.getInstanceId().equals(instanceId);
     }

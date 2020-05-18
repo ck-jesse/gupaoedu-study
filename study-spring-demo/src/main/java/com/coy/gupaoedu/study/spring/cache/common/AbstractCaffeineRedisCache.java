@@ -82,14 +82,14 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
     protected Object lookup(Object key) {
         Object value = lookup0(key);
         if (value != null) {
-            logger.debug("lookup get cache from caffeine, key={}", key);
+            logger.debug("lookup get cache from caffeine, cacheName={}, key={}", this.getName(), key);
             return value;
         }
 
         value = getRedisValue(key);
 
         if (value != null) {
-            logger.debug("lookup get cache from redis and put in caffeine, key={}", key);
+            logger.debug("lookup get cache from redis and put in caffeine, cacheName={}, key={}", this.getName(), key);
             put0(key, value);
         }
         return value;
@@ -97,7 +97,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
 
     @Override
     public void put(Object key, @Nullable Object value) {
-        logger.debug("put cache, key={}, value={}", key, value);
+        logger.debug("put cache, cacheName={}, key={}, value={}", this.getName(), key, value);
         Object userValue = toStoreValue(value);
 
         setRedisValue(key, userValue);
@@ -110,7 +110,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
     @Override
     @Nullable
     public ValueWrapper putIfAbsent(Object key, @Nullable final Object value) {
-        logger.debug("putIfAbsent cache, key={}, value={}", key, value);
+        logger.debug("putIfAbsent cache, cacheName={}, key={}, value={}", this.getName(), key, value);
         Object userValue = toStoreValue(value);
         // 如果不存在，则设置
         boolean flag = this.redisTemplate.opsForValue().setIfAbsent(getRedisKey(key), userValue, getExpireTime(), TimeUnit.MILLISECONDS);
@@ -129,7 +129,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
 
     @Override
     public void evict(Object key) {
-        logger.debug("evict cache, key={}", key);
+        logger.debug("evict cache, cacheName={}, key={}", this.getName(), key);
         // 先清除redis中缓存数据，然后清除caffeine中的缓存，避免短时间内如果先清除caffeine缓存后其他请求会再从redis里加载到caffeine中
         this.redisTemplate.delete(getRedisKey(key));
 
@@ -140,7 +140,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
 
     @Override
     public void clear() {
-        logger.debug("clear all cache");
+        logger.debug("clear all cache, cacheName={}", this.getName());
         // 先清除redis中缓存数据，然后清除caffeine中的缓存，避免短时间内如果先清除caffeine缓存后其他请求会再从redis里加载到caffeine中
         Set<Object> keys = redisTemplate.keys(this.name.concat(":"));
         for (Object key : keys) {

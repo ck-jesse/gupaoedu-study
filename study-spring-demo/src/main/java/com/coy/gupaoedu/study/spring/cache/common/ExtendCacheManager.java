@@ -23,6 +23,11 @@ public interface ExtendCacheManager extends CacheManager {
     void clearLocalCache(String cacheName, Object key);
 
     /**
+     * 刷新本地缓存
+     */
+    void refreshLocalCache(String cacheName, Object key);
+
+    /**
      * 判断是否为当前缓存实例
      */
     boolean currentCacheInstance(String instanceId);

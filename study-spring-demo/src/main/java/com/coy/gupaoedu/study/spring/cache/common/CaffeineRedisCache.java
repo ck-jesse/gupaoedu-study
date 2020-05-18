@@ -51,12 +51,12 @@ public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
     public ValueWrapper get(Object key) {
         if (this.caffeineCache instanceof LoadingCache) {
             Object value = ((LoadingCache<Object, Object>) this.caffeineCache).get(key);
-            logger.debug("LoadingCache.get cache, key={}, value={}", key, value);
+            logger.debug("LoadingCache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
             return toValueWrapper(value);
         }
 
         ValueWrapper value = super.get(key);
-        logger.debug("Cache.get cache, key={}, value={}", key, value);
+        logger.debug("Cache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
         return value;
     }
 
@@ -77,14 +77,14 @@ public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
 
                 // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
                 Object value = ((LoadingCache<Object, Object>) this.caffeineCache).get(key);
-                logger.debug("LoadingCache.get(key, callable) cache, key={}, value={}", key, value);
+                logger.debug("LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
                 return (T) fromStoreValue(value);
             }
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
         Object value = this.caffeineCache.get(key, new LoadFunction(this, valueLoader));
-        logger.debug("get(key, callable) cache, key={}, value={}", key, value);
+        logger.debug("Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
         return (T) fromStoreValue(value);
     }
 

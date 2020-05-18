@@ -28,18 +28,18 @@ public class LoadFunction implements Function<Object, Object> {
     @Override
     public Object apply(Object key) {
         try {
-            logger.debug("[LoadFunction] load cache, key={}", key);
+            logger.debug("[LoadFunction] load cache, cacheName={}, key={}", extendCache.getName(), key);
             // 走到此处，表明已经从本地缓存中没有获取到数据，所以先从redis中获取数据
             Object value = extendCache.getRedisValue(key);
 
             if (value != null) {
-                logger.info("[LoadFunction] get cache from redis, key={}, value={}", key, value);
+                logger.info("[LoadFunction] get cache from redis, cacheName={}, key={}, value={}", extendCache.getName(), key, value);
                 // 从redis中获取到数据后不需要显示设置到本地缓存，利用Caffeine本身的机制进行设置
                 return value;
             }
             // 执行业务方法获取数据
             value = extendCache.toStoreValueWrap(this.valueLoader.call());
-            logger.info("[LoadFunction] load data from method, key={}, value={}", key, value);
+            logger.debug("[LoadFunction] load data from method, cacheName={}, key={}, value={}", extendCache.getName(), key, value);
 
             extendCache.setRedisValue(key, value);
 

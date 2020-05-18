@@ -70,14 +70,14 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
             try {
                 value = ((AsyncLoadingCache<Object, Object>) this.caffeineCache).get(key).get();
             } catch (InterruptedException | ExecutionException e) {
-                logger.error("LoadingCache.get(key, callable) error, key=" + key, e);
+                logger.error("AsyncLoadingCache.get(key, callable) error, cacheName=" + this.getName() + ", key=" + key, e);
             }
-            logger.debug("LoadingCache.get cache, key={}, value={}", key, value);
+            logger.debug("AsyncLoadingCache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
             return toValueWrapper(value);
         }
 
         ValueWrapper value = super.get(key);
-        logger.debug("Cache.get cache, key={}, value={}", key, value);
+        logger.debug("AsyncCache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
         return value;
     }
 
@@ -101,9 +101,9 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
                 try {
                     value = ((AsyncLoadingCache<Object, Object>) this.caffeineCache).get(key).get();
                 } catch (InterruptedException | ExecutionException e) {
-                    logger.error("AsyncLoadingCache.get(key, callable) error, key=" + key, e);
+                    logger.error("AsyncLoadingCache.get(key, callable) error, cacheName=" + this.getName() + ", key=" + key, e);
                 }
-                logger.debug("AsyncLoadingCache.get(key, callable) cache, key={}, value={}", key, value);
+                logger.debug("AsyncLoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
                 return (T) fromStoreValue(value);
             }
         }
@@ -113,18 +113,22 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
         try {
             value = this.caffeineCache.get(key, new LoadFunction(this, valueLoader)).get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("get(key, callable) error, key=" + key, e);
+            logger.error("AsyncCache.get(key, callable) error, cacheName=" + this.getName() + ", key=" + key, e);
         }
-        logger.debug("get(key, callable) cache, key={}, value={}", key, value);
+        logger.debug("AsyncCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
         return (T) fromStoreValue(value);
     }
 
     @Override
     public Object lookup0(Object key) {
+        CompletableFuture future = caffeineCache.getIfPresent(key);
+        if (null == future) {
+            return null;
+        }
         try {
-            return caffeineCache.getIfPresent(key).get();
+            return future.get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("lookup0 error, key=" + key, e);
+            logger.error("lookup0 error, cacheName=" + this.getName() + ", key=" + key, e);
         }
         return null;
     }
@@ -168,7 +172,7 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
         if (this.caffeineCache instanceof AsyncLoadingCache) {
             AsyncLoadingCache loadingCache = (AsyncLoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.info("refreshAll cache, name={}, key={}", this.getName(), key);
+                logger.debug("refreshAll cache, name={}, key={}", this.getName(), key);
                 loadingCache.synchronous().refresh(key);
             }
         }
@@ -179,7 +183,7 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
         if (this.caffeineCache instanceof AsyncLoadingCache) {
             AsyncLoadingCache loadingCache = (AsyncLoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.info("refreshAllExpireCache cache, name={}, key={}", this.getName(), key);
+                logger.debug("refreshAllExpireCache cache, name={}, key={}", this.getName(), key);
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 loadingCache.synchronous().get(key);
             }

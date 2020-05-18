@@ -41,7 +41,13 @@ public class CaffeineCacheService {
      */
     @Cacheable(value = "userCacheSync", key = "#userId", sync = true)
     public User queryUserSync(String userId) {
-        User user = new User(userId, "addr");
+        User user = new User(userId, "addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr-addr" +
+                "-addr-addr-addr-addr-addr-addr");
         try {
             Thread.sleep(2000);// 模拟加载数据的耗时
         } catch (InterruptedException e) {

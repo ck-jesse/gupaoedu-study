@@ -29,12 +29,12 @@ public class CacheMessageListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         CacheMessage cacheMessage = (CacheMessage) redisTemplate.getValueSerializer().deserialize(message.getBody());
         if (extendCacheManager.currentCacheInstance(cacheMessage.getInstanceId())) {
-            logger.info("[RedisTopicMessage] the same instanceId not clear local cache, instanceId={}, cacheName={}, key={}",
+            logger.info("[RedisCacheTopicMessage] the same instanceId not refresh local cache, instanceId={}, cacheName={}, key={}",
                     cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey());
             return;
         }
-        logger.info("[RedisTopicMessage] clear local cache, instanceId={}, cacheName={}, key={}",
+        logger.info("[RedisCacheTopicMessage] refresh local cache, instanceId={}, cacheName={}, key={}",
                 cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey());
-        extendCacheManager.clearLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
+        extendCacheManager.refreshLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
     }
 }

@@ -54,12 +54,12 @@ public class CaffeineRedisCacheProperties {
         /**
          * true 表示构建异步缓存Caffeine false 表示构建同步缓存Caffeine
          */
-        private boolean asyncCache = true;
+        private boolean asyncCache = false;
 
         /**
          * 缓存刷新调度线程池的大小
          */
-        private Integer refreshPoolSize = 2;
+        private Integer refreshPoolSize = 1;
 
         /**
          * 缓存刷新的频率(秒)
