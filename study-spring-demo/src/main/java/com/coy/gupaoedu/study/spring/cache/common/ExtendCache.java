@@ -51,12 +51,16 @@ public interface ExtendCache extends Cache {
     /**
      * 异步加载{@code key}的新值
      * 如果新值加载成功，则替换缓存中的前一个值
+     *
+     * @see LoadFunction#apply(java.lang.Object)
      */
     void refresh(@NonNull Object key);
 
     /**
      * 异步加载所有新值
      * 如果新值加载成功，则替换缓存中的前一个值
+     *
+     * @see LoadFunction#apply(java.lang.Object)
      */
     void refreshAll();
 

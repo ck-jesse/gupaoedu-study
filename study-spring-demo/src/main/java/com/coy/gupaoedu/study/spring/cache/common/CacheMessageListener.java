@@ -36,7 +36,7 @@ public class CacheMessageListener implements MessageListener {
         logger.info("[RedisCacheTopicMessage] deal local cache, instanceId={}, cacheName={}, key={}, optType={}",
                 cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey(), cacheMessage.getOptType());
         if (CacheConsts.CACHE_REFRESH.equals(cacheMessage.getOptType())) {
-            extendCacheManager.refreshLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
+            extendCacheManager.refresh(cacheMessage.getCacheName(), cacheMessage.getKey());
         } else {
             extendCacheManager.clearLocalCache(cacheMessage.getCacheName(), cacheMessage.getKey());
         }

@@ -44,9 +44,9 @@ public class CaffeineCacheController {
     @RequestMapping(value = "/evictCache")
     public String evictCache(String cacheName, String key, String optType) {
         if (CacheConsts.CACHE_REFRESH.equals(optType)) {
-            extendCacheManager.refreshLocalCache(cacheName, key);
+            extendCacheManager.refresh(cacheName, key);
         } else {
-            extendCacheManager.clearLocalCache(cacheName, key);
+            extendCacheManager.clear(cacheName, key);
         }
         return "success";
     }

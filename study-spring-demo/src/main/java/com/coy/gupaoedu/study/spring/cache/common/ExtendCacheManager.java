@@ -18,14 +18,20 @@ public interface ExtendCacheManager extends CacheManager {
     void setRemovalListener(RemovalListener<Object, Object> removalListener);
 
     /**
+     * 清理缓存
+     * 注：先删除redis，再发送clear消息，然后再删除本地缓存；其他节点接收到clear消息，调用ExtendCacheManager#clearLocalCache()清理本地缓存
+     */
+    void clear(String cacheName, Object key);
+
+    /**
      * 清理本地缓存
      */
     void clearLocalCache(String cacheName, Object key);
 
     /**
-     * 刷新本地缓存
+     * 刷新缓存
      */
-    void refreshLocalCache(String cacheName, Object key);
+    void refresh(String cacheName, Object key);
 
     /**
      * 判断是否为当前缓存实例
