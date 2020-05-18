@@ -133,7 +133,6 @@ public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("refreshAll cache, name={}, key={}", this.getName(), key);
                 loadingCache.refresh(key);
-                loadingCache.get(key);
             }
         }
     }

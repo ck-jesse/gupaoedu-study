@@ -29,11 +29,11 @@ public class CacheMessageListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         CacheMessage cacheMessage = (CacheMessage) redisTemplate.getValueSerializer().deserialize(message.getBody());
         if (extendCacheManager.currentCacheInstance(cacheMessage.getInstanceId())) {
-            logger.info("[RedisCacheTopicMessage] the same instanceId not deal local cache, instanceId={}, cacheName={}, key={}, optType={}",
+            logger.info("[RedisCacheTopicMessage] the same instanceId not deal cache, instanceId={}, cacheName={}, key={}, optType={}",
                     cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey(), cacheMessage.getOptType());
             return;
         }
-        logger.info("[RedisCacheTopicMessage] deal local cache, instanceId={}, cacheName={}, key={}, optType={}",
+        logger.info("[RedisCacheTopicMessage] deal cache, instanceId={}, cacheName={}, key={}, optType={}",
                 cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey(), cacheMessage.getOptType());
         if (CacheConsts.CACHE_REFRESH.equals(cacheMessage.getOptType())) {
             extendCacheManager.refresh(cacheMessage.getCacheName(), cacheMessage.getKey());

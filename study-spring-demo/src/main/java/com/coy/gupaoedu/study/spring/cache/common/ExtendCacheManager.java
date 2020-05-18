@@ -1,10 +1,7 @@
 package com.coy.gupaoedu.study.spring.cache.common;
 
 import com.github.benmanes.caffeine.cache.RemovalListener;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author chenck
@@ -38,8 +35,4 @@ public interface ExtendCacheManager extends CacheManager {
      */
     boolean currentCacheInstance(String instanceId);
 
-    /**
-     * 获取缓存集合
-     */
-    ConcurrentMap<String, Cache> getCacheMap();
 }

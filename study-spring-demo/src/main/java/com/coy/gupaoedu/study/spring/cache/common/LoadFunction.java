@@ -37,6 +37,8 @@ public class LoadFunction implements Function<Object, Object> {
                 // 从redis中获取到数据后不需要显示设置到本地缓存，利用Caffeine本身的机制进行设置
                 return value;
             }
+            // TODO 此处可添加分布式锁来控制全局只有一个节点加载数据
+
             // 执行业务方法获取数据
             value = extendCache.toStoreValueWrap(this.valueLoader.call());
             logger.debug("[LoadFunction] load data from method, cacheName={}, key={}, value={}", extendCache.getName(), key, value);

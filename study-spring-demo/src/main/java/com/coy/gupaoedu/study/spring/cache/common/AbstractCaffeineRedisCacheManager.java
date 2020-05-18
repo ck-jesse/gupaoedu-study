@@ -133,12 +133,6 @@ public abstract class AbstractCaffeineRedisCacheManager implements ExtendCacheMa
      */
     protected abstract Cache createCaffeineRedisCache(String name);
 
-
-    @Override
-    public ConcurrentMap<String, Cache> getCacheMap() {
-        return cacheMap;
-    }
-
     // getter ... ...
 
     public boolean isDynamic() {
