@@ -29,7 +29,7 @@ public class CacheMessageListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         CacheMessage cacheMessage = (CacheMessage) redisTemplate.getValueSerializer().deserialize(message.getBody());
         if (extendCacheManager.currentCacheInstance(cacheMessage.getInstanceId())) {
-            logger.info("[RedisCacheTopicMessage] the same instanceId not deal cache, instanceId={}, cacheName={}, key={}, optType={}",
+            logger.debug("[RedisCacheTopicMessage] not deal cache instanceId is same, instanceId={}, cacheName={}, key={}, optType={}",
                     cacheMessage.getInstanceId(), cacheMessage.getCacheName(), cacheMessage.getKey(), cacheMessage.getOptType());
             return;
         }

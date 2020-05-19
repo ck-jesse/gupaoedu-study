@@ -11,6 +11,11 @@ import org.springframework.lang.Nullable;
 public interface ExtendCache extends Cache {
 
     /**
+     * 是否为LoadingCache
+     */
+    boolean isLoadingCache();
+
+    /**
      * 获取redis过期时间(ms)
      */
     long getExpireTime();

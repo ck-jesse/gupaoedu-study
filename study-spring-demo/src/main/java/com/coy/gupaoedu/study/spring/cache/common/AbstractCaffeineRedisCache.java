@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring.cache.common;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
@@ -10,6 +11,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,6 +31,9 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
      * 缓存名字
      */
     private final String name;
+
+    @Nullable
+    private final CacheLoader<Object, Object> cacheLoader;
 
     /**
      * RedisTemplate
@@ -59,7 +64,8 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
      * @param caffeineRedisCacheProperties the properties for this cache
      */
     public AbstractCaffeineRedisCache(String name, RedisTemplate<Object, Object> redisTemplate,
-                                      CaffeineRedisCacheProperties caffeineRedisCacheProperties, long expireTime) {
+                                      CaffeineRedisCacheProperties caffeineRedisCacheProperties, long expireTime,
+                                      CacheLoader<Object, Object> cacheLoader) {
         super(caffeineRedisCacheProperties.isAllowNullValues());
         Assert.notNull(caffeineRedisCacheProperties.getInstanceId(), "Instance Id must not be null");
         Assert.notNull(name, "Name must not be null");
@@ -70,11 +76,61 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
         this.caffeine = caffeineRedisCacheProperties.getCaffeine();
         this.redis = caffeineRedisCacheProperties.getRedis();
         this.expireTime = expireTime;
+        this.cacheLoader = cacheLoader;
     }
 
     @Override
     public final String getName() {
         return this.name;
+    }
+
+    /**
+     * @Cacheable(sync=false) 进入此方法
+     * 并发场景：未做同步控制，所以存在多个线程同时加载数据的情况，即可能存在缓存击穿的情况
+     */
+    @Override
+    @Nullable
+    public ValueWrapper get(Object key) {
+        if (isLoadingCache()) {
+            Object value = get0(key);
+            logger.debug("LoadingCache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+            return toValueWrapper(value);
+        }
+
+        ValueWrapper value = super.get(key);
+        logger.debug("Cache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+        return value;
+    }
+
+    /**
+     * @Cacheable(sync=true) 进入此方法
+     * 并发场景：仅一个线程加载数据，其他线程均阻塞
+     * 注：借助Callable入参，可以实现不同缓存调用不同的加载数据逻辑的目的。
+     */
+    @Override
+    @Nullable
+    public <T> T get(Object key, Callable<T> valueLoader) {
+        if (isLoadingCache()) {
+            if (null != this.cacheLoader) {
+                if (this.cacheLoader instanceof CustomCacheLoader) {
+                    // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
+                    CustomCacheLoader customCacheLoader = ((CustomCacheLoader) this.cacheLoader);
+                    customCacheLoader.setExtendCache(this);
+                    customCacheLoader.addValueLoader(key, valueLoader);
+                }
+
+                // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
+                Object value = get0(key);
+                logger.debug("LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+                return (T) fromStoreValue(value);
+            }
+        }
+
+        // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
+        //Object value = this.caffeineCache.get(key, new LoadFunction(this, valueLoader));
+        Object value = get0(key, valueLoader);
+        logger.debug("Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+        return (T) fromStoreValue(value);
     }
 
     @Override
@@ -189,6 +245,13 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
     }
 
     // the abstract method of operate native cache
+
+    /**
+     * 基于LoadingCache的get(key)
+     */
+    public abstract Object get0(Object key);
+
+    public abstract Object get0(Object key, Callable<?> valueLoader);
 
     public abstract Object lookup0(Object key);
 

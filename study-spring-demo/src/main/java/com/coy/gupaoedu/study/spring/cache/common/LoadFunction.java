@@ -33,7 +33,7 @@ public class LoadFunction implements Function<Object, Object> {
             Object value = extendCache.getRedisValue(key);
 
             if (value != null) {
-                logger.info("[LoadFunction] get cache from redis, cacheName={}, key={}, value={}", extendCache.getName(), key, value);
+                logger.debug("[LoadFunction] get cache from redis, cacheName={}, key={}, value={}", extendCache.getName(), key, value);
                 // 从redis中获取到数据后不需要显示设置到本地缓存，利用Caffeine本身的机制进行设置
                 return value;
             }

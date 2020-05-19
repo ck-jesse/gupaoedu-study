@@ -96,7 +96,7 @@ public class CaffeineRedisCacheProperties {
          */
         public CustomCaffeineSpec getCaffeineSpec(String name) {
             String spec = this.getSpec(name);
-            logger.info("create native caffiene cache, name={}, spec={}", name, spec);
+            logger.info("create a native Caffeine Cache, name={}, spec={}", name, spec);
             if (!StringUtils.hasText(spec)) {
                 return null;
             }

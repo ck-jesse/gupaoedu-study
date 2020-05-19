@@ -62,7 +62,7 @@ public class CustomExpiry implements Expiry<Object, Object> {
         if (null == milliseconds || -1 == milliseconds || -2 == milliseconds) {
             return expireTime;
         }
-        logger.info("[CustomExpiry] expireAfterCreate key={}, currentTime={}, milliseconds={}", key, format(currentTime), milliseconds);
+        logger.debug("[CustomExpiry] expireAfterCreate key={}, currentTime={}, milliseconds={}", key, format(currentTime), milliseconds);
 
         return TimeUnit.MILLISECONDS.toNanos(milliseconds);
     }
@@ -70,7 +70,7 @@ public class CustomExpiry implements Expiry<Object, Object> {
     // 返回更新后的过期时间
     @Override
     public long expireAfterUpdate(@NonNull Object key, @NonNull Object value, long currentTime, @NonNegative long currentDuration) {
-        logger.info("[CustomExpiry] expireAfterUpdate key={}, currentTime={}, currentDuration={}", key,
+        logger.debug("[CustomExpiry] expireAfterUpdate key={}, currentTime={}, currentDuration={}", key,
                 format(currentTime), format(currentDuration));
         return currentDuration;
     }

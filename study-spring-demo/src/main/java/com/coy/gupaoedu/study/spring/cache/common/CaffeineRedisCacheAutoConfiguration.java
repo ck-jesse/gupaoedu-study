@@ -20,7 +20,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
  * @date 2020/4/29 10:58
  */
 @Configuration
-@ConditionalOnClass({Caffeine.class, CaffeineRedisCacheManager.class, AsyncCaffeineRedisCacheManager.class})
+@ConditionalOnClass({Caffeine.class, CaffeineRedisCacheManager.class})
 @ConditionalOnMissingBean(CacheManager.class)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @EnableConfigurationProperties(CaffeineRedisCacheProperties.class)
@@ -51,12 +51,7 @@ public class CaffeineRedisCacheAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ExtendCacheManager cacheManager() {
-        ExtendCacheManager cacheManager = null;
-        if (caffeineRedisCacheProperties.getCaffeine().isAsyncCache()) {
-            cacheManager = new AsyncCaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
-        } else {
-            cacheManager = new CaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
-        }
+        ExtendCacheManager cacheManager = new CaffeineRedisCacheManager(redisTemplate, caffeineRedisCacheProperties);
 
         if (null != this.removalListener) {
             cacheManager.setRemovalListener(this.removalListener);
