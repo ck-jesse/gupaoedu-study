@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * 1、只能控制refreshAfterWrite策略下的一致性
  * 2、Expiry有一个缺陷，验证下来发现，如果使用CustomExpiry，获取过期缓存项时会阻塞所有线程，未使用到refreshAfterWrite的特性
  * <p>
- * 采用定时刷新的方式
+ * 方案：采用定期刷新过期缓存的方式来尽量保证分布式缓存一致性。
  *
  * @author chenck
  * @date 2020/5/11 17:17

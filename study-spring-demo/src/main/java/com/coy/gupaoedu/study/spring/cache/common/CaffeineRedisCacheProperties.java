@@ -57,6 +57,11 @@ public class CaffeineRedisCacheProperties {
         private boolean asyncCache = false;
 
         /**
+         * 是否自动刷新过期缓存 true 是 false 否
+         */
+        private boolean autoRefreshExpireCache = true;
+
+        /**
          * 缓存刷新调度线程池的大小
          */
         private Integer refreshPoolSize = 1;
@@ -64,7 +69,7 @@ public class CaffeineRedisCacheProperties {
         /**
          * 缓存刷新的频率(秒)
          */
-        private Long refreshPeriod = 3L;
+        private Long refreshPeriod = 5L;
 
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.

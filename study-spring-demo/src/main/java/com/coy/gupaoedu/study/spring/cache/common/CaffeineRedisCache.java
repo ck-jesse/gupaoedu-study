@@ -84,7 +84,7 @@ public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
 
     @Override
     public void refresh(@NonNull Object key) {
-        if (this.caffeineCache instanceof LoadingCache) {
+        if (isLoadingCache()) {
             logger.debug("refresh cache, name={}, key={}", this.getName(), key);
             ((LoadingCache) caffeineCache).refresh(key);
         }

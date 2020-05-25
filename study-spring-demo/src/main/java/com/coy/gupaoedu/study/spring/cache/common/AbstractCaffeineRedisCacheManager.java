@@ -45,20 +45,22 @@ public abstract class AbstractCaffeineRedisCacheManager implements ExtendCacheMa
         this.dynamic = caffeineRedisCacheProperties.isDynamic();
         this.caffeineRedisCacheProperties = caffeineRedisCacheProperties;
 
-        // 定期刷新过期的缓存
-        ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(caffeineRedisCacheProperties.getCaffeine().getRefreshPoolSize(),
-                new DaemonThreadFactory("cache-refresh-"));
-        scheduler.scheduleWithFixedDelay(() -> {
-            for (Map.Entry<String, Cache> entry : cacheMap.entrySet()) {
-                if (entry.getValue() instanceof ExtendCache) {
-                    ExtendCache extendCache = (ExtendCache) entry.getValue();
-                    // refresh() 只要加载成功，均会替换缓存中的前一个值
-                    // 因为目的是刷新过期的缓存，所以refresh()不适用
-                    // 思路：通过LoadingCache.get(key)来刷新过期缓存
-                    extendCache.refreshAllExpireCache();
+        if (caffeineRedisCacheProperties.getCaffeine().isAutoRefreshExpireCache()) {
+            // 定期刷新过期的缓存
+            ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(caffeineRedisCacheProperties.getCaffeine().getRefreshPoolSize(),
+                    new DaemonThreadFactory("cache-refresh-"));
+            scheduler.scheduleWithFixedDelay(() -> {
+                for (Map.Entry<String, Cache> entry : cacheMap.entrySet()) {
+                    if (entry.getValue() instanceof ExtendCache) {
+                        ExtendCache extendCache = (ExtendCache) entry.getValue();
+                        // refresh() 只要加载成功，均会替换缓存中的前一个值
+                        // 因为目的是刷新过期的缓存，所以refresh()不适用
+                        // 思路：通过LoadingCache.get(key)来刷新过期缓存
+                        extendCache.refreshAllExpireCache();
+                    }
                 }
-            }
-        }, 3, caffeineRedisCacheProperties.getCaffeine().getRefreshPeriod(), TimeUnit.SECONDS);
+            }, 3, caffeineRedisCacheProperties.getCaffeine().getRefreshPeriod(), TimeUnit.SECONDS);
+        }
 
     }
 
