@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +21,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 @Configuration
 @ConditionalOnClass({Caffeine.class, CaffeineRedisCacheManager.class})
 @ConditionalOnMissingBean(CacheManager.class)
-@AutoConfigureAfter(RedisAutoConfiguration.class)
+@AutoConfigureAfter(CacheAutoConfiguration.class)
 @EnableConfigurationProperties(CaffeineRedisCacheProperties.class)
 public class CaffeineRedisCacheAutoConfiguration {
 
