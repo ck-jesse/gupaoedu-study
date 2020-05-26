@@ -71,7 +71,9 @@ public class CaffeineRedisCacheAutoConfiguration {
     }
 
     // 在resources/META-INF/spring.factories文件中增加spring boot配置扫描
-    // # Auto Configure
     //org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     //com.coy.gupaoedu.study.spring.cache.common.CaffeineRedisCacheAutoConfiguration
+
+    // 注意：自定义spring-boot-starter时，需要让 CacheAutoConfiguration 被spring扫描到，否则CaffeineRedisCacheAutoConfiguration会注入失败。
+    // 为了减少启动时扫描的类，也可以将CacheAutoConfiguration中的内容在CaffeineRedisCacheAutoConfiguration中定义。
 }

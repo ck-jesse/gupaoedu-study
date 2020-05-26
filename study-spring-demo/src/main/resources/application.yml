@@ -44,5 +44,5 @@ spring:
           userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
       # 二级缓存
       redis:
-        topic: 1000
+        topic: cache:caffeine:redis:topic
 
