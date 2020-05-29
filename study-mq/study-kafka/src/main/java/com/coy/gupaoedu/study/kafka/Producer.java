@@ -1,10 +1,8 @@
 package com.coy.gupaoedu.study.kafka;
 
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -39,6 +37,7 @@ public class Producer extends Thread {
         this.isAsync = isAsync;
     }
 
+    @Override
     public void run() {
         int messageNo = 1;
         while (true) {
@@ -46,6 +45,8 @@ public class Producer extends Thread {
             long startTime = System.currentTimeMillis();
             if (isAsync) { // Send asynchronously
                 // 异步发送消息
+                // 未指定分区，但指定了key，则对key进行hash，再取模分区数的余数，得到具体的分区
+                // 如果分区和key都未指定，则以轮询方式选择分区
                 producer.send(new ProducerRecord<>(topic, messageNo, messageStr), new DemoCallBack(startTime, messageNo, messageStr));
             } else { // Send synchronously
                 try {
@@ -62,41 +63,6 @@ public class Producer extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
-}
-
-
-class DemoCallBack implements Callback {
-
-    private final long startTime;
-    private final int key;
-    private final String message;
-
-    public DemoCallBack(long startTime, int key, String message) {
-        this.startTime = startTime;
-        this.key = key;
-        this.message = message;
-    }
-
-    /**
-     * A callback method the user can implement to provide asynchronous handling of request completion. This method will
-     * be called when the record sent to the server has been acknowledged. When exception is not null in the callback,
-     * metadata will contain the special -1 value for all fields except for topicPartition, which will be valid.
-     *
-     * @param metadata  The metadata for the record that was sent (i.e. the partition and offset). Null if an error
-     *                  occurred.
-     * @param exception The exception thrown during processing of this record. Null if no error occurred.
-     */
-    public void onCompletion(RecordMetadata metadata, Exception exception) {
-        long elapsedTime = System.currentTimeMillis() - startTime;
-        if (metadata != null) {
-            System.out.println(
-                    "message(" + key + ", " + message + ") sent to partition(" + metadata.partition() +
-                            "), " +
-                            "offset(" + metadata.offset() + ") in " + elapsedTime + " ms");
-        } else {
-            exception.printStackTrace();
         }
     }
 }
