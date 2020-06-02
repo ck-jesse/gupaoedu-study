@@ -10,6 +10,7 @@ import java.util.Collections;
  * @Description: 咕泡学院，只为更好的你
  */
 public class DistLock {
+
     private static final String LOCK_SUCCESS = "OK";
     private static final String SET_IF_NOT_EXIST = "NX";
     private static final String SET_WITH_EXPIRE_TIME = "PX";
@@ -17,9 +18,10 @@ public class DistLock {
 
     /**
      * 尝试获取分布式锁
-     * @param jedis Redis客户端
-     * @param lockKey 锁
-     * @param requestId 请求标识
+     *
+     * @param jedis      Redis客户端
+     * @param lockKey    锁
+     * @param requestId  请求标识
      * @param expireTime 超期时间
      * @return 是否获取成功
      */
@@ -34,8 +36,16 @@ public class DistLock {
 
     /**
      * 释放分布式锁
-     * @param jedis Redis客户端
-     * @param lockKey 锁
+     *
+     * 通过lua脚本，保证释放操作的原子性
+     *
+     * 1、获取key的值
+     * 2、判断值与传入的是否相同
+     * 3、相同，则删除key，表示只有该锁的拥有者才能解锁。
+     * 4、不同，则返回0
+     *
+     * @param jedis     Redis客户端
+     * @param lockKey   锁
      * @param requestId 请求标识
      * @return 是否释放成功
      */

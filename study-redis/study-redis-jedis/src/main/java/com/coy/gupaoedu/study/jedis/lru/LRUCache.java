@@ -89,6 +89,7 @@ public class LRUCache {
         Object value;
         LRUNode prev;
         LRUNode next;
+
         public LRUNode(String key, Object value) {
             this.key = key;
             this.value = value;
