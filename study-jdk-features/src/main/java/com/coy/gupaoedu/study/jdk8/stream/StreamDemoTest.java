@@ -12,10 +12,15 @@ import java.util.stream.Collectors;
 /**
  * Stream作为java8的新特性，基于lambda表达式，是对集合对象功能的增强，
  * 它专注于对集合对象进行各种高效、便利的聚合操作或者大批量的数据操作，提高了编程效率和代码可读性。
- *
+ * <p>
  * Stream的原理：
  * 将要处理的元素看做一种流，流在管道中传输，并且可以在管道的节点上处理，包括 过滤筛选、去重、排序、聚合等。
  * 元素流在管道中经过中间操作的处理，最后由最终操作得到前面处理的结果。
+ * <p>
+ * Stream 不是集合元素，它不是数据结构并不保存数据，它是有关算法和计算的，它更像一个高级版本的 Iterator。
+ * Stream 就如同一个迭代器（Iterator），单向，不可往复，数据只能遍历一次，遍历过一次后即用尽了，就好比流水从面前流过，一去不复返。
+ * 而和迭代器又不同的是，Stream 可以并行化操作，迭代器只能命令式地、串行化操作。
+ * Stream 的另外一大特点是，数据源本身可以是无限的。
  *
  * @author chenck
  * @date 2019/9/18 10:20
@@ -64,6 +69,13 @@ public class StreamDemoTest {
         // forEach 为终止方法操作
         list.forEach(System.out::println);
         System.out.println();
+    }
+
+    @Test
+    public void testMap1() {
+        //将cost增加了0,05倍的大小然后输出
+        List<Double> cost = Arrays.asList(10.0, 20.0, 30.0);
+        cost.stream().map(x -> x + x * 0.05).forEach(x -> System.out.println(x));
     }
 
     /**
