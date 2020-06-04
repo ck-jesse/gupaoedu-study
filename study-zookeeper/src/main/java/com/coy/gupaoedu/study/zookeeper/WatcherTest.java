@@ -69,9 +69,6 @@ public class WatcherTest {
 
     @Test
     public void create() throws Exception {
-
-        String path = "/watcher/w2";
-
-        curatorFramework.createNode(path, "watcher");
+        curatorFramework.createNode("/watcher/w3", "watcher");
     }
 }

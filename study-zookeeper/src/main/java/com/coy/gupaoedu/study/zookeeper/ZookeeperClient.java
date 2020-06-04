@@ -53,8 +53,7 @@ public class ZookeeperClient {
      * 获取节点数据
      */
     public String getNodeData(String path) throws Exception {
-        byte[] result = curatorFramework.getData()
-                .forPath(path);
+        byte[] result = curatorFramework.getData().forPath(path);
         return new String(result);
     }
 
@@ -64,8 +63,7 @@ public class ZookeeperClient {
     public Stat setNodeData(String path, String data) {
         Stat result = null;
         try {
-            result = curatorFramework.setData()
-                    .forPath(path, data.getBytes());
+            result = curatorFramework.setData().forPath(path, data.getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -93,8 +91,7 @@ public class ZookeeperClient {
     public boolean isExistNode(String path) {
         Stat result = null;
         try {
-            result = curatorFramework.checkExists()
-                    .forPath(path);
+            result = curatorFramework.checkExists().forPath(path);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -117,7 +114,7 @@ public class ZookeeperClient {
      */
     public boolean registryWatcherNodeChanged(String path, NodeCacheListener nodeCacheListener) {
 
-        NodeCache nodeCache = new NodeCache(curatorFramework, "/curd/create1", false);
+        NodeCache nodeCache = new NodeCache(curatorFramework, path, false);
 
         try {
             // curator实现了一直监听，zookeeper本身只能监听一次

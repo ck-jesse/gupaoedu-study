@@ -19,6 +19,12 @@ import java.util.concurrent.locks.Lock;
 /**
  * 优化版本的redis分布式锁
  *
+ * lock:
+ * 1、设置锁的过期时间并定时续期，避免redis宕机时无法删除锁，导致的死锁场景。
+ * 2、通过pub/sub来即时通知阻塞的线程。（与zookeeper的watch机制对等）
+ *
+ * 注：zookeeper 的分布式锁是通过创建临时有序节点和watcher机制来实现的，而此基于redis实现的分布式锁方案，原理上非常类似zookeepr分布式锁的方式了。
+ *
  * @author chenck
  * @date 2020/6/1 20:31
  */

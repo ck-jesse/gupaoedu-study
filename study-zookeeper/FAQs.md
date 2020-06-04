@@ -57,3 +57,56 @@
     （要注意每一个Processor的下一个Processor是谁，这样才方便阅读源码）
  
 
+## 源码分析
+
+### 客户端与Zookeeper服务端通信
+
+```text
+org.apache.zookeeper.ClientCnxn
+> 通信的核心类，包含 SendThread 和 EventThread
+
+org.apache.zookeeper.ClientCnxn.start
+> 启动SendThread.run()和EventThread.run()
+
+org.apache.zookeeper.ClientCnxn.SendThread.run
+> 自旋，
+
+org.apache.zookeeper.ClientCnxn.SendThread.startConnect
+> 建立NIO SocketChannel 连接
+
+org.apache.zookeeper.ClientCnxnSocket.doTransport
+> 发送数据
+> pendingQueue 已经发送并等待响应的数据包
+> outgoingQueue 存放需要发送的数据包
+
+org.apache.zookeeper.ClientCnxnSocketNIO.doIO
+> 对NIO读写事件进行处理
+> 读事件处理：通过SendThread.readResponse读取并解析数据，并通过EventThread.queueEvent将事件存放到waitingEvents
+> 写事件处理：outgoingQueue队列中有数据时，则取出来，并通过NIO的SocketChannel将数据发送到服务端。（通过synchronized保证同步）
+
+org.apache.zookeeper.ClientCnxn.EventThread.queueEvent
+> 将接收到的事件信息存放到待处理的事件队列waitingEvents
+
+org.apache.zookeeper.ClientCnxn.EventThread.run
+> 自旋，从waitingEvents中读取事件，并处理事件。
+
+org.apache.zookeeper.ClientCnxn.EventThread.processEvent
+> 事件处理
+> WatcherSetEventPair: 观察者处理事件，实际为org.apache.zookeeper.Watcher.process事件处理
+> ExistsResponse
+> SetDataResponse
+> SetACLResponse
+> GetDataResponse
+> GetACLResponse
+> GetChildrenResponse
+> GetChildren2Response
+> CreateResponse
+> MultiResponse
+> VoidCallback
+
+org.apache.zookeeper.AsyncCallback
+> 异步回调，处理结果
+
+org.apache.zookeeper.AsyncCallback.VoidCallback.processResult
+> 不同的异步回调实现有各自的processResult
+```
