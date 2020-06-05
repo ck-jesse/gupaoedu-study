@@ -188,6 +188,7 @@ public class ZookeeperClient {
             e.printStackTrace();
         } finally {
             try {
+                // 只能是获得锁的线程释放锁
                 if (lock.isOwnedByCurrentThread()) {
                     lock.release();
                     System.out.println(threadName + " 释放锁");
@@ -217,6 +218,7 @@ public class ZookeeperClient {
      */
     public void leaderElection(String path, String clientName, long sleepTime) {
         LeaderSelectorListener listener = new LeaderSelectorListenerAdapter() {
+            @Override
             public void takeLeadership(CuratorFramework client) throws Exception {
                 // this callback will get called when you are the leader
                 // do whatever leader work you need to and only exit
