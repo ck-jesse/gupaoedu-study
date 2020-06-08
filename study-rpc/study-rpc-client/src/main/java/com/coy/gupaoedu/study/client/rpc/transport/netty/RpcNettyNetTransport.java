@@ -1,6 +1,6 @@
-package com.coy.gupaoedu.study.client.rpc.netty;
+package com.coy.gupaoedu.study.client.rpc.transport.netty;
 
-import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
+import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
 import io.netty.bootstrap.Bootstrap;
@@ -29,6 +29,7 @@ public class RpcNettyNetTransport extends RpcNetTransport {
     /**
      * 执行rpc调用
      */
+    @Override
     public Object rpcInvoke(RpcRequest request, RpcUrl rpcUrl) {
         final RpcNettyConsumerHandler consumerHandler = new RpcNettyConsumerHandler();
         EventLoopGroup group = new NioEventLoopGroup();

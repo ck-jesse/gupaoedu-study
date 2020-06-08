@@ -16,6 +16,8 @@ public class RpcRefereceBeanConfig {
 
     /**
      * 定义远程服务的bean
+     *
+     * TODO 可以通过自定义注解来进行RPC 服务Bean定义
      */
     @Bean(name = "helloServiceFacade")
     public RefereceBean<HelloServiceFacade> helloServiceFacade() {

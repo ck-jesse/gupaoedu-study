@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.client.rpc.netty;
+package com.coy.gupaoedu.study.client.rpc.transport.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

@@ -1,6 +1,6 @@
-package com.coy.gupaoedu.study.client.rpc.bio;
+package com.coy.gupaoedu.study.client.rpc.transport.bio;
 
-import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
+import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
 
@@ -20,6 +20,7 @@ public class RpcBioNetTransport extends RpcNetTransport {
     /**
      * 执行rpc调用
      */
+    @Override
     public Object rpcInvoke(RpcRequest request, RpcUrl rpcUrl) {
         Socket socket = null;
         Object result = null;

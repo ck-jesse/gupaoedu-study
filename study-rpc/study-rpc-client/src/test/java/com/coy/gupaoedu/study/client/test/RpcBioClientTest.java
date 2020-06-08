@@ -1,8 +1,8 @@
 package com.coy.gupaoedu.study.client.test;
 
-import com.coy.gupaoedu.study.client.rpc.RpcNetTransport;
+import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
 import com.coy.gupaoedu.study.client.rpc.RpcProxyClient;
-import com.coy.gupaoedu.study.client.rpc.bio.RpcBioNetTransport;
+import com.coy.gupaoedu.study.client.rpc.transport.bio.RpcBioNetTransport;
 import com.coy.gupaoedu.study.client.rpc.discovery.ZookeeperServiceDiscovery;
 import com.coy.gupaoedu.study.client.service.HelloService;
 import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
@@ -58,7 +58,7 @@ public class RpcBioClientTest {
     public void test() throws Exception {
         RpcProxyClient rpcProxyClient = context.getBean(RpcProxyClient.class);
 
-        Thread.sleep(1000);
+        Thread.sleep(1000);// 休眠1s，等待从注册中心发现服务，再进行服务调用
         // 通过RpcProxyClient创建rpc服务代理对象
         HelloServiceFacade helloServiceFacade = rpcProxyClient.clientProxy(HelloServiceFacade.class);
         System.out.println(helloServiceFacade.sayHello("coy"));
@@ -72,7 +72,8 @@ public class RpcBioClientTest {
      * 对远程facade接口生成代理对象，并注入到普通bean中的测试
      */
     @Test
-    public void facadeProxyTest() {
+    public void facadeProxyTest() throws InterruptedException {
+        Thread.sleep(1000);
         HelloService helloService = context.getBean(HelloService.class);
         String result = helloService.testHelloServiceFacade(" coy testHelloServiceFacade");
         System.out.println(result);

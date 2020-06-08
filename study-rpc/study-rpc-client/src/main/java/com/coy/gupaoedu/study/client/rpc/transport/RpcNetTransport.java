@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.client.rpc;
+package com.coy.gupaoedu.study.client.rpc.transport;
 
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
