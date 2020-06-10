@@ -49,6 +49,7 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery {
 
     protected void startDiscoveryService() {
         String path = "/rpc";
+        // TreeCache 监视路径下所有的创建、更新、删除事件
         TreeCache treeCache = new TreeCache(curatorFramework, path);
         try {
             // curator实现了一直监听，zookeeper本身只能监听一次
