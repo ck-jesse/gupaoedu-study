@@ -75,6 +75,8 @@ public class ConsumerAssign extends ShutdownableThread {
         }
         // 不改变当前offset，指定从这个topic和partition的开始位置获取
         // consumer.seekToBeginning(Arrays.asList(new TopicPartition(this.topic, 0)));
+        // 重置为最新位点，相当于丢弃所有堆积消息
+        // consumer.seekToEnd(Arrays.asList(new TopicPartition(this.topic, 0)));
 
         int pollNo = 1;
         while (true) {
