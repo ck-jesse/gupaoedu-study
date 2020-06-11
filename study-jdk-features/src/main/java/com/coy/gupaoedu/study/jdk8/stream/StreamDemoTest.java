@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +39,7 @@ public class StreamDemoTest {
         students.add(s1);
         students.add(s2);
         students.add(s3);
+        students.add(s4);
         students.add(s4);
     }
 
@@ -180,5 +182,16 @@ public class StreamDemoTest {
         if (noneMatch) {
             System.out.println("没有叫杨洋的同学");
         }
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testGroup() {
+        // 分组
+        Map<Long, List<Student>> studentsMap = students.stream()
+                .collect(Collectors.groupingBy(Student::getId));
+        System.out.println(studentsMap);
     }
 }

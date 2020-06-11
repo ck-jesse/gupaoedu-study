@@ -5,12 +5,14 @@ import org.junit.Test;
 /**
  * 一个 partition 只能被同一个 group 内的一个 consumer 所消费（也就保障了一个消息只能被 group 内的一个 consuemr 所消费），但是多个 group 可以同时消费这个 partition。
  *
+ * 重置offset：consumer group状态必须是inactive的，即不能是处于正在工作中的状态
+ *
  * @author chenck
  * @date 2019/8/21 11:12
  */
 public class ConsumerSubscribeTest {
 
-    private static final String topic = "my-replicated-topic-p2";// 2个partition,3个replication
+    private static final String topic = "myreplicated";// 2个partition,3个replication
 
     @Test
     public void producerTest() {
