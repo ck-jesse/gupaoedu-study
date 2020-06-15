@@ -16,13 +16,13 @@ public class ConsumerTest {
         this.name = name;
     }
 
-    public void consumer(Consumer<String> consumer) {
+    public void accept(Consumer<String> consumer) {
         consumer.accept(this.name);
     }
 
     public static void main(String[] args) {
         ConsumerTest test = new ConsumerTest("hello");
 
-        test.consumer(s -> System.out.println("Consumer.accept() param = " + s));
+        test.accept(s -> System.out.println("Consumer.accept() param = " + s));
     }
 }
