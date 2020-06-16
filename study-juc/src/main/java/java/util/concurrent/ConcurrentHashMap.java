@@ -708,6 +708,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * never be used in index calculations because of table bounds.
      */
     static final int spread(int h) {
+        // 无符号右移加入高位影响，与HASH_BITS做与操作保留对hash有用的比特位，有让hash>0的意思
         return (h ^ (h >>> 16)) & HASH_BITS;
     }
 
@@ -1063,8 +1064,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 tab = initTable();
             // 2. 否则，计算 hash 值对应的下标，获取 table 上对应下标的头结点
             // i = (n - 1) & hash 表示计算的key在table中为位置
-            // tabAt(i) 获取最新的数据，如果i位置没有数据，就直接无锁插入
-            // 通过Unsafe从内存中获取对应位置的元素，通过cas的获取Volatile 数组中的元素的最新可见性，
+            // tabAt(i) 获取最新的数据，如果i位置没有数据，就直接无锁插入，通过cas保证数组中的元素的最新可见性
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
                 /*
                  * table 对应下标的头结点为 null
@@ -1072,7 +1072,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                  * 如果失败则说明期间有并发操作，需要进入一轮新的循环
                  */
                 if (casTabAt(tab, i, null, new Node<K, V>(hash, key, value, null)))
-                    break;// 设置结点成功，put 操作完成
+                    break;
             }
             // 3. 否则，如果 Map 正在执行扩容操作（MOVED 哈希值表示正在扩容），则帮助扩容，并发扩容
             else if ((fh = f.hash) == MOVED)
@@ -2223,9 +2223,11 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     /* ---------------- Special Nodes -------------- */
 
     /**
+     * 扩容时存放的结点类型，并发扩容的实现关键之一
      * A node inserted at head of bins during transfer operations.
      */
     static final class ForwardingNode<K, V> extends Node<K, V> {
+        // 扩容时用于存放数据的变量，扩容完成后会置为null。
         final Node<K, V>[] nextTable;
 
         ForwardingNode(Node<K, V>[] tab) {
@@ -2234,6 +2236,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         }
 
         Node<K, V> find(int h, Object k) {
+            // 避免转发节点上任意深度递归的循环
             // loop to avoid arbitrarily deep recursion on forwarding nodes
             outer:
             for (Node<K, V>[] tab = nextTable; ; ) {

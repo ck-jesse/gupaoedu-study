@@ -2241,11 +2241,16 @@ public abstract class AbstractQueuedSynchronizer
         public final void await() throws InterruptedException {
             if (Thread.interrupted())
                 throw new InterruptedException();
+            // 创建一个新的Node，节点状态为condition
             Node node = addConditionWaiter();
+            // 释放当前的锁，得到锁的状态，并唤醒AQS队列中的一个线程
             int savedState = fullyRelease(node);
             int interruptMode = 0;
+            // 如果当前节点没有在同步队列上，即还没有被 signal，则将当前线程阻塞
             while (!isOnSyncQueue(node)) {
                 LockSupport.park(this);
+                // isOnSyncQueue 判断当前 node 状态,如果是 CONDITION 状态,或者不在队列上了,就继续阻塞
+                // isOnSyncQueue 判断当前 node 还在队列上且不是 CONDITION 状态了,就结束循环和阻塞.
                 if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
                     break;
             }

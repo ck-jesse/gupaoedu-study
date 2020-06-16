@@ -23,13 +23,16 @@ public class ServiceA {
     }
 
     public void put(String key, String value) {
-        System.out.println(earlyProxyReferences.size());
         earlyProxyReferences.put(key, value);
-        System.out.println(earlyProxyReferences.size());
+    }
+
+    public Object get(String key) {
+        return earlyProxyReferences.get(key);
     }
 
     public static void main(String[] args) {
         ServiceA serviceA = new ServiceA();
-        serviceA.put("key","value");
+        serviceA.put("key", "value");
+        System.out.println(serviceA.get("key"));
     }
 }
