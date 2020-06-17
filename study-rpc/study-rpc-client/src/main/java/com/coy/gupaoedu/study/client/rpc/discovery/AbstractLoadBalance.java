@@ -10,6 +10,7 @@ import java.util.List;
  * @date 2019/7/10 22:44
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
+
     @Override
     public RpcUrl selectService(List<RpcUrl> serviceList) {
         if (CollectionUtils.isEmpty(serviceList)) {

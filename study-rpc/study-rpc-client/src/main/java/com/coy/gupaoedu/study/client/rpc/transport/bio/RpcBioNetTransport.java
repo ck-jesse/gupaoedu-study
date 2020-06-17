@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.client.rpc.transport.bio;
 import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,6 +16,7 @@ import java.net.Socket;
  * @author chenck
  * @date 2019/6/9 16:08
  */
+@Slf4j
 public class RpcBioNetTransport extends RpcNetTransport {
 
     /**
@@ -40,20 +42,20 @@ public class RpcBioNetTransport extends RpcNetTransport {
             // 反序列化
             result = inputStream.readObject();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
             if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
         }

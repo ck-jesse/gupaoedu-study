@@ -14,6 +14,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 基于netty的rpc注册中心
@@ -21,6 +22,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
  * @author chenck
  * @date 2019/6/19 15:01
  */
+@Slf4j
 public class RpcNettyServer {
 
     private final int port;
@@ -101,7 +103,7 @@ public class RpcNettyServer {
             System.out.println("Netty RPC Registry 已启动，监听的端口是：" + this.port);
             cf.channel().closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         } finally {
             // 关闭线程池
             bossGroup.shutdownGracefully();

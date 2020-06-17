@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.server.rpc.nio;
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
 import com.coy.gupaoedu.study.server.serializer.JavaSerializer;
 import com.coy.gupaoedu.study.server.serializer.Serializer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,6 +19,7 @@ import java.util.Set;
  * @author chenck
  * @date 2020/6/8 13:13
  */
+@Slf4j
 public class RpcNioServer {
 
     private final int port;
@@ -45,7 +47,7 @@ public class RpcNioServer {
 
             server.register(selector, SelectionKey.OP_ACCEPT);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 
@@ -70,7 +72,7 @@ public class RpcNioServer {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 

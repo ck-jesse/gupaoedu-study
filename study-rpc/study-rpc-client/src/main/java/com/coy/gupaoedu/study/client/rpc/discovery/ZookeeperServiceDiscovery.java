@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.client.rpc.discovery;
 
 import com.alibaba.fastjson.JSON;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -16,9 +17,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 基于Zookeeper的服务发现
+ *
  * @author chenck
  * @date 2019/7/10 22:22
  */
+@Slf4j
 public class ZookeeperServiceDiscovery implements ServiceDiscovery {
 
     private CuratorFramework curatorFramework;
@@ -27,6 +31,7 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery {
      * Map<service, Map<host:port(registry), List<provider>>>
      */
     //private final Map<String, ConcurrentMap<String, List<RpcUrl>>> serviceRegistryProviders = new ConcurrentHashMap<>();
+
     /**
      * Map<service, List<provider>>
      */
@@ -58,11 +63,11 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery {
                 public void childEvent(CuratorFramework client, TreeCacheEvent event) throws Exception {
                     ChildData childData = event.getData();
                     if (TreeCacheEvent.Type.NODE_ADDED == event.getType()) {
-                        System.out.println(event.getType());
+                        log.info("event.type={}", event.getType());
                         // 反序列化service url node
                         RpcUrl rpcUrl = RpcUrl.deserialize(childData.getPath());
                         if (null != rpcUrl) {
-                            System.out.println(JSON.toJSONString(rpcUrl));
+                            log.info("rpcUrl={}", JSON.toJSONString(rpcUrl));
                             List<RpcUrl> serviceList = serviceProviders.get(rpcUrl.getServiceName());
                             if (null == serviceList) {
                                 serviceList = new ArrayList<>();
@@ -72,7 +77,7 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery {
                         }
                     }
                     if (TreeCacheEvent.Type.NODE_REMOVED == event.getType()) {
-                        System.out.println(event.getType());
+                        log.info("event.type={}", event.getType());
                         // 反序列化service url node
                         RpcUrl rpcUrl = RpcUrl.deserialize(childData.getPath());
                         List<RpcUrl> serviceList = serviceProviders.get(rpcUrl.getServiceName());
@@ -82,13 +87,12 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery {
                             serviceList.remove(rpcUrl1);
                         }
                     }
-                    System.out.println();
                 }
             });
 
             treeCache.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("服务发现异常", e);
         }
     }
 
@@ -124,7 +128,7 @@ public class ZookeeperServiceDiscovery implements ServiceDiscovery {
         }
 
         // 随机负载
-        RandonLoadBalance loadBalance = new RandonLoadBalance();
+        RandomLoadBalance loadBalance = new RandomLoadBalance();
         RpcUrl rpcUrl = loadBalance.select(serviceList);
         return rpcUrl;
     }

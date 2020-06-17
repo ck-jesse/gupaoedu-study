@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.server.rpc;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,7 +13,9 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 @Data
+@Slf4j
 public class RpcUrl implements Serializable {
+
     /**
      * 应用名称
      */
@@ -92,18 +95,18 @@ public class RpcUrl implements Serializable {
      */
     public static RpcUrl deserialize(String path) {
         try {
-            System.out.println(URLDecoder.decode(path, "UTF-8"));
+            log.info("path={}", URLDecoder.decode(path, "UTF-8"));
             String[] nodes = path.split("/");
             // 从路径中取最后一个节点
             String serviceNodeUrl = nodes[nodes.length - 1];
             serviceNodeUrl = URLDecoder.decode(serviceNodeUrl, "UTF-8");
-            System.out.println(serviceNodeUrl);
+            log.info("serviceNodeUrl={}", serviceNodeUrl);
 
             // 校验serviceNodeUrl是否匹配规则
             String regex = "^(https|http|rpc|dubbo)?://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
             Pattern pattern = Pattern.compile(regex);
             if (!pattern.matcher(serviceNodeUrl).matches()) {
-                System.out.println("path路径中最后一个节点不是service node，不进行反序列化； " + serviceNodeUrl);
+                log.info("path路径中最后一个节点不是service node，不进行反序列化； serviceNodeUrl={}", serviceNodeUrl);
                 return null;
             }
 
@@ -111,7 +114,7 @@ public class RpcUrl implements Serializable {
             URL url = new URL(null, serviceNodeUrl, new URLStreamHandler() {
                 @Override
                 protected URLConnection openConnection(URL u) throws IOException {
-                    System.out.println("自定义协议处理 " + u.toString());
+                    log.info("自定义协议处理 Url={}", u.toString());
                     return null;
                 }
             });
@@ -138,15 +141,17 @@ public class RpcUrl implements Serializable {
             }
             return rpcUrl;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
             return null;
         }
     }
 
     public static void main(String[] args) {
-        String path = "/rpc/com.coy.gupaoedu.study.server.facade.HelloServiceFacade/providers/rpc%3A%2F%2F10.1.6.48%3A8080%2Fcom.coy.gupaoedu.study.server.facade.HelloServiceFacade%3FmethodNames%3DsaveUser%2CsayHello";
+        String path = "/rpc/com.coy.gupaoedu.study.server.facade.HelloServiceFacade/providers/rpc%3A%2F%2F10.1.6.48%3A8080%2Fcom.coy.gupaoedu.study" +
+                ".server.facade.HelloServiceFacade%3FmethodNames%3DsaveUser%2CsayHello";
         RpcUrl rpcUrl = new RpcUrl();
-        rpcUrl.deserialize(path);
+        System.out.println(RpcUrl.deserialize(path));
+        ;
     }
 
 }

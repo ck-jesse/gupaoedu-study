@@ -1,12 +1,13 @@
 package com.coy.gupaoedu.study.client.test;
 
-import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
 import com.coy.gupaoedu.study.client.rpc.RpcProxyClient;
-import com.coy.gupaoedu.study.client.rpc.transport.bio.RpcBioNetTransport;
 import com.coy.gupaoedu.study.client.rpc.discovery.ZookeeperServiceDiscovery;
+import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
+import com.coy.gupaoedu.study.client.rpc.transport.bio.RpcBioNetTransport;
 import com.coy.gupaoedu.study.client.service.HelloService;
 import com.coy.gupaoedu.study.server.facade.HelloServiceFacade;
 import com.coy.gupaoedu.study.server.facade.PaymentServiceFacade;
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +15,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import java.net.URL;
 
 /**
  * @author chenck
@@ -50,6 +53,10 @@ public class RpcBioClientTest {
 
     @Before
     public void before() {
+        // log4j 加载
+        URL url = RpcBioClientTest.class.getClassLoader().getResource("log4j.properties");
+        PropertyConfigurator.configure(url.getPath());
+
         System.out.println("基于 BIO 的RPC远程服务调用");
         context = new AnnotationConfigApplicationContext(RpcBioClientTest.class);
     }

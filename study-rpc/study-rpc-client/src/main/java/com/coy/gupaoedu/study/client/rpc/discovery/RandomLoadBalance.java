@@ -11,7 +11,7 @@ import java.util.Random;
  * @author chenck
  * @date 2019/7/10 22:42
  */
-public class RandonLoadBalance extends AbstractLoadBalance {
+public class RandomLoadBalance extends AbstractLoadBalance {
 
     @Override
     public RpcUrl select(List<RpcUrl> serviceList) {

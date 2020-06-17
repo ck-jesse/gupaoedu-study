@@ -27,6 +27,7 @@ public class RpcProxyClient {
     }
 
     public <T> T clientProxy(final Class<T> interfaces, String version) {
+        // JDK代理
         return (T) Proxy.newProxyInstance(interfaces.getClassLoader(), new Class[]{interfaces},
                 new RemoteInvocationHandler(version, serviceDiscovery, rpcNetTransport));
     }

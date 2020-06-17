@@ -5,6 +5,7 @@ import com.coy.gupaoedu.study.server.serializer.JavaSerializer;
 import com.coy.gupaoedu.study.server.serializer.Serializer;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,6 +22,7 @@ import java.util.Set;
  * @author chenck
  * @date 2020/6/8 12:18
  */
+@Slf4j
 public class RpcNioNetTransport extends RpcNetTransport {
 
     protected ByteBuffer lenBuffer = ByteBuffer.allocate(1024);
@@ -98,20 +100,20 @@ public class RpcNioNetTransport extends RpcNetTransport {
             }
 
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            log.error("", e);
         } finally {
             if (objectInputStream != null) {
                 try {
                     objectInputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
             if (objectOutputStream != null) {
                 try {
                     objectOutputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
         }

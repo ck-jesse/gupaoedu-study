@@ -5,6 +5,7 @@ import com.coy.gupaoedu.study.client.rpc.discovery.ServiceDiscovery;
 import com.coy.gupaoedu.study.client.rpc.transport.RpcNetTransport;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
  * @author chenck
  * @date 2019/6/9 16:06
  */
+@Slf4j
 public class RemoteInvocationHandler implements InvocationHandler {
 
     private String version;
@@ -52,11 +54,10 @@ public class RemoteInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodName(method.getName());
         rpcRequest.setParameters(args);
         rpcRequest.setVersion(version);
-        System.out.println();
-        System.out.println("[client]请求参数: " + JSON.toJSONString(rpcRequest));
         // 执行rpc调用
+        log.info("[client]请求参数: {}", JSON.toJSONString(rpcRequest));
         Object result = rpcNetTransport.rpcInvoke(rpcRequest, rpcUrl);
-        System.out.println("[client]响应参数: " + JSON.toJSONString(result));
+        log.info("[client]响应参数: {}", JSON.toJSONString(result));
         return result;
     }
 }

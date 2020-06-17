@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.server.rpc.bio;
 
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,6 +15,7 @@ import java.util.concurrent.Executors;
  * @author chenck
  * @date 2019/6/6 16:57
  */
+@Slf4j
 public class RpcBioServer {
 
     private final int port;
@@ -37,7 +39,7 @@ public class RpcBioServer {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(port);
-            System.out.println("BIO RPC Server 已启动，监听的端口是：" + this.port);
+            log.info("BIO RPC Server 已启动，监听的端口是：{}", this.port);
             while (true) {
                 // accept不断接受请求
                 Socket socket = serverSocket.accept();//BIO
@@ -45,13 +47,13 @@ public class RpcBioServer {
                 executorService.execute(new RpcBioRequestHandler(socket, rpcInvoker));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("port=" + this.port, e);
         } finally {
             if (serverSocket != null) {
                 try {
                     serverSocket.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
         }

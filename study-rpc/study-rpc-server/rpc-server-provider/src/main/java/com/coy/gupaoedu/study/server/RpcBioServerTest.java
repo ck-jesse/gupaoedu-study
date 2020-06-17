@@ -4,10 +4,13 @@ import com.coy.gupaoedu.study.server.registry.ZookeeperRegistryCenter;
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
 import com.coy.gupaoedu.study.server.rpc.bio.RpcBioServer;
 import com.coy.gupaoedu.study.server.rpc.netty.RpcConfig;
+import org.apache.log4j.PropertyConfigurator;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import java.net.URL;
 
 /**
  * @author chenck
@@ -42,6 +45,9 @@ public class RpcBioServerTest {
     }
 
     public static void main(String[] args) {
+        URL url = RpcBioServerTest.class.getClassLoader().getResource("log4j.properties");
+        PropertyConfigurator.configure(url.getPath());
+
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(RpcBioServerTest.class);
         applicationContext.start();
 

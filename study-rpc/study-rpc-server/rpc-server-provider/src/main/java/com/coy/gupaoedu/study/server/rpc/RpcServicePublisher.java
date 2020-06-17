@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.server.rpc;
 
 import com.alibaba.fastjson.JSON;
 import com.coy.gupaoedu.study.server.registry.RegistryCenter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -21,6 +22,7 @@ import java.util.Map;
  * @author chenck
  * @date 2019/6/6 17:20
  */
+@Slf4j
 @Component
 public class RpcServicePublisher implements ApplicationContextAware, InitializingBean {
 
@@ -55,7 +57,7 @@ public class RpcServicePublisher implements ApplicationContextAware, Initializin
             if (!StringUtils.isEmpty(version)) {
                 serviceName += "-" + version;
             }
-            System.out.println("[server]publish service " + serviceName);
+            log.info("[server]publish service {}", serviceName);
             // 将服务添加到容器中
             handlerMap.put(serviceName, servcieBean);
 
@@ -78,7 +80,7 @@ public class RpcServicePublisher implements ApplicationContextAware, Initializin
             }
             rpcUrl.setMethodNames(methodNames);
             rpcUrl.setSide("providers");
-            System.out.println(JSON.toJSONString(rpcUrl));
+            log.info("[server]rpcUrl {}", JSON.toJSONString(rpcUrl));
 
             // 将该服务发布到注册中心
             registryCenter.registry(rpcUrl);

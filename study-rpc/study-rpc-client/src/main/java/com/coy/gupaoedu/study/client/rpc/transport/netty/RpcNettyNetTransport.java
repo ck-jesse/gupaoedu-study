@@ -16,6 +16,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -24,6 +25,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
  * @author chenck
  * @date 2019/6/19 16:14
  */
+@Slf4j
 public class RpcNettyNetTransport extends RpcNetTransport {
 
     /**
@@ -63,7 +65,7 @@ public class RpcNettyNetTransport extends RpcNetTransport {
             future.channel().writeAndFlush(request).sync();
             future.channel().closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         } finally {
             group.shutdownGracefully();
         }

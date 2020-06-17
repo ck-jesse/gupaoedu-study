@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.server.registry;
 
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
 import com.coy.gupaoedu.study.server.rpc.netty.RpcConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -14,6 +15,7 @@ import java.net.URLEncoder;
  * @author chenck
  * @date 2019/7/10 22:22
  */
+@Slf4j
 public class ZookeeperRegistryCenter implements RegistryCenter {
 
     private CuratorFramework curatorFramework;
@@ -42,10 +44,10 @@ public class ZookeeperRegistryCenter implements RegistryCenter {
             }
             // 将服务信息作为path的最后一个节点
             String path = getPath(rpcUrl) + URLEncoder.encode(rpcUrl.serialize(), "UTF-8");
-            System.out.println("[server]registry service " + URLDecoder.decode(path, "UTF-8"));
+            log.info("[server]registry service {}", URLDecoder.decode(path, "UTF-8"));
             curatorFramework.create().creatingParentContainersIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path, rpcUrl.getHost().getBytes());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 

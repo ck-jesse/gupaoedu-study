@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
 import com.coy.gupaoedu.study.server.rpc.RpcRequest;
 import com.coy.gupaoedu.study.server.serializer.Serializer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,6 +16,7 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/8 13:47
  */
+@Slf4j
 public class RpcNioRequestHandler implements Callable<ByteBuffer> {
 
     private Serializer serializer;
@@ -35,29 +37,28 @@ public class RpcNioRequestHandler implements Callable<ByteBuffer> {
             // 反序列化
             RpcRequest rpcRequest = serializer.deserialize(buffer.array(), RpcRequest.class);
             System.out.println();
-            System.out.println("请求参数：" + JSON.toJSONString(rpcRequest));
-
+            log.info("请求参数：{}", JSON.toJSONString(rpcRequest));
             Object result = rpcInvoker.invoke(rpcRequest);
-            System.out.println("响应参数：" + JSON.toJSONString(result));
+            log.info("响应参数：{}", JSON.toJSONString(result));
 
             // 序列化
             byte[] bytes = serializer.serialize(result, Object.class);
             return ByteBuffer.wrap(bytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("", e);
         } finally {
             if (objectInputStream != null) {
                 try {
                     objectInputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
             if (objectOutputStream != null) {
                 try {
                     objectOutputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             }
         }
