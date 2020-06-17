@@ -95,12 +95,10 @@ public class RpcUrl implements Serializable {
      */
     public static RpcUrl deserialize(String path) {
         try {
-            log.info("path={}", URLDecoder.decode(path, "UTF-8"));
             String[] nodes = path.split("/");
             // 从路径中取最后一个节点
             String serviceNodeUrl = nodes[nodes.length - 1];
             serviceNodeUrl = URLDecoder.decode(serviceNodeUrl, "UTF-8");
-            log.info("serviceNodeUrl={}", serviceNodeUrl);
 
             // 校验serviceNodeUrl是否匹配规则
             String regex = "^(https|http|rpc|dubbo)?://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";

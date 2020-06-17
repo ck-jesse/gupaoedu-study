@@ -1,7 +1,7 @@
 package com.coy.gupaoedu.study.server.registry;
 
 import com.coy.gupaoedu.study.server.rpc.RpcUrl;
-import com.coy.gupaoedu.study.server.rpc.netty.RpcConfig;
+import com.coy.gupaoedu.study.server.rpc.RpcConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;

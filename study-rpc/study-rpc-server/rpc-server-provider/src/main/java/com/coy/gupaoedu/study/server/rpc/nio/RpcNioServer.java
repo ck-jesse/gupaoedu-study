@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.server.rpc.nio;
 
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
+import com.coy.gupaoedu.study.server.rpc.RpcServer;
 import com.coy.gupaoedu.study.server.serializer.JavaSerializer;
 import com.coy.gupaoedu.study.server.serializer.Serializer;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import java.util.Set;
  * @date 2020/6/8 13:13
  */
 @Slf4j
-public class RpcNioServer {
+public class RpcNioServer implements RpcServer {
 
     private final int port;
     private RpcInvoker rpcInvoker;
@@ -46,6 +47,8 @@ public class RpcNioServer {
             server.configureBlocking(false);
 
             server.register(selector, SelectionKey.OP_ACCEPT);
+
+            this.start();
         } catch (IOException e) {
             log.error("", e);
         }
@@ -54,8 +57,10 @@ public class RpcNioServer {
     /**
      * 监听客户端请求
      */
+    @Override
     public void start() {
         try {
+            System.out.println("NIO RPC Registry 已启动，监听的端口是：" + this.port);
             while (true) {
                 int readyChannels = selector.select();
                 if (readyChannels == 0) {

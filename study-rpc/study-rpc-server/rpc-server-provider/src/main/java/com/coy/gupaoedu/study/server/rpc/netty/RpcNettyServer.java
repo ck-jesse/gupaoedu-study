@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.server.rpc.netty;
 
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
+import com.coy.gupaoedu.study.server.rpc.RpcServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -23,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2019/6/19 15:01
  */
 @Slf4j
-public class RpcNettyServer {
+public class RpcNettyServer implements RpcServer {
 
     private final int port;
 
@@ -36,8 +37,10 @@ public class RpcNettyServer {
     public RpcNettyServer(int port, RpcInvoker rpcInvoker) {
         this.port = port;
         this.rpcInvoker = rpcInvoker;
+        this.start();
     }
 
+    @Override
     public void start() {
         // boos线程
         EventLoopGroup bossGroup = new NioEventLoopGroup();

@@ -44,7 +44,7 @@ public class RpcNioNetTransport extends RpcNetTransport {
         try {
             selector = Selector.open();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
     }
 

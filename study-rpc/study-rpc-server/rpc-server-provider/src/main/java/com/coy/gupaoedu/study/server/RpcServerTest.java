@@ -1,9 +1,8 @@
 package com.coy.gupaoedu.study.server;
 
 import com.coy.gupaoedu.study.server.registry.ZookeeperRegistryCenter;
-import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
-import com.coy.gupaoedu.study.server.rpc.bio.RpcBioServer;
-import com.coy.gupaoedu.study.server.rpc.netty.RpcConfig;
+import com.coy.gupaoedu.study.server.rpc.RpcConfig;
+import com.coy.gupaoedu.study.server.rpc.RpcConsts;
 import org.apache.log4j.PropertyConfigurator;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -18,22 +17,16 @@ import java.net.URL;
  */
 @Configuration
 @ComponentScan(basePackages = "com.coy.gupaoedu.study.server")
-public class RpcBioServerTest {
+public class RpcServerTest {
 
     public static final int port = 8081;
     public static final String connectString = "127.0.0.1:2181";
 
     @Bean(name = "rpcConfig")
     public RpcConfig rpcConfig() {
-        return new RpcConfig(port, connectString);
-    }
-
-    /**
-     * 实例化 RpcBioServer
-     */
-    @Bean(name = "rpcBioServer")
-    public RpcBioServer rpcBioServer(RpcInvoker rpcInvoker, RpcConfig rpcConfig) {
-        return new RpcBioServer(rpcConfig.getServerPort(), rpcInvoker);
+//        return new RpcConfig(port, connectString, RpcConsts.BIO);
+        return new RpcConfig(port, connectString, RpcConsts.NIO);
+        //return new RpcConfig(port, connectString, RpcConsts.NETTY);
     }
 
     /**
@@ -45,14 +38,10 @@ public class RpcBioServerTest {
     }
 
     public static void main(String[] args) {
-        URL url = RpcBioServerTest.class.getClassLoader().getResource("log4j.properties");
+        URL url = RpcServerTest.class.getClassLoader().getResource("log4j.properties");
         PropertyConfigurator.configure(url.getPath());
 
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(RpcBioServerTest.class);
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(RpcServerTest.class);
         applicationContext.start();
-
-        // 启动socket服务监听
-        RpcBioServer rpcBioServer = applicationContext.getBean(RpcBioServer.class);
-        rpcBioServer.start();
     }
 }

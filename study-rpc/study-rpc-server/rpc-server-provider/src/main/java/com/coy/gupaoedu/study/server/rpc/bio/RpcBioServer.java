@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.server.rpc.bio;
 
 import com.coy.gupaoedu.study.server.rpc.RpcInvoker;
+import com.coy.gupaoedu.study.server.rpc.RpcServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.concurrent.Executors;
  * @date 2019/6/6 16:57
  */
 @Slf4j
-public class RpcBioServer {
+public class RpcBioServer implements RpcServer {
 
     private final int port;
     private RpcInvoker rpcInvoker;
@@ -30,11 +31,13 @@ public class RpcBioServer {
     public RpcBioServer(int port, RpcInvoker rpcInvoker) {
         this.port = port;
         this.rpcInvoker = rpcInvoker;
+        this.start();
     }
 
     /**
      * 监听客户端请求
      */
+    @Override
     public void start() {
         ServerSocket serverSocket = null;
         try {
