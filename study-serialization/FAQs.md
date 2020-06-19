@@ -25,6 +25,11 @@
     Java 序列化API给开发人员提供了一个标准机制, 通过 java.io.Serializable 和 java.io.Externalizable 接口, 
     ObjectInputStream 及ObjectOutputStream 处理对象序列化. Java 程序员可自由选择基于类结构的标准序列化或是他们自定义的二进制格式, 
     通常认为后者才是最佳实践, 因为序列化的二进制文件格式成为类输出 API的一部分, 可能破坏 Java 中私有和包可见的属性的封装.
+    
+    缺点：
+    1、无法跨语言
+    2、序列化后码流太大
+    3、序列化性能太低
 
 #### 如何序列化
 
