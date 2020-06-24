@@ -621,7 +621,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
 
     /**
      * ConcurrentHashMap存储结构的基本单元，继承于HashMap中的Entry，用于存储数据，其是一个链表，只允许对数据进行查找，不允许进行修改
-     *
+     * <p>
      * Key-value entry.  This class is never exported out as a
      * user-mutable Map.Entry (i.e., one supporting setValue; see
      * MapEntry below), but can be used for read-only traversals used
@@ -820,7 +820,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * 当为负数时：-1代表正在初始化，-N代表有N-1个线程正在 进行扩容
      * 当为0时：代表当时的table还没有被初始化
      * 当为正数时：表示初始化或者下一次进行扩容的大小
-     *
+     * <p>
      * Table initialization and resizing control.  When negative, the
      * table is being initialized or resized: -1 for initialization,
      * else -(1 + the number of active resizing threads).  Otherwise,
@@ -1062,9 +1062,9 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             if (tab == null || (n = tab.length) == 0)
                 // 基于 CAS 策略初始化 table，初始化大小为 16
                 tab = initTable();
-            // 2. 否则，计算 hash 值对应的下标，获取 table 上对应下标的头结点
-            // i = (n - 1) & hash 表示计算的key在table中为位置
-            // tabAt(i) 获取最新的数据，如果i位置没有数据，就直接无锁插入，通过cas保证数组中的元素的最新可见性
+                // 2. 否则，计算 hash 值对应的下标，获取 table 上对应下标的头结点
+                // i = (n - 1) & hash 表示计算的key在table中为位置
+                // tabAt(i) 获取最新的数据，如果i位置没有数据，就直接无锁插入，通过cas保证数组中的元素的最新可见性
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
                 /*
                  * table 对应下标的头结点为 null
@@ -1077,7 +1077,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             // 3. 否则，如果 Map 正在执行扩容操作（MOVED 哈希值表示正在扩容），则帮助扩容，并发扩容
             else if ((fh = f.hash) == MOVED)
                 tab = helpTransfer(tab, f);
-            // 4. 否则，获取到 hash 值对应下标的头结点，且结点不为 null
+                // 4. 否则，获取到 hash 值对应下标的头结点，且结点不为 null
             else {
                 V oldVal = null;
                 // 如果以上条件都不满足，那就要进行加锁操作，也就是存在hash冲突，锁住链表或者红黑树的头结点
@@ -2334,7 +2334,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     private final void addCount(long x, int check) {
         CounterCell[] as;
         long b, s;
-        // 增加元素
+        // 累计数量
         if ((as = counterCells) != null ||
                 !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) {
             CounterCell a;
@@ -2344,8 +2344,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             // ThreadLocalRandom 生成随机数
             if (as == null || (m = as.length - 1) < 0 ||
                     (a = as[ThreadLocalRandom.getProbe() & m]) == null ||
-                    !(uncontended =
-                            U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) {
+                    !(uncontended = U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) {
                 fullAddCount(x, uncontended);
                 return;
             }
@@ -2381,7 +2380,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     /**
      * 如果正在调整大小，则帮助传输。
      * 其实helpTransfer（）方法的目的就是调用多个工作线程一起帮助进行扩容，这样的效率就会更高，而不是只有检查到要扩容的那个线程进行扩容操作，其他线程就要等待扩容操作完成才能工作
-     *
+     * <p>
      * Helps transfer if a resize is in progress.
      */
     final Node<K, V>[] helpTransfer(Node<K, V>[] tab, Node<K, V> f) {
@@ -2730,9 +2729,9 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
 
     /**
      * 链表转换为红黑树
-     *
+     * <p>
      * treeifyBin主要的功能就是把链表所有的节点Node转换为TreeNode节点
-     *
+     * <p>
      * Replaces all linked nodes in bin at given index unless table is
      * too small, in which case resizes instead.
      */
@@ -2744,8 +2743,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             // 因为这个阈值扩容可以减少hash冲突，不必要去转红黑树
             if ((n = tab.length) < MIN_TREEIFY_CAPACITY)
                 tryPresize(n << 1);// 尝试预先调整表的大小以容纳给定数量的元素
-            // 2. 否则，将链表转换成红黑树
-            // 头结点 hash 大于 0，说明是链表
+                // 2. 否则，将链表转换成红黑树
+                // 头结点 hash 大于 0，说明是链表
             else if ((b = tabAt(tab, index)) != null && b.hash >= 0) {
                 synchronized (b) {
                     if (tabAt(tab, index) == b) {
@@ -2753,7 +2752,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                         // 循环将Node节点的链表转换为TreeNode节点的链表
                         // 将链表转换成一棵红黑树
                         for (Node<K, V> e = b; e != null; e = e.next) {
-                            TreeNode<K, V> p = new TreeNode<K, V>(e.hash, e.key, e.val,null, null);
+                            TreeNode<K, V> p = new TreeNode<K, V>(e.hash, e.key, e.val, null, null);
                             if ((p.prev = tl) == null)
                                 hd = p;
                             else
@@ -2847,7 +2846,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
 
     /**
      * TreeBin从字面含义中可以理解为存储树形结构的容器，而树形结构就是指TreeNode，所以TreeBin就是封装TreeNode的容器，它提供转换黑红树的一些条件和锁的控制
-     *
+     * <p>
      * TreeNodes used at the heads of bins. TreeBins do not hold user
      * keys or values, but instead point to list of TreeNodes and
      * their root. They also maintain a parasitic read-write lock
