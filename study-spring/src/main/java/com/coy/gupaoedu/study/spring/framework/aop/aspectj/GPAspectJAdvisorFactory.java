@@ -97,7 +97,7 @@ public class GPAspectJAdvisorFactory {
                     String aspectClass = PropertiesUtils.getAspectClass();
                     // 将pointcut表达式转换为正则表达式
                     // 注：默认配置aspectPointcut表达式为全的表达式，所以可以理解为针对method的表达式
-                    String aspectPointcutRegx = convertToRegx(aspectPointcut);
+                    String aspectPointcutRegx = GPAspectJAdvisorFactory.convertToRegx(aspectPointcut);
 
                     List<GPAdvisor> advisors = new LinkedList<>();
                     aspectNames = new LinkedList<>();
@@ -145,7 +145,7 @@ public class GPAspectJAdvisorFactory {
     /**
      * 将pointcut表达式转换为正则表达式
      */
-    public String convertToRegx(String aspectPointcut) {
+    public static String convertToRegx(String aspectPointcut) {
         String aspectPointcutRegx = aspectPointcut
                 .replaceAll("\\.", "\\\\.")
                 .replaceAll("\\\\.\\*", ".*")

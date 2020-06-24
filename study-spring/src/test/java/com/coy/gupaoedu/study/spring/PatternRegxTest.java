@@ -1,6 +1,7 @@
 package com.coy.gupaoedu.study.spring;
 
 import com.coy.gupaoedu.study.spring.demo.mvc.action.TwoAction;
+import com.coy.gupaoedu.study.spring.framework.aop.aspectj.GPAspectJAdvisorFactory;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -14,29 +15,27 @@ import java.util.regex.Pattern;
  */
 public class PatternRegxTest {
 
+    public static String classRegexDeal(String typePattern) {
+        // 获取class的正则表达式
+        String classPointCutRegex = typePattern.substring(0, typePattern.lastIndexOf("\\(") - 4);
+        if (classPointCutRegex.indexOf(" +") != -1) {
+            classPointCutRegex = classPointCutRegex.substring(classPointCutRegex.lastIndexOf(" +") + 2);
+        }
+        return classPointCutRegex;
+    }
+
     @Test
     public void patternTest() throws NoSuchMethodException {
         String aspectPointcut = " * com.coy.gupaoedu.study.spring.demo..*Action..*(.*)".trim();
 
-        aspectPointcut = aspectPointcut
-                .replaceAll("\\.", "\\\\.")
-                .replaceAll("\\\\.\\*", ".*")
-                .replaceAll("\\(", "\\\\(")
-                .replaceAll("\\)", "\\\\)");
-        if (aspectPointcut.startsWith("public")) {
-            aspectPointcut = aspectPointcut.replaceAll("public\\s+\\*\\s+", "public +\\\\w+ +");
-        }
-        if (aspectPointcut.startsWith("*")) {
-            aspectPointcut = aspectPointcut.replaceAll("\\*\\s+", "[\\\\w\\\\s]* +");
-        }
+        aspectPointcut = GPAspectJAdvisorFactory.convertToRegx(aspectPointcut);
 
         System.out.println(aspectPointcut);
 
         TwoAction testAction = new TwoAction();
         String clazz = testAction.getClass().getName();
         System.out.println(clazz);
-        String pointCutForClassRegex = aspectPointcut.substring(0, aspectPointcut.lastIndexOf("\\(") - 4);
-        pointCutForClassRegex = pointCutForClassRegex.substring(pointCutForClassRegex.lastIndexOf(" +") + 2);
+        String pointCutForClassRegex = classRegexDeal(aspectPointcut);
         System.out.println("classPointcut=" + pointCutForClassRegex);
         Pattern pointCutClassPattern = Pattern.compile(pointCutForClassRegex);
 
@@ -66,7 +65,7 @@ public class PatternRegxTest {
         String aspectPointcut = "public * com.coy.gupaoedu.study.spring.demo..*Action..*(.*)";
         System.out.println(aspectPointcut);
 
-        aspectPointcut = convertToRegx(aspectPointcut);
+        aspectPointcut = GPAspectJAdvisorFactory.convertToRegx(aspectPointcut);
         System.out.println(aspectPointcut);
         Pattern methodPattern = Pattern.compile(aspectPointcut);
 
@@ -82,32 +81,31 @@ public class PatternRegxTest {
         System.out.println(classPointCutRegex);
     }
 
-    /**
-     * 将pointcut表达式转换为正则表达式
-     */
-    public String convertToRegx(String aspectPointcut) {
-        String aspectPointcutRegx = aspectPointcut
-                .replaceAll("\\.", "\\\\.")
-                .replaceAll("\\\\.\\*", ".*")
-                .replaceAll("\\(", "\\\\(")
-                .replaceAll("\\)", "\\\\)").trim();
-        // 以public开头表达式的处理
-        if (aspectPointcutRegx.startsWith("public")) {
-            aspectPointcutRegx = aspectPointcutRegx.replaceAll("public\\s+\\*\\s+", "public +[\\\\w\\\\s.*]* +");
-        }
-        // 以*开头表达式的处理
-        if (aspectPointcutRegx.startsWith("*")) {
-            aspectPointcutRegx = aspectPointcutRegx.replaceAll("\\*\\s+", "[\\\\w\\\\s]* +");
-        }
-        return aspectPointcutRegx;
+    @Test
+    public void classPatternTest() {
+        String aspectPointcut = "public * com.coy.gupaoedu.study.spring.demo..*Service.*..*(.*)";
+        System.out.println(aspectPointcut);
+
+        aspectPointcut = GPAspectJAdvisorFactory.convertToRegx(aspectPointcut);
+        System.out.println(aspectPointcut);
+        aspectPointcut = classRegexDeal(aspectPointcut);
+        System.out.println(aspectPointcut);
+        Pattern classPattern = Pattern.compile(aspectPointcut);
+
+        String classString = "public abstract java.lang.String com.coy.gupaoedu.study.spring.demo.service.DemoService";
+        classString = "com.coy.gupaoedu.study.spring.demo.service.impl.UserService";
+        classString = "com.coy.gupaoedu.study.spring.demo.service.DemoServiceImpl";
+        System.out.println(classString);
+        System.out.println(classPattern.matcher(classString).matches());
+
     }
 
     @Test
-    public void test1() {
+    public void methodPatternTest() {
         String aspectPointcut = "public * com.coy.gupaoedu.study.spring.demo..*Service..*(.*)";
         System.out.println(aspectPointcut);
 
-        aspectPointcut = convertToRegx(aspectPointcut);
+        aspectPointcut = GPAspectJAdvisorFactory.convertToRegx(aspectPointcut);
         System.out.println(aspectPointcut);
         Pattern methodPattern = Pattern.compile(aspectPointcut);
 
