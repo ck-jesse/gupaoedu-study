@@ -611,6 +611,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         Worker(Runnable firstTask) {
             setState(-1); // inhibit interrupts until runWorker
             this.firstTask = firstTask;
+            // 基于线程工厂创建的线程，也就是线程池中实际的线程
             this.thread = getThreadFactory().newThread(this);
         }
 
@@ -931,6 +932,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         Worker w = null;
         try {
             // worker实现runnable接口，并实现AQS同步队列工具
+            //            // w.thread是包装了worker，所以t.start()其本质是执行了Worker.run()
             w = new Worker(firstTask);
             final Thread t = w.thread;
             if (t != null) {
@@ -946,7 +948,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                         (rs == SHUTDOWN && firstTask == null)) {
                         if (t.isAlive()) // precheck that t is startable
                             throw new IllegalThreadStateException();
-                        // 添加到hashset中
+                        // 将工作线程添加到hashset中
                         workers.add(w);
                         int s = workers.size();
                         if (s > largestPoolSize)
@@ -958,7 +960,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 }
                 // 添加成功，则启动线程
                 if (workerAdded) {
-                    t.start();
+                    t.start();// 本质是会执行Worker.run()
                     workerStarted = true;
                 }
             }
@@ -1078,6 +1080,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             }
 
             try {
+                // 从队列中消费任务
                 Runnable r = timed ? workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) : workQueue.take();
                 if (r != null)
                     return r;
@@ -1353,13 +1356,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             throw new NullPointerException();
         /*
          * Proceed in 3 steps:
-         *
+         * 1、如果运行的线程数小于核心线程数，则尝试新建一个线程执行任务
          * 1. If fewer than corePoolSize threads are running, try to
          * start a new thread with the given command as its first
          * task.  The call to addWorker atomically checks runState and
          * workerCount, and so prevents false alarms that would add
          * threads when it shouldn't, by returning false.
          *
+         * 2、如果任务成功加入到队列
          * 2. If a task can be successfully queued, then we still need
          * to double-check whether we should have added a thread
          * (because existing ones died since last checking) or that
@@ -1379,14 +1383,17 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 return;
             c = ctl.get();
         }
-        // 将任务添加到任务队列中
+        // 线程池处于运行状态，则将任务添加到任务队列中
         if (isRunning(c) && workQueue.offer(command)) {
             int recheck = ctl.get();
+            // 检查线程池是否已关闭，若关闭，则删除任务，并且执行拒绝策略
             if (! isRunning(recheck) && remove(command))
-                reject(command);
+                reject(command);// 执行拒绝策略
+            // 如果没有工作线程，则新增一个工作线程
             else if (workerCountOf(recheck) == 0)
                 addWorker(null, false);
         }
+        // 添加工作线程失败，则执行拒绝策略
         else if (!addWorker(command, false))
             reject(command);
     }

@@ -108,7 +108,9 @@ public abstract class AbstractExecutorService implements ExecutorService {
      */
     public Future<?> submit(Runnable task) {
         if (task == null) throw new NullPointerException();
+        // 创建新的任务，实际为包装了Runnable的Callable，并且实际调用的是Runnable.run()
         RunnableFuture<Void> ftask = newTaskFor(task, null);
+        // 执行任务
         execute(ftask);
         return ftask;
     }
