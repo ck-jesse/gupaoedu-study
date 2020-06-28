@@ -89,6 +89,10 @@ public class GPExposeInvocationInterceptor implements GPMethodInterceptor, GPPri
     @Override
     public Object invoke(GPMethodInvocation mi) throws Throwable {
         // 从ThreadLocal中将旧的Invocation取出来，并记录下来
+        // methodA方法 调用 methodB方法时
+        // methodA方法进来时oldInvocation=null
+        // methodB方法进来时oldInvocation=methodAInvocation，这样保证methodB方法执行完后，methodA方法执行时获得自己的Invocation
+        // 这样保证嵌套方法都被拦截时外层方法获取的Invocation是正确的。
         GPMethodInvocation oldInvocation = invocation.get();
         // 设置当前Invocation到ThreadLocal中，保证当前的拦截器能获取到自己的Invocation
         invocation.set(mi);

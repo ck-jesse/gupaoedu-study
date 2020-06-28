@@ -55,7 +55,7 @@ public abstract class AspectJProxyUtils {
                 }
             }
             if (foundAspectJAdvice && !advisors.contains(GPExposeInvocationInterceptor.ADVISOR)) {
-                // 添加到拦截器链的第一个元素
+                // 添加到拦截器链的第一个元素，用于解决方法A调用方法B且A和B都被同一个后置拦截器拦截时方法A执行完后获取的Invocation变为了方法B的Invocation
                 advisors.add(0, GPExposeInvocationInterceptor.ADVISOR);
                 return true;
             }
