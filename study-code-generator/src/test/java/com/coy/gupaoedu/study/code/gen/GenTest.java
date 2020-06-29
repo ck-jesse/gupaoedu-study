@@ -33,7 +33,8 @@ public class GenTest {
 //            "t_sync_order_all_commission_detail",
 //            "t_sync_order",
 //            "after_sale_apply_main_record",
-            "t_biz_auth",
+//            "t_biz_auth",
+            "hx_poster_config",
     };
 
     /**
