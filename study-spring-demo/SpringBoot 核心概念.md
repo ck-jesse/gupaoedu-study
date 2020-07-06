@@ -35,7 +35,7 @@ SpringFactoriesLoader.loadFactoryNames(EnableAutoConfiguration.class) 从META-IN
 
 > 通过配置文件META-INF/spring-autoconfigure-metadata.properties来协助条件装配，内容如下：
 >
-> com.coy.l2cache.CaffeineRedisCacheAutoConfiguration.ConditionalOnClass=com.github.benmanes.caffeine.cache.Caffeine
+> com.coy.l2cache.spring.L2CacheConfiguration.ConditionalOnClass=com.github.benmanes.caffeine.cache.Caffeine
 
 
 
