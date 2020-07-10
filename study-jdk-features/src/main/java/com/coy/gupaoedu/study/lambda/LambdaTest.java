@@ -2,6 +2,8 @@ package com.coy.gupaoedu.study.lambda;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 
@@ -14,7 +16,7 @@ import java.util.function.Consumer;
  * @author chenck
  * @date 2020/6/2 16:32
  */
-public class LambdaTest {
+public class LambdaTest extends BaseExample {
 
     // 语法格式一：无参，无返回值，Lambda体只需要一条语句
     @Test
@@ -55,4 +57,47 @@ public class LambdaTest {
         System.out.println(bi.apply(20, 30));
     }
 
+    // 双冒号(::)运算符在Java 8中被用作方法引用（method reference）。它提供了一种不执行方法的方法。为此，方法引用需要由兼容的函数接口组成的目标类型上下文。
+    // 静态方法引用语法：classname::methodname 例如：Person::getAge
+    // 对象的实例方法引用语法：instancename::methodname 例如：System.out::println
+    // 对象的超类方法引用语法： super::methodname
+    // 类构造器引用语法： classname::new 例如：ArrayList::new
+    // 数组构造器引用语法： typename[]::new 例如： String[]:new
+
+    // 静态方法引用语法:ClassName::methodName 例如：Person::getAge
+    @Test
+    public void test11() {
+        List<String> list = Arrays.asList("aaaa", "bbbb", "cccc");
+        list.forEach(LambdaTest::print11);
+    }
+
+    // 对象的实例方法引用语法：instancename::methodName 例如：System.out::println
+    @Test
+    public void test12() {
+        List<String> list = Arrays.asList("aaaa", "bbbb", "cccc");
+        list.forEach(new LambdaTest()::print12);
+    }
+
+    // 对象的超类方法引用语法： super::methodname
+    @Test
+    public void test13() {
+        List<String> list = Arrays.asList("aaaa", "bbbb", "cccc");
+        list.forEach(super::print);
+    }
+
+
+    public static void print11(String content) {
+        System.out.println(content);
+    }
+
+    public void print12(String content) {
+        System.out.println(content);
+    }
+
+}
+
+class BaseExample {
+    public void print(String content) {
+        System.out.println(content);
+    }
 }
