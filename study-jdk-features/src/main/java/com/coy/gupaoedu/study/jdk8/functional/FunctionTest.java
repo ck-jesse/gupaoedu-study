@@ -37,6 +37,7 @@ public class FunctionTest {
 
     /**
      * 还原 compose 和 andThen 的实现，以便阅读和理解
+     * 本质其实是包装了2次Function
      *
      * @see java.util.function.Function#compose(java.util.function.Function)
      * @see java.util.function.Function#andThen(java.util.function.Function)
