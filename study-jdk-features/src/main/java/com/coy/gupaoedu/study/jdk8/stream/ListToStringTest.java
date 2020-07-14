@@ -25,5 +25,9 @@ public class ListToStringTest {
 
         List<String> list1 = Arrays.asList(listStr.split(","));
         System.out.println(list1);
+
+        // 选择一个子域
+        Arrays.stream(new int[]{1, 3, 5, 7, 15, 28, 37}, 3, 6)
+                .forEach(value -> System.out.println(value));
     }
 }
