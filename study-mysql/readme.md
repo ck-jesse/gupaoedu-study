@@ -4,3 +4,7 @@
 4. RC 和 RR 隔离级别下，如何加锁及使用 MVCC 机制读取数据
 5. undolog 和 ReadView 如何实现事务隔离性
 6. redolog 如何实现事务的持久性和一致性
+
+
+数据结构动图网址
+> https://www.cs.usfca.edu/~galles/visualization/Algorithms.html

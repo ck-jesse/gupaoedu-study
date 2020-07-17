@@ -41,3 +41,8 @@ show variables like 'innodb_log%';
 -- 查看log buffer 写入磁盘的参数
 SHOW VARIABLES LIKE 'innodb_flush_log_at_trx_commit';
 
+-- 查看数据和索引的大小
+SELECT
+	CONCAT( ROUND( SUM( DATA_LENGTH / 1024 / 1024 ), 2 ), 'MB' ) AS data_len,
+	CONCAT( ROUND( SUM( INDEX_LENGTH / 1024 / 1024 ), 2 ), 'MB' ) AS index_len
+FROM information_schema.TABLES WHERE table_schema = 'coy' AND table_name = 'user_info';
