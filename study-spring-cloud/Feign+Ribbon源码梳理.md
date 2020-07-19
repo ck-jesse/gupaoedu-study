@@ -156,3 +156,11 @@
 
 openapi-gateway
 
+
+eureka 源码借鉴
+
+1、衰减重试 - 设计值得借鉴
+> 10s,20s,40s,60s,120s 
+
+com.netflix.discovery.DiscoveryClient.initScheduledTasks
+com.netflix.discovery.TimedSupervisorTask
