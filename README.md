@@ -24,6 +24,9 @@ BeanFactoryAware向之类提供BeanFactory实例
 4、设计模式
 
 5、序列化
+```text
+Java序列化、protobuf、hessian、json、xml、messagepack、kryo
+```
 
 6、netty
 
@@ -38,6 +41,15 @@ BeanFactoryAware向之类提供BeanFactory实例
 11、SpringCloud
 
 12、RPC
+```text
+1、网络通信
+BIO/NIO/Netty
+2、序列化
+3、服务注册发现
+4、负载均衡
+随机、轮询、加权轮询
+5、动态代理
+```
 
 13、MQ - kafka/rocketmq
 
@@ -46,3 +58,16 @@ BeanFactoryAware向之类提供BeanFactory实例
 15、分布式锁
 
 16、Zookeeper
+
+17、MYSQL核心
+```text
+1、查询SQL执行流程
+2、更新SQL执行流程
+3、存储引擎
+Innodb存储引擎逻辑结构
+4、索引 - B+Tree
+5、事务
+6、锁MVCC
+7、主从复制
+8、Explain
+```

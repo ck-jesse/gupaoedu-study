@@ -162,3 +162,99 @@ Redis并不是简单的key-value存储，实际上他是一个数据结构服务
 > 注意：布隆过滤器需要提前初始化数据到其中；
 > 布隆过滤器存在误判率的问题，也就是原本不存在的元素，但是判断为存在，实质是hash碰撞导致的。
 > 如果布隆过滤器判断不存在，则一定不存在，如果判断存在，则可能不存在（误判）
+
+
+
+## Redis实现延迟消息队列
+
+> Redis可以通知发布/订阅客户端关于键空间中发生的事件，如果Redis开启了键空间事件通知，且客户端订阅了某些键的事件，则在相应的键发生变动时，会通过发布/订阅向客户端发送两条消息：
+>
+> PUBLISH __keyspace@0__:foo del  -- 键空间通知
+>
+> PUBLISH __keyevent@0__:del foo  -- 键事件通知
+>
+> 当开启键空间通知功能时，需要额外的消耗一些CPU，所以此功能默认为关闭状态，可以通过修改redis.conf文件或者使用config set命令来开启或关闭键空间通知功能
+>
+> 当notify-keyspace-events的值为空字符串时，功能关闭
+>
+> 当参数的值不是空字符串时，功能开启，且参数的值的取值范围是固定的
+
+ 参数的可选值
+
+ 输入的参数中至少要有一个K或E来指定通知类型，否则配置不会生效
+
+| 字符 | 通知事件                                                   |
+| ---- | ---------------------------------------------------------- |
+| K    | 键空间通知，所有通知以 __keyspace@__ 为前缀                |
+| E    | 键事件通知，所有通知以 __keyevent@__ 为前缀                |
+| g    | DEL 、 EXPIRE 、 RENAME 等类型无关的通用命令的通知         |
+| $    | 字符串命令的通知                                           |
+| l    | 列表命令的通知                                             |
+| s    | 集合命令的通知                                             |
+| h    | 哈希命令的通知                                             |
+| z    | 有序集合命令的通知                                         |
+| x    | 过期事件：每当有过期键被删除时发送                         |
+| e    | 驱逐(evict)事件：每当有键因为 maxmemory 政策而被删除时发送 |
+| A    | 参数 g$lshzxe 的别名                                       |
+|      |                                                            |
+
+在Redis中有两种方式将key删除：
+
+1. 当一个键被访问时，Redis会对这个键进行检查，如果键已经过期，则将该键删除
+2. Redis后台会定期删除那些已经过期的键
+
+当过期键被删除时，Redis会产生一个expired通知。在此要理解一点，就是并不是当key的TTL变为0时就会立即被删除，所以Redis产生expired通知的时间为键被删除的时候而不是键的TTL变为0的时候。
+
+依据上述表格，我们可以将`notify-keyspace-events`设置为`Ex`，表示键过期事件通知。
+
+
+
+##### Java应用中通知监控
+
+Spring Data Redis 实现发布订阅功能非常简单 
+
+-  创建`RedisMessageListenerContainer`实例 
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.stereotype.Component;
+
+@Component
+public class RedisListenerConfig {
+
+    @Bean
+    public RedisMessageListenerContainer container(RedisConnectionFactory redisConnectionFactory) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(redisConnectionFactory);
+        return container;
+    }
+
+}
+```
+
+
+
+- 创建key过期事件监听器
+
+```java
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.stereotype.Component;
+
+@Component
+public class RedisKeyExpirationListener extends KeyExpirationEventMessageListener {
+    public RedisKeyExpirationListener(RedisMessageListenerContainer listenerContainer) {
+        super(listenerContainer);
+    }
+
+    @Override
+    public void onMessage(Message message, byte[] pattern) {
+        String key = message.toString();
+        System.out.println("监听到key: " + key + " 过期!");
+    }
+}
+```
+

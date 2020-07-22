@@ -8,3 +8,15 @@
 
 数据结构动图网址
 > https://www.cs.usfca.edu/~galles/visualization/Algorithms.html
+>
+
+MYSQL核心
+1、查询SQL执行流程
+2、更新SQL执行流程
+3、存储引擎
+Innodb存储引擎逻辑结构
+4、索引 - B+Tree
+5、事务
+6、锁MVCC
+7、主从复制
+8、Explain
