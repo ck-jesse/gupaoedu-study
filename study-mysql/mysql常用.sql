@@ -38,6 +38,9 @@ SHOW VARIABLES like '%innodb_buffer_pool%';
 -- 查看innodb_log参数
 show variables like 'innodb_log%';
 
+-- 查看写缓冲的最大值
+SHOW VARIABLES LIKE 'innodb_change_buffer_max_size';
+
 -- 查看log buffer 写入磁盘的参数
 SHOW VARIABLES LIKE 'innodb_flush_log_at_trx_commit';
 
