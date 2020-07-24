@@ -10,11 +10,15 @@
 
 > 数据行的物理顺序与键值的逻辑顺序相同，一个表中只能拥有一个聚集索引。 
 >
+> 聚集索引的叶子节点存的是整行数据，可直接通过这个聚集索引的键值找到某行。
+>
 > 主键就是聚集索引。创建表时如果不创建索引，系统会自动创建一个隐含列作为表的聚集索引。 最好还是在创建表的时候添加聚集索引 。
 
 ### 2、**非聚集索引**
 
->  索引的逻辑顺序与磁盘上行的物理存储顺序不同，一个表中可以拥有多个非聚集索引。 
+> 索引的逻辑顺序与磁盘上行的物理存储顺序不同，一个表中可以拥有多个非聚集索引。 
+>
+> 非聚集索引的叶子节点存的是聚集索引键值，通过这个非聚集索引的键值找到对应的聚集索引字段的值，再通过聚集索引键值找到表的某行。 
 
 在 InnoDB 里面，索引类型有三种，普通索引、唯一索引（主键索引是特殊的唯一索引）、全文索引。
 
@@ -24,7 +28,7 @@
 
 **唯一索引（Unique）**：
 
-> 唯一索引要求键值不能重复。另外需要注意的是，主键索引是一种特殊的唯一索引，它还多了一个限制条件，要求键值不能为空。主键索引用 primay key 创建。 
+> 唯一索引要求键值不能重复。另外主键索引是一种特殊的唯一索引，它还多了一个限制条件，要求键值不能为空。主键索引用 primay key 创建。 
 
 **全文索引（Fulltext）**：
 
@@ -156,7 +160,7 @@ Binary Tree
 
 **优点：**
 
-B-Tree 实现一个节点存储多个关键字
+B-Tree 实现一个节点存储多个关键字，相较AVL树提升了空间利用率。
 
 **缺点：**
 
@@ -213,6 +217,42 @@ B+Tree
 **缺点：**
 
 B+Tree的写请求是随机分布的，也就是会有大量的随机IO。
+
+### 5、Hash索引
+
+Hash索引以 KV 的形式检索数据，也就是说，它会根据索引字段生成哈希码和指针，指针指向数据。 
+
+**优点：**
+
+1）时间复杂度是 O(1)，查询速度比较快。
+
+> 查询数据时根据键值计算哈希码，直接等值查询。
+
+**缺点：**
+
+1）不支持排序
+
+> 因为哈希索引里面的数据不是按顺序存储的，所以不能用于排序。 
+
+2）不支持范围查询
+
+> 查询数据时根据键值计算哈希码，所以它只能支持等值查询（= IN），不支持范围查询（> < >= <= between and）。 
+
+3）存在哈希冲突时，效率降低
+
+> 如果字段重复值很多时，会出现大量的哈希冲突（采用拉链法解决），效率会降低。 
+
+InnoDB 只支持显式创建 B+Tree 索引，对于一些热点数据页， InnoDB 会自动建立自适应 Hash 索引，也就是在 B+Tree 索引基础上建立 Hash 索引， 这个过程对于客户端是不可控制的，隐式的。 
+
+比如Buffer Pool 里面有一块区域 Adaptive Hash Index 就是自适应哈希索引。
+
+```sql
+show variables like 'innodb_adaptive_hash_index';
+```
+
+
+
+注：因为B-Tree 和B+Tree 的特性，它们广泛地用在文件系统和数据库中，例如Windows 的 HPFS 文件系统，Oracel、MySQL、SQLServer 数据库。 
 
 
 
@@ -301,3 +341,35 @@ set optimizer_switch='index_condition_pushdown=on';
 ![执行计划UsingIndexCondition](img/执行计划UsingIndexCondition.png)
 
 Extra的值 Using index condition  代表把 first_name LIKE '%zi'下推给存储引擎后，只会从数据表读取所需的 1 条记录。 
+
+
+
+**样例表结构：**
+
+```sql
+DROP TABLE employees;
+CREATE TABLE `employees` (
+	`emp_no` INT ( 11 ) NOT NULL,
+	`birth_date` date NULL,
+	`first_name` VARCHAR ( 14 ) NOT NULL,
+	`last_name` VARCHAR ( 16 ) NOT NULL,
+	`gender` enum ( 'M', 'F' ) NOT NULL,
+	`hire_date` date NULL,
+	PRIMARY KEY ( `emp_no` ) 
+) ENGINE = INNODB DEFAULT CHARSET = latin1;
+
+ALTER TABLE employees ADD INDEX idx_lastname_firstname ( last_name, first_name );
+
+INSERT INTO `employees` ( `emp_no`, `birth_date`, `first_name`, `last_name`, `gender`, `hire_date` )
+VALUES	( 1, NULL, '698', 'liu', 'F', NULL ),
+VALUES	( 2, NULL, 'd99', 'zheng', 'F', NULL ),
+VALUES	( 3, NULL, 'e08', 'huang', 'F', NULL ),
+VALUES	( 4, NULL, '59d', 'lu', 'F', NULL ),
+VALUES	( 5, NULL, '0dc', 'yu', 'F', NULL ),
+VALUES	( 6, NULL, '989', 'wang', 'F', NULL ),
+VALUES	( 7, NULL, 'e38', 'wang', 'F', NULL ),
+VALUES	( 8, NULL, '0zi', 'wang', 'F', NULL ),
+VALUES	( 9, NULL, 'dc9', 'xie', 'F', NULL ),
+VALUES	( 10, NULL, '5ba', 'zhou', 'F', NULL );
+```
+
