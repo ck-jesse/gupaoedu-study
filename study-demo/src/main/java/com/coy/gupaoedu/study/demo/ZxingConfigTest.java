@@ -4,6 +4,9 @@ import com.google.zxing.BarcodeFormat;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 注：生成的二维码图片的格式为png，识别率更高
@@ -11,7 +14,7 @@ import java.io.File;
  * @author chenck
  * @date 2020/7/31 10:34
  */
-public class ZxingTest {
+public class ZxingConfigTest {
 
     String contents = "www.baidu.com";
     int width = 150;
@@ -22,7 +25,7 @@ public class ZxingTest {
 
     // 解码
     public void decodeQRCode(String path) {
-        String contents = ZxingUtil.decode(path);
+        String contents = ZxingConfigUtil.decode(path);
         System.out.println(contents);
     }
 
@@ -35,7 +38,7 @@ public class ZxingTest {
         width = 150;
         height = 80;
         qrcodePath = "E:/temp/barcode.png";
-        ZxingUtil.createBarCode(contents, width, height, qrcodePath);
+        ZxingConfigUtil.createBarCode(contents, width, height, qrcodePath);
 
         decodeQRCode(qrcodePath);
     }
@@ -45,7 +48,7 @@ public class ZxingTest {
      */
     @Test
     public void createQRCode() {
-        ZxingUtil.createQRCode(contents, width, height, qrcodePath);
+        ZxingConfigUtil.createQRCode(contents, width, height, qrcodePath);
 
         decodeQRCode(qrcodePath);
     }
@@ -56,7 +59,7 @@ public class ZxingTest {
     @Test
     public void createQRCodeLogo() {
         qrcodePath = "E:/temp/qrcodelogo.png";
-        ZxingUtil.createQRCodeLogo(contents, width, height, qrcodePath, logoPath);
+        ZxingConfigUtil.createQRCodeLogo(contents, width, height, qrcodePath, logoPath);
 
         decodeQRCode(qrcodePath);
     }
@@ -76,13 +79,21 @@ public class ZxingTest {
      */
     @Test
     public void batchCreateQRCodeLogo() {
-        String imgPath = "E:/temp/qrcode/qrcode";
+        String imgPath = "E:/temp/qrcode1/qrcode";
         String name = "";
+        ZxingConfig config = new ZxingConfig();
         long initstart = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             name = imgPath + i + ".png";
             long start = System.currentTimeMillis();
-            ZxingUtil.createQRCodeLogo(contents + i, width, height, name, logoPath);
+
+            config.setFormat(BarcodeFormat.QR_CODE);
+            config.setContents(contents + i);
+            config.setWidth(width);
+            config.setHeight(height);
+            config.setQrcodePath(name);
+            config.setLogoPath(logoPath);
+            ZxingConfigUtil.encode(config);
             long end = System.currentTimeMillis();
             System.out.println(i + " " + name + " " + (end - start) + " ms");
         }
@@ -132,12 +143,54 @@ public class ZxingTest {
         config.setHeight(height);
         config.setQrcodePath(qrcodePath);
         config.setLogoPath(logoPath);
-        config.setShowWords(true);
-        config.setWords(words);
+//        config.setShowWords(true);
+//        config.setWords(words);
 
         ZxingConfigUtil.encode(config);
 
         decodeQRCode(qrcodePath);
     }
 
+    /**
+     * 多线程版本的测试
+     */
+    @Test
+    public void batchCreateQRCodeLogoThread() throws InterruptedException {
+
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+
+        int total = 1000;
+        CountDownLatch countDownLatch = new CountDownLatch(total);
+        String imgPath = "E:/temp/qrcode1/qrcode";
+        String name = "";
+        long initstart = System.currentTimeMillis();
+        for (int i = 0; i < total; i++) {
+            name = imgPath + i + ".png";
+
+            int finalI = i;
+            String finalName = name;
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    long start = System.currentTimeMillis();
+
+                    ZxingConfig config = new ZxingConfig();
+                    config.setFormat(BarcodeFormat.QR_CODE);
+                    config.setContents(contents + finalI);
+                    config.setWidth(width);
+                    config.setHeight(height);
+                    config.setQrcodePath(finalName);
+                    config.setLogoPath(logoPath);
+                    ZxingConfigUtil.encode(config);
+
+                    long end = System.currentTimeMillis();
+                    System.out.println(Thread.currentThread().getName() + " " + finalI + " " + finalName + " " + (end - start) + " ms");
+                    countDownLatch.countDown();
+                }
+            });
+        }
+        countDownLatch.await();
+        long end = System.currentTimeMillis();
+        System.out.println("总耗时 " + (end - initstart) + " ms");
+    }
 }
