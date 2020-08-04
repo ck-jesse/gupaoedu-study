@@ -710,9 +710,9 @@ SourceFile: "StackFrameTest.java"
 
 
 
-# 五、垃圾回收
+# 五、垃圾回收 Garbage Collect
 
-Garbage Collect
+
 
 ## 1、如何确定一个对象是垃圾？
 
@@ -783,7 +783,7 @@ Garbage Collect
 
 #### 缺点
 
-### 4）分代收集算法
+## 3、分代收集算法
 
 堆内存到底使用的是哪一种垃圾收集算法呢？
 
@@ -797,4 +797,500 @@ Garbage Collect
 
 
 
-## 3、垃圾收集器
+## 4、垃圾收集器
+
+收集算法是内存回收的方法论，垃圾收集器是内存回收的具体实现。其中主要的垃圾收集器为CMS和G1。
+
+![垃圾收集器](img/垃圾收集器.png)
+
+### 1）垃圾收集器类型
+
+#### 1.1）串行收集器
+
+`Serial` 和 `Serial Old`，只有一个垃圾收集线程(GC线程)执行，会停顿用户线程。
+
+> 适用于内存比较小的嵌入式设备。
+
+#### 1.2）并行收集器（吞吐量优先）
+
+`Parallel Scavenge` 和 `Parallel Old`，多个垃圾收集线程(GC线程)并行工作，会停顿用户线程。
+
+> 适用于科学计算	、后台处理等场景。
+
+#### 1.3）并发收集器（停顿时间优先）
+
+`CMS` 和 `G1`，用户线程和垃圾收集线程(GC线程)同时执行（不一定是并行的，也可能是交替执行），垃圾收集线程(GC线程)执行时不会停顿用户线程的运行。
+
+> 适用于对时间有要求的场景，如web。
+
+#### 1.4）停顿时间和吞吐量
+
+这两个指标是评价垃圾回收器好坏的标准，其实调优也就是在观察者两个变量。
+
+- 停顿时间
+
+垃圾收集器执行垃圾回收时造成的系统停顿时间，也就是Stop The World的时间。
+
+> 停顿时间越短就越适合需要和用户交互的程序，良好的响应速度能提升用户体验。
+
+- 吞吐量
+
+吞吐量 = 运行用户代码时间 / (运行用户代码时间 + 垃圾收集时间)
+
+> 高吞吐量可以高效地利用CPU时间，尽快完成程序的运算任务，所以适用于后台运算等场景。
+>
+> 比如虚拟机总共运行了100分钟，垃圾收集时间用了1分钟，吞吐量=(100-1)/100=99%。
+>
+> 若吞吐量越大，意味着垃圾收集的时间越短，则用户代码可以充分利用CPU资源，尽快完成程序
+> 的运算任务。
+
+
+
+### 2）Serial 收集器
+
+Serial收集器是最基本、发展历史最悠久的收集器，在JDK1.3.1之前是虚拟机新生代收集的唯一选择。
+
+它是一种单线程收集器，也就是说它只会使用一个CPU的一个GC收集线程去完成垃圾收集工作，并且在执行垃圾收集工作时会暂停所有的用户线程。
+
+![Serial收集器](img/Serial收集器.png)
+
+
+
+优点：简单高效，拥有很高的单线程收集效率
+缺点：收集过程需要暂停所有线程
+算法：复制算法
+适用范围：新生代
+应用：Client模式下的默认新生代收集器。
+
+### 3）ParNew 收集器
+
+ParNew 收集器可以理解为Serial 收集器的多线程版本。
+
+![ParNew 收集器](img/ParNew 收集器.png)
+
+
+
+优点：在多CPU时，比Serial收集器效率高。
+缺点：收集过程暂停所有应用程序线程，单CPU时比Serial效率差。
+算法：复制算法
+适用范围：新生代
+应用：运行在Server模式下的虚拟机中首选的新生代收集器。
+
+### 4）Parallel Scavenge 收集器
+
+Parallel Scavenge收集器是一个新生代收集器，它使用复制算法的收集器，又是并行的多线程收集器，看上去和ParNew一样，但是Parallel Scanvenge更关注 系统的吞吐量 。
+
+```
+-XX:MaxGCPauseMillis // 控制最大的垃圾收集停顿时间
+-XX:GCTimeRatio      // 设置吞吐量的大小(0,100)
+```
+
+
+
+### 5）Serial Old 收集器
+
+Serial Old 收集器是Serial 收集器的老年代版本，也是一个单线程收集器，不同的是采用"标记-整理算
+法"，运行过程和Serial 收集器一样。
+
+![Serial Old 收集器](img/Serial Old 收集器.png)
+
+
+
+### 6）Parallel Old 收集器
+
+Parallel Old收集器是Parallel Scavenge收集器的老年代版本，使用多线程和"标记-整理算法"进行垃圾
+回收。吞吐量优先。
+
+
+
+### 7）CMS 收集器
+
+Concurrent Mark Sweep 并发标记收集器。JDK 8默认的收集器。
+
+CMS 收集器的目标是`降低停顿时间`。采用`标记-清除算法` 。
+
+> 官网文档：
+>
+> https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/cms.html#concurrent_mark_sweep_cms_collector
+
+#### 7.1）优点
+
+> 并发收集、低停顿
+
+#### 7.2）缺点
+
+> 产生大量空间碎片、并发阶段会降低吞吐量。
+>
+> 占用CPU资源。
+>
+> 无法处理并发清除阶段产生的浮动垃圾（下一次GC清除）。
+
+
+
+#### 7.3）回收过程
+
+**并发标记和并发清除，GC线程可以与用户线程一起工作，所以CMS收集器的内存回收过程是与用户线程一起并发地执行的。**
+
+![CMS 收集器](img/CMS 收集器.png)
+
+- 1、初始标记
+
+> CMS initial mark，标记GC Roots能关联到的对象。
+>
+> 会Stop The World，也就是暂停用户线程。
+
+- 2、并发标记
+
+> CMS concurrent mark，进行GC Roots Tracing，基于GC Roots对象开始往下一层一层进行对象可达性分析。GC线程和用户线程并发执行。
+
+- 3、重新标记
+
+> CMS remark， 修正在并发标记阶段因为用户线程的并发执行导致变动的数据。
+>
+> 会Stop The World，也就是暂停用户线程。
+
+- 4、并发清除
+
+> CMS concurrent sweep，清除不可达的GC Roots对象。GC线程和用户线程并发执行。
+
+
+
+### 8）G1 收集器
+
+从JDK 7开始使用，到JDK 8已非常成熟，JDK 9默认的垃圾收集器，适用于新老生代。
+
+G1 收集器的目标是`降低停顿时间`。采用`标记-整理算法`。
+
+> 官方文档
+>
+> https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/g1_gc.html#garbage_first_garbage_collection
+
+#### 8.1）优点
+
+> 1、并行与并发
+>
+> 2、分代收集（仍然保留了分代的概念）
+>
+> 3、空间整合（整体上属于“标记-整理”算法，不会导致空间碎片）
+>
+> 4、可预测的停顿（比CMS更先进的地方在于能让使用者明确指定一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间不得超过N毫秒）
+
+#### 8.2）回收过程
+
+![G1 收集器](img/G1 收集器.png)
+
+- 1、初始标记
+
+> Initial Marking，标记GC Roots能关联到的对象，修改TAMS的值。
+>
+> 会Stop The World，也就是暂停用户线程。
+
+- 2、并发标记
+
+> Concurrent Marking，进行GC Roots Tracing，基于GC Roots对象开始往下一层一层进行对象可达性分析。GC线程和用户线程并发执行。
+
+- 3、最终标记
+
+> Final Marking，修正在并发标记阶段因为用户线程的并发执行导致变动的数据。
+>
+> 会Stop The World，也就是暂停用户线程。
+
+- 4、筛选回收
+
+> Live Data Counting and Evacuation，对各个Region的回收价值和成本进行排序，根据用户所期望的GC停顿时间制定回收计划。
+
+#### 8.3）G1内存模型
+
+使用G1收集器时，Java堆的内存布局与其他收集器有很大差别，它将整个Java堆划分为多个大小相等的独立区域（Region），虽然还保留有新生代和老年代的概念，但新生代和老年代不再是物理隔离的了，它们都是Region集合的一部分（不需要连续）。
+
+![G1内存模型](img/G1内存模型.png)
+
+
+
+#### 8.4）G1分区模型
+
+使用一个Per Region Table（PRT）来记录Region之间的引用，Card之间的引用，对象之间的引用， 以便GC线程根据GCRoot进行可达性分析。 GC 调优时会用到这个知识点。
+
+![G1分区模型](img/G1分区模型.png)
+
+
+
+#### 8.5）收集集合 CSet
+
+代表每次GC暂停时回收的一些列目标Region分区。
+
+#### 8.6）判断是否需要使用G1收集器？
+
+- 1、50%以上的堆被存活对象占用
+- 2、对象分配和晋升的速度变化非常大
+- 3、垃圾回收时间比较长
+
+
+
+### 9、如何选择垃圾收集器
+
+> 官方文档：
+>
+> https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/collectors.html#sthref28
+
+- 优先调整堆的大小让服务器自己来选择
+- 如果内存小于100M，使用串行收集器
+- 如果是单核，并且没有停顿时间要求，使用串行或JVM自己选
+- 如果允许停顿时间超过1秒，选择并行或JVM自己选
+- 如果响应时间最重要，并且不能超过1秒，使用并发收集器
+
+
+
+### 10、如何设置垃圾收集器
+
+**1）串行**
+
+> -XX:+UseSerialGC
+> -XX:+UseSerialOldGC
+
+**2）并行(吞吐量优先)**
+
+>  -XX:+UseParallelGC
+>  -XX:+UseParallelOldGC
+
+**3）并发收集器(停顿时间优先)**
+
+> -XX:+UseConcMarkSweepGC
+> -XX:+UseG1GC
+
+
+
+# 六、JVM 实战
+
+## 1、常用命令
+
+### 1）jps
+
+```shell
+# 查看java进程（显示主类全名）
+jps -l
+# 查看java进程（运行传入主类的参数）
+jps -m
+# 查看java进程（显示JVM参数）
+jps -v
+```
+
+### 2）jstat
+
+查看JVM统计信息，查看类加载、内存、垃圾收集、JIT编译信息。
+
+> 官方文档
+>
+> https://docs.oracle.com/javase/8/docs/technotes/tools/unix/jstat.html
+
+```shell
+# 查看options参数的帮助
+jstat -options -help
+# 每1秒打印一次GC信息
+jstat -gcutil 16876 1000
+# 每1秒打印一次GC信息，共打印10次
+jstat -gcutil 16876 1000 10
+# 查看垃圾收集信息
+jstat -gc 16876 1000 10
+# 查看类装载信息
+jstat -class 16876 1000
+```
+
+```
+# 每1秒打印一次GC信息
+jstat -gcutil 16876 1000
+-------------------------
+S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT
+0.00  99.56  52.16  18.72  81.15  84.83      1    0.005     0    0.000    0.005
+0.00  99.56  52.16  18.72  81.15  84.83      1    0.005     0    0.000    0.005
+... ...
+0.00   0.00  36.73  72.19  81.16  84.83      3    0.017     1    0.119    0.135
+0.00   0.00  36.73  72.19  81.16  84.83      3    0.017     1    0.119    0.135
+-------------------------
+S0：表示Survior的from区
+S1：表示Survior的to区
+E： 表示Eden区
+O： 表示Old区
+M： 表示Metaspace
+CCS：
+YGC：  表示Young GC次数
+YGCT： 表示Young GC时间，单位秒
+FGC：  表示Full GC次数
+FGCT： 表示Full GC时间，单位秒
+GCT：  表示Young GC和Full GC的总时间
+```
+
+
+
+```
+# 查看垃圾收集信息
+jstat -gc 16876 1000 10
+-------------------------
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT
+1536.0 1536.0  0.0    0.0   10240.0   4204.4   27648.0      0.0     4480.0 775.1  384.0   76.4       0    0.000   0      0.000    0.000
+1536.0 1536.0  0.0    0.0   10240.0   4541.0   27648.0      0.0     4480.0 775.1  384.0   76.4       0    0.000   0      0.000    0.000
+1536.0 1536.0  0.0    0.0   10240.0   4541.0   27648.0      0.0     4480.0 775.1  384.0   76.4       0    0.000   0      0.000    0.000
+-------------------------
+S0C：年轻代中 To Survivor 的容量（单位 KB）；
+S1C：年轻代中 From Survivor 的容量（单位 KB）；
+S0U：年轻代中 To Survivor 目前已使用空间（单位 KB）；
+S1U：年轻代中 From Survivor 目前已使用空间（单位 KB）；
+EC： 年轻代中 Eden 的容量（单位 KB）；
+EU： 年轻代中 Eden 目前已使用空间（单位 KB）；
+OC： 老年代的容量（单位 KB）；
+OU： 老年代目前已使用空间（单位 KB）；
+MC： 元空间的容量（单位 KB）；
+MU： 元空间目前已使用空间（单位 KB）；
+YGC： 从应用程序启动到采样时年轻代中 gc 次数；
+YGCT：从应用程序启动到采样时年轻代中 gc 所用时间 (s)；
+FGC： 从应用程序启动到采样时 老年代（Full Gc）gc 次数；
+FGCT：从应用程序启动到采样时 老年代代（Full Gc）gc 所用时间 (s)；
+GCT： 从应用程序启动到采样时 gc 用的总时间 (s)。
+```
+
+
+
+### 3）jinfo
+
+实时调整和查看JVM参数。
+
+jinfo -XX:option=value
+
+```shell
+# 查看java进程信息(含JVM、系统环境变量等信息)
+jinfo 16876
+# 查看JVM的flag信息
+jinfo -flags 16876
+# 查看指定名称的flag信息
+jinfo -flag UseG1GC 16876
+# 启用或禁用指定名称的JVM标志，只有被标记为manageable的flags可以被实时修改
+jinfo -flag [+|-]name PID
+# 设置指定flag名称的值
+jinfo -flag name=value PID
+```
+
+### 4）jmap
+
+```shell
+# 查看堆内存相关信息
+jmap -heap PID
+# 转储堆栈信息到文件
+jmap -dump:format=b,file=filepath PID
+# 查看存活对象
+jmap -histo:live PID
+```
+
+
+
+### 5）jstack
+
+查看线程堆栈信息，可用于分析死锁的情况。
+
+```shell
+jstack PID
+```
+
+
+
+## 2、常用工具
+
+### 1）jconsole
+
+jconsole工具是JDK自带的可视化监控工具。
+
+查看java应用程序的运行概况、监控堆信息、永久区使用情况、类加载情况等。
+
+```shell
+# 启用jconsole，在命令行中输入
+jconsole
+```
+
+### 2）jvisualvm
+
+可以在[工具 - 插件 - 可用插件]中选择`Visual GC`插件来查看堆内存的运行情况。
+
+**监控本地JVM进程**
+
+![jvisualvm堆内存分析](img/jvisualvm堆内存分析.png)
+
+**监控远程JVM进程**
+
+可添加JMX连接，不过需要远程应用开启JMX功能。
+
+- 添加JMX启动参数
+
+```
+-Dcom.sun.management.jmxremote -
+Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.port=8998
+-Dcom.sun.management.jmxremote.ssl=false -
+Dcom.sun.management.jmxremote.authenticate=true -
+Dcom.sun.management.jmxremote.access.file=../conf/jmxremote.access -
+Dcom.sun.management.jmxremote.password.file=../conf/jmxremote.password
+```
+
+- 在 ../conf 中添加两个文件`jmxremote.access`和`jmxremote.password`
+
+jmxremote.access 访问权限文件
+
+```
+guest readonly
+manager readwrite
+```
+
+jmxremote.password 账号文件
+
+```
+guest guest
+manager manager
+```
+
+```shell
+# 得到PID
+lsof -i:8998
+# 查看8998监听情况
+netstat -antup | grep PID
+```
+
+### 3）Arthas
+
+Arthas 是Alibaba开源的Java诊断工具，采用命令行交互模式，是排查jvm相关问题的利器。
+
+> 官网：https://github.com/alibaba/arthas
+
+
+
+### 4）MAT
+
+
+
+### 5）GC 日志分析工具
+
+1、在线工具
+
+2、GCViewer
+
+## 3、常见Java性能问题
+
+上面列举了常用的工具和命令，下面将结合模拟环境的案例来分析具体的问题。
+
+当然真实的线上环境可能十分复杂，并没有模拟环境那么简单，但原理是一样的，问题的表现也是类似的，我们重点是要抓住原理，灵活运用，来解决复杂的线上问题。
+
+### 1）CPU负载过高
+
+### 2）内存泄漏
+
+2.1）内存泄漏和内存溢出的区别？
+
+> 内存泄漏：对象无法得到及时的回收，持续占用内存空间，从而造成内存空间的浪费。
+>
+> 内存溢出：内存泄漏到一定的程度就会导致内存溢出，但是内存溢出也有可能是大对象导致的。
+
+2.2）
+
+2.3）
+
+### 3）死锁
+
+### 4）GC频繁
+
+### 5）线程频繁切换
