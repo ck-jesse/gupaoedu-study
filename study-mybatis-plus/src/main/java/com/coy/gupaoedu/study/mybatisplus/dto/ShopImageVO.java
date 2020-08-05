@@ -12,6 +12,14 @@ import java.io.Serializable;
  */
 @Data
 public class ShopImageVO implements Serializable {
+
+    public ShopImageVO() {
+    }
+
+    public ShopImageVO(String name) {
+        this.name = name;
+    }
+
     //主键生成方式
     private Long id;
     // 商家ID

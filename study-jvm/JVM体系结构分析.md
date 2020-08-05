@@ -367,6 +367,8 @@ SourceFile: "User.java"
 
 查找和导入class文件。
 
+> 类字节码的来源可以是class文件、jar文件、二进制流、动态生成、JSP等。
+
 > 1）通过一个类的全限定名获取此类文件的二进制字节流。
 >
 > 2）将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构。
@@ -1050,8 +1052,8 @@ G1 收集器的目标是`降低停顿时间`。采用`标记-整理算法`。
 
 **2）并行(吞吐量优先)**
 
->  -XX:+UseParallelGC
->  -XX:+UseParallelOldGC
+> -XX:+UseParallelGC
+> -XX:+UseParallelOldGC
 
 **3）并发收集器(停顿时间优先)**
 
@@ -1205,6 +1207,8 @@ jconsole工具是JDK自带的可视化监控工具。
 jconsole
 ```
 
+
+
 ### 2）jvisualvm
 
 可以在[工具 - 插件 - 可用插件]中选择`Visual GC`插件来查看堆内存的运行情况。
@@ -1219,30 +1223,36 @@ jconsole
 
 - 添加JMX启动参数
 
-```
--Dcom.sun.management.jmxremote -
-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.port=8998
--Dcom.sun.management.jmxremote.ssl=false -
-Dcom.sun.management.jmxremote.authenticate=true -
-Dcom.sun.management.jmxremote.access.file=../conf/jmxremote.access -
-Dcom.sun.management.jmxremote.password.file=../conf/jmxremote.password
+```shell
+-Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.port=8998 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.access.file=/usr/local/jdk/conf/jmxremote.access -Dcom.sun.management.jmxremote.password.file=/usr/local/jdk/conf/jmxremote.password
 ```
 
-- 在 ../conf 中添加两个文件`jmxremote.access`和`jmxremote.password`
+- 在 /usr/local/jdk/conf 中添加两个文件`jmxremote.access`和`jmxremote.password`
 
-jmxremote.access 访问权限文件
+> 可指定绝对路径，也可指定相对路径。
+
+1）jmxremote.access 访问权限文件
 
 ```
 guest readonly
 manager readwrite
 ```
 
-jmxremote.password 账号文件
+2）jmxremote.password 账号文件
 
 ```
 guest guest
 manager manager
 ```
+
+3）文件授权
+
+```shell
+# 文件授权
+chmod 600 *jmxremote*
+```
+
+4）监听端口
 
 ```shell
 # 得到PID
@@ -1250,6 +1260,8 @@ lsof -i:8998
 # 查看8998监听情况
 netstat -antup | grep PID
 ```
+
+
 
 ### 3）Arthas
 
@@ -1261,15 +1273,293 @@ Arthas 是Alibaba开源的Java诊断工具，采用命令行交互模式，是�
 
 ### 4）MAT
 
+> 下载地址 https://www.eclipse.org/mat/downloads.php 
+
+#### Histogram
+
+> 列出内存中的对象，对象的个数及其大小。
+>
+> Class Name:类名称，java类名
+> Objects:类的对象的数量，这个对象被创建了多少个
+> Shallow Heap:一个对象内存的消耗大小，不包含对其他对象的引用
+> Retained Heap:是shallow Heap的总和，即该对象被GC之后所能回收到内存的总和
+
+#### Leak Suspects
+
+> 查找并分析内存泄漏的可能原因。
+>
+> Reports--->Leak Suspects--->Details
+
+#### Top Consumers
+
+> Leak Identification -->Top Consumers
+>
+> 列出大对象
+
+#### MAT启用异常处理
+
+```
+---------------------------
+MemoryAnalyzer
+---------------------------
+Java was started but returned exit code=13
+... ...
+```
+
+**方案：**修改 MemoryAnalyzer.ini  文件
+
+> 1、配置javaw.exe路径  `-vm /usr/local/jdk/bin/javaw.exe`
+>
+> 2、配置日志路径  `-data /logs/mat`
+
+```
+-vm
+D:\software\java\jdk1.8.0_172\bin\javaw.exe
+-startup
+plugins/org.eclipse.equinox.launcher_1.5.0.v20180512-1130.jar
+-data
+E:\temp\logs\mat
+--launcher.library
+plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.700.v20180518-1200
+-vmargs
+-Xmx1024m
+```
+
+
+
+#### MAT具体分析步骤
+
+```
+1、打开Histogram窗口
+2、根据列Retained Heap降序排序，找到占用Heap最大的几个类记录
+3、右击类名-->List Objects-->with incoming references-->列出该类的实例
+比如模拟数组内存溢出，可找到数组元素为ArrayList，也可找到ArrayList在具体类中的变量名称，这样定位到代码。
+4、选中占用空间最大的对象，如果是数组，可从左侧Attributes面板中可看到元素列表，特别关注元素是否是业务类。
+5、展开占用空间最大的对象，可看到该对象（或其下的元素）所属Class，特别关注所属Class是否是业务类。
+6、右击对象-->Merge Shortest Paths to GC Roots-->exclude all phantom/weak/soft etc.refrences
+7、找到GCRoot以及原因
+比如模拟数组内存溢出，可找到数据里面的元素对象，然后可定位到具体的类，在结合代码来分析具体是哪个点导致了OOM。
+```
+
+![1596612325475](img/1596612325475.png)
+
+![1596612195810](img/1596612195810.png)
+
 
 
 ### 5）GC 日志分析工具
 
-1、在线工具
+可通过工具来分析GC日志，包含指标：吞吐量及GC暂停平均时间、最大时间、各个时间段的比例、GC发生的原因、次数、时间等。
 
-2、GCViewer
+> 主要关注吞吐量和停顿时间。
 
-## 3、常见Java性能问题
+#### 1、在线工具
+
+> 官网： http://gceasy.io
+
+
+
+**关键指标**
+
+![1596621370332](img/1596621370332.png)
+
+**GC收集统计**
+
+![1596621422659](img/1596621422659.png)
+
+**GC原因**
+
+![1596621454960](img/1596621454960.png)
+
+
+
+#### 2、GCViewer
+
+> 官方地址：包含各项指标的解释
+>
+> https://github.com/chewiebug/GCViewer 
+
+```shell
+# 通过工具来分析GC日志
+java -jar gcviewer-1.36-SNAPSHOT.jar
+```
+
+![1596621201474](img/1596621201474.png)
+
+## 3、GC调优
+
+### 1）GC日志分析
+
+配置GC日志文件参数
+
+```shell
+# 未配置垃圾收集器，则默认使用 ParallelGC 
+-verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log
+```
+
+> -verbose:gc  在控制台输出GC情况
+> -XX:+PrintGCDetails  在控制台输出详细的GC情况 
+> -Xloggc: filepath  将GC日志输出到指定文件中 
+
+#### 1.1）Parallel GC日志分析
+
+- 参数配置
+
+```shell
+-verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+UseParallelGC 
+```
+
+- 特点
+
+吞吐量优先。
+
+- 日志分析
+
+```
+# Young区GC MinorGC
+2020-08-05T10:23:58.715+0800: 1.110: [GC (Allocation Failure) [PSYoungGen: 65024K[Young区回收前]->8121K[Young区回收后](75776K[Young区总大小])] 65024K[整个堆回收前]->8137[整个堆回收后]K(249344K[整个堆总大小]), 0.0065560 secs] [Times: user=0.05 sys=0.08, real=0.01 secs] 
+```
+
+
+
+#### 1.2）CMS日志分析
+
+- 参数配置
+
+```shell
+-Xmx10M -Xms10M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:cms-gc.log -XX:+UseConcMarkSweepGC 
+```
+
+- 特点
+
+停顿时间优先。
+
+- 日志分析
+
+```
+# 命令行JVM标志参数
+CommandLine flags: -XX:InitialHeapSize=10485760 -XX:MaxHeapSize=10485760 -XX:MaxNewSize=3497984 -XX:MaxTenuringThreshold=6 -XX:NewSize=3497984 -XX:OldPLABSize=16 -XX:OldSize=6987776 -XX:+PrintGC -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseConcMarkSweepGC -XX:-UseLargePagesIndividualAllocation -XX:+UseParNewGC 
+
+# Young区GC ParNew收集器 分配失败
+2020-08-05T16:54:50.386+0800: 0.130: [GC (Allocation Failure) 2020-08-05T16:54:50.386+0800: 0.130: [ParNew: 3072K[Young区回收前]->320K[Young区回收后](3072K[Young区总大小]), 0.0029042 secs] 4077K[整个堆回收前]->3390K[整个堆回收后](9920K[整个堆总大小]), 0.0029843 secs] [Times: user=0.08 sys=0.02, real=0.00 secs] 
+
+# Old区GC CMS收集器
+# 阶段一：初始标记
+2020-08-05T16:54:50.394+0800: 0.138: [GC (CMS Initial Mark) [1 CMS-initial-mark: 5821K(6848K)] 6247K(9920K), 0.0002101 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+# 阶段二：在GC开始后的0.138秒处开始并行标记
+2020-08-05T16:54:50.394+0800: 0.138: [CMS-concurrent-mark-start]
+# 阶段二：分配失败；ParNew收集后，内存无变化；并发标记结束
+2020-08-05T16:54:50.396+0800: 0.140: [GC (Allocation Failure) 2020-08-05T16:54:50.396+0800: 0.140: [ParNew: 3072K->3072K(3072K), 0.0000126 secs]2020-08-05T16:54:50.396+0800: 0.140: [CMS2020-08-05T16:54:50.408+0800: 0.152: [CMS-concurrent-mark: 0.012/0.014 secs] [Times: user=0.05 sys=0.00, real=0.01 secs] 
+# 阶段二：并发模式失败，因为剩余空间无法满足新对象的分配要求
+ (concurrent mode failure): 5821K->6847K(6848K), 0.0255327 secs] 8893K->7828K(9920K), [Metaspace: 3450K->3450K(1056768K)], 0.0256104 secs] [Times: user=0.06 sys=0.00, real=0.03 secs] 
+# Old区 CMS收集器 Full GC 分配失败
+2020-08-05T16:54:50.422+0800: 0.166: [Full GC (Allocation Failure) 2020-08-05T16:54:50.422+0800: 0.166: [CMS: 6847K->6847K(6848K), 0.0138690 secs] 9148K->9102K(9920K), [Metaspace: 3451K->3451K(1056768K)], 0.0139466 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+# 阶段一：初始标记
+2020-08-05T16:54:50.451+0800: 0.195: [GC (CMS Initial Mark) [1 CMS-initial-mark: 6847K(6848K)] 9084K(9920K), 0.0025257 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+# 阶段二：并发标记开始 -- 此处OOM
+2020-08-05T16:54:50.454+0800: 0.198: [CMS-concurrent-mark-start]
+# 可通过下面的信息分析堆内存的分布情况
+Heap
+ par new generation   total 3072K, used 2392K [0x00000000ff600000, 0x00000000ff950000, 0x00000000ff950000)
+  eden space 2752K,  86% used [0x00000000ff600000, 0x00000000ff856120, 0x00000000ff8b0000)
+  from space 320K,   0% used [0x00000000ff900000, 0x00000000ff900000, 0x00000000ff950000)
+  to   space 320K,   0% used [0x00000000ff8b0000, 0x00000000ff8b0000, 0x00000000ff900000)
+ concurrent mark-sweep generation total 6848K, used 6847K [0x00000000ff950000, 0x0000000100000000, 0x0000000100000000)
+ Metaspace       used 3482K, capacity 4564K, committed 4864K, reserved 1056768K
+  class space    used 379K, capacity 388K, committed 512K, reserved 1048576K
+```
+
+
+
+**错误 `concurrent mode failure` 分析：**
+
+> 出现该错误主要有两个原因：
+>
+> 1、在最大停顿时间内，并发收集器无法完成对不可访问对象的回收
+>
+> 2、剩余空间无法满足新加入对象的分配要求
+>
+>  解决办法就是要让年老代留有足够的空间，以保证新对象空间的分配。 
+
+#### 1.3）G1日志分析
+
+- 参数配置
+
+```shell
+-Xmx10M -Xms10M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:cms-gc.log -XX:+UseG1GC
+```
+
+- 特点
+
+停顿时间优先。
+
+- 日志分析
+
+> 理解G1日志格式 https://blogs.oracle.com/poonam/understanding-g1-gc-logs 
+
+```
+# GC发生的时间，相对的时间刻，GC发生的区域young，总共花费的时间0.0033173s
+2020-08-05T17:16:49.747+0800: 0.139: [GC pause (G1 Evacuation Pause) (young), 0.0033173 secs]
+   # 10个并行GC线程的总运行时间2.7ms,
+   [Parallel Time: 2.7 ms, GC Workers: 10]
+      # GC线程的启动时间的平均值、最小值、最大值和差异
+      [GC Worker Start (ms): Min: 139.0, Avg: 139.1, Max: 139.1, Diff: 0.1]
+      # GC线程所花费时间的平均值、最小值、最大值和差异
+      [Ext Root Scanning (ms): Min: 0.0, Avg: 0.1, Max: 0.3, Diff: 0.3, Sum: 1.5]
+      # GC线程在更新记忆集上花费的时间的平均值、最小值、最大值和差异
+      # Remembered Sets RS 记忆集是跟踪指向堆区域的引用的数据结构。包含与指向该区域的引用相对应的卡片。
+      [Update RS (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]
+      	 # GC线程处理的更新缓冲区的数量
+         [Processed Buffers: Min: 0, Avg: 0.0, Max: 0, Diff: 0, Sum: 0]
+      # GC线程扫描RS所花费的时间
+      [Scan RS (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]
+      [Code Root Scanning (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]
+      # GC线程将活动对象从RS中的区域复制到其他区域所花费的时间
+      [Object Copy (ms): Min: 2.2, Avg: 2.3, Max: 2.4, Diff: 0.2, Sum: 23.1]
+      # GC线程终止所花费的时间，终止之前，它会检查其他线程的工作队列，如果其他工作队列中仍有对象引用，则会尝试窃取对象引用，如果成功窃取引用，则会处理该引用并再次提供终止
+      [Termination (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.1]
+         [Termination Attempts: Min: 28, Avg: 32.1, Max: 39, Diff: 11, Sum: 321]
+      # GC线程在执行上面我们没有考虑到的其他任务时所花费的总并行时间
+      [GC Worker Other (ms): Min: 0.0, Avg: 0.1, Max: 0.3, Diff: 0.3, Sum: 0.8]
+      # GC线程在执行上面流程时所花费的总并行时间
+      [GC Worker Total (ms): Min: 2.5, Avg: 2.5, Max: 2.6, Diff: 0.1, Sum: 25.5]
+      # GC线程停止的时间
+      [GC Worker End (ms): Min: 141.6, Avg: 141.6, Max: 141.6, Diff: 0.0]
+   [Code Root Fixup: 0.0 ms]
+   [Code Root Purge: 0.0 ms]
+   # 用于清除卡片表的时间，以串行模式执行
+   [Clear CT: 0.1 ms]
+   # 列出在其他任务上花费的时间
+   [Other: 0.5 ms]
+   	  # 为选择Collection Set区域所花费的时间。
+      [Choose CSet: 0.0 ms]
+      # 处理引用对象所花费的总时间
+      [Ref Proc: 0.2 ms]
+      # 将引用排队到引用队列所花费的时间
+      [Ref Enq: 0.0 ms]
+      [Redirty Cards: 0.2 ms]
+      [Humongous Register: 0.0 ms]
+      [Humongous Reclaim: 0.0 ms]
+      # 释放Collection Set区域所花费的时间
+      [Free CSet: 0.0 ms]
+   # 表示堆空间大小随垃圾收集暂停而变化的详细信息
+   [Eden: 6144.0K(6144.0K)->0.0B(2048.0K) Survivors: 0.0B->1024.0K Heap: 6144.0K(10.0M)->3920.0K(10.0M)]
+ [Times: user=0.00 sys=0.00, real=0.00 secs] 
+```
+
+
+
+### 2）G1调优与最佳指南
+
+#### 2.1）调优
+
+
+
+#### 2.1）最佳实现
+
+
+
+## 4、常见Java性能问题
 
 上面列举了常用的工具和命令，下面将结合模拟环境的案例来分析具体的问题。
 
@@ -1278,6 +1568,13 @@ Arthas 是Alibaba开源的Java诊断工具，采用命令行交互模式，是�
 ### 1）CPU负载过高
 
 ### 2）内存泄漏
+
+```shell
+# 当JVM发生OOM时，自动生成DUMP文件
+-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof
+```
+
+
 
 2.1）内存泄漏和内存溢出的区别？
 
@@ -1292,5 +1589,12 @@ Arthas 是Alibaba开源的Java诊断工具，采用命令行交互模式，是�
 ### 3）死锁
 
 ### 4）GC频繁
+
+```shell
+# GC日志输出到文件
+-verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:E:\temp\gclog\gc-%t.log
+```
+
+
 
 ### 5）线程频繁切换

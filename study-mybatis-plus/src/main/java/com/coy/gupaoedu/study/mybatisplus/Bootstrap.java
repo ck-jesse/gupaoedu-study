@@ -19,6 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Bootstrap {
 
+    /**
+     * 开启GC日志 和 JMX
+     * -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:E:\temp\gclog\gc.log -Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.port=8998 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
+     *
+     * -Xmx128M -Xms128M -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:E:\temp\gclog\gc_%t.log  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap_%t.hprof
+     */
     public static void main(String[] args) {
         SpringApplication.run(Bootstrap.class, args);
     }

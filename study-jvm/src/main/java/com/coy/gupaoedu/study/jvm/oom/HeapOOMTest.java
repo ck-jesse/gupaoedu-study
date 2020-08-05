@@ -22,15 +22,23 @@ public class HeapOOMTest {
     }
 
     /**
-     * 设置堆内存大小： -Xmx10M -Xms10M -XX:+PrintGCDetails -XX:+PrintGCDateStamps
+     * 设置堆内存大小： -Xmx10M -Xms10M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+UseConcMarkSweepGC
+     * -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof
      * <p>
-     * 异常：java.lang.OutOfMemoryError: GC overhead limit exceeded
+     * 垃圾收集器参数配置
+     * -XX:+UseParallelGC
+     * -XX:+UseConcMarkSweepGC
+     * -XX:+UseG1GC
+     * <p>
+     * 异常：
+     * java.lang.OutOfMemoryError: GC overhead limit exceeded
+     * java.lang.OutOfMemoryError: Java heap space
      */
     public static void main(String[] args) throws InterruptedException {
         HeapOOMTest test = new HeapOOMTest();
         while (true) {
             test.add(new User("heapoomtestssssssssssssssssssssssssssssssss"));
-            Thread.sleep(1);
+//            Thread.sleep(1);
         }
     }
 }
