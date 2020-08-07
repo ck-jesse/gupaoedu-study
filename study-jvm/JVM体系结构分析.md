@@ -1365,9 +1365,9 @@ Arthas 是Alibaba开源的Java诊断工具，采用命令行交互模式，是�
 
 #### Top Consumers
 
-> Leak Identification -->Top Consumers
+> 列出大对象。
 >
-> 列出大对象
+> Leak Identification -->Top Consumers
 
 #### MAT启用异常处理
 
@@ -1400,7 +1400,7 @@ plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.700.v20180518-1200
 
 
 
-#### MAT具体分析步骤
+#### 【重点】MAT具体分析步骤
 
 ```
 1、打开Histogram窗口
@@ -1715,37 +1715,226 @@ IHOP如果阀值设置过高，可能会遇到转移失败的风险，比如对�
 
 ### 1）CPU负载过高
 
+> 1、通过 `top` 命令查看各个进程CPU的使用情况，找出占用CPU资源高的进程ID(pid)
+>
+> 2、通过 `top -Hp pid`  查看该进程下各个线程CPU的使用情况，找出占用CPU资源高的线程ID(tid)
+>
+> 3、通过 `printf '%x' tid ` 获取16进制的线程ID(tid1)，用于从dump信息中查询线程
+>
+> 4、通过 `jstack pid | grep -A 20 tid1 ` 查看线程具体的dump信息
+>
+> 5、通过线程dump信息直接定位到方法和代码行。
+
+
+
 ### 2）内存泄漏
 
-```shell
-# 当JVM发生OOM时，自动生成DUMP文件
--XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof
+**2.1）源码**
+
+```java
+public class HeapOOMTest1 {
+    List<byte[]> list = new ArrayList<>();
+    public void add(byte[] bytes) {
+        list.add(bytes);
+    }
+    public static void main(String[] args) throws InterruptedException {
+        HeapOOMTest1 test = new HeapOOMTest1();
+        while (true) {
+            byte[] bytes = new byte[1024 * 1024];// 1M
+            test.add(bytes);
+        }
+    }
+}
 ```
 
+**2.2）JVM参数配置**
 
-
-2.1）内存泄漏和内存溢出的区别？
-
-> 内存泄漏：对象无法得到及时的回收，持续占用内存空间，从而造成内存空间的浪费。
->
-> 内存溢出：内存泄漏到一定的程度就会导致内存溢出，但是内存溢出也有可能是大对象导致的。
-
-2.2）
-
-2.3）
-
-### 3）死锁
-
-### 4）GC频繁
+配置堆内存大小，打印GC日志，CMS收集器，自动转储DUMP文件。
 
 ```shell
-# GC日志输出到文件
+-Xmx128M -Xms128M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/home/dump/gc_%t.log -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/dump/
+```
+
+**2.3）DUMP文件分析**
+
+通过MAT工具分析DUMP文件。
+
+1）通过 `Leak Suspects ` 查看内存泄露的原因，从下图中可以得知有一个内存泄露的对象占用了99.49%的内存。
+
+![1596787656214](img/1596787656214.png)
+
+2）通过 `Histogram` 查看占用内存最多的类
+
+从图中可知占用内存最多的类是byte[]，所以我们来分析这个类的对象。
+
+右击类名-->List Objects-->with incoming references-->列出该类的实例。
+
+![1596788231809](img/1596788231809.png)
+
+
+
+![1596788364269](img/1596788364269.png)
+
+分析上图，展开对象，发现`byte[]`是被 `HeapOOMTest1.list` 字段所引用，导致没有被回收。
+
+至此通过MAT工具已定位到内存泄露的具体类和字段，可以进行代码优化了。
+
+
+
+### 3）GC频繁
+
+**3.1）分析GC日志**
+
+获取GC日志有下面两种方式，具体如下：
+
+- GC日志输出到文件
+
+```shell
 -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:E:\temp\gclog\gc-%t.log
 ```
+
+- 每1秒打印一次GC信息
+
+```shell
+jstat -gcutil pid 1000
+```
+
+通过GC日志我们可以分析出堆内存的运行情况，来判断是否需要优化程序。
+
+**3.2）分析dump堆栈信息**
+
+通过 `jmap` 获取dump文件，可dump几个不同时间点的dump文件，以便分析。
+
+```shell
+jmap -dump:format=b,file=filepath PID
+```
+
+通过MAT工具来分析dump文件，我们可以重点关注 `Histogram` 和 `Leak Suspects` ，前者可以重点关注对象数量多，且占用空间比较大的类，后者可以分析内存泄漏的可能原因，然后结合业务代码来分析可以优化的代码。
+
+这个过程其实就是一个调优的过程，需要投入大量时间和精力，要结合理论来进行分析。
+
+
+
+### 4）死锁
+
+4.1）源码
+
+```java
+//运行主类
+public class DeadLockDemo {
+    public static void main(String[] args) {
+        DeadLock d1 = new DeadLock(true);
+        DeadLock d2 = new DeadLock(false);
+        Thread t1 = new Thread(d1);
+        Thread t2 = new Thread(d2);
+        t1.start();
+        t2.start();
+    }
+}
+
+//定义锁对象
+class MyLock {
+    public static Object obj1 = new Object();
+    public static Object obj2 = new Object();
+}
+
+//死锁代码
+class DeadLock implements Runnable {
+    private boolean flag;
+
+    DeadLock(boolean flag) {
+        this.flag = flag;
+    }
+
+    @Override
+    public void run() {
+        if (flag) {
+            while (true) {
+                synchronized (MyLock.obj1) {
+                    System.out.println(Thread.currentThread().getName() + "----if获得obj1锁");
+                    synchronized (MyLock.obj2) {
+                        System.out.println(Thread.currentThread().getName() + "----if获得obj2锁");
+                    }
+                }
+            }
+        } else {
+            while (true) {
+                synchronized (MyLock.obj2) {
+                    System.out.println(Thread.currentThread().getName() + "----否则获得obj2锁");
+                    synchronized (MyLock.obj1) {
+                        System.out.println(Thread.currentThread().getName() + "----否则获得obj1锁");
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+
+
+4.2）分析
+
+通过 `jstack` 来查看线程堆栈信息。
+
+```shell
+jstack pid
+```
+
+![1596789344119](img/1596789344119.png)
+
+从上图可以得知，存在一个deadlock，具体分析如下：
+
+> Thread-0 锁住 `0x000000076bf1ef80` ，等待锁 `0x000000076bf1ef90`
+>
+> Thread-1 锁住 `0x000000076bf1ef90` ，等待锁 `0x000000076bf1ef80` 
+
+可知是 Thread-0 和 Thread-1 在彼此等待对方释放所持有的资源，所以造成了死锁。
 
 
 
 ### 5）线程频繁切换
+
+上下文切换会导致将大量CPU时间浪费在寄存器、内核栈以及虚拟内存的保存和恢复上，导致系统整体性能下降。
+
+5.1）源码
+
+```java
+public class ThreadSwapTest {
+    public static void main(String[] args) {
+        System.out.println("模拟线程切换");
+        for (int i = 0; i < 100; i++) {
+            new Thread(new ThreadSwap(), "thread-swap-" + i).start();
+        }
+    }
+    public static class ThreadSwap implements Runnable {
+        AtomicInteger count = new AtomicInteger(0);
+        @Override
+        public void run() 
+            while (true) {
+                count.addAndGet(1);
+                Thread.yield();// 让出CPU资源，让CPU重新调度，CPU有可能继续调度该线程
+            }
+        }
+    }
+}
+```
+
+
+
+```shell
+# 监控CPU和内存，每1秒打印10次
+# 可查看线程切换切换次数，可查看用户态CPU和内核态CPU的使用率
+vmstat 1 10
+# 查看内核态CPU使用率
+top
+# 查看用户线程的CPU使用率
+top -Hp pid
+```
+
+比较 用户态CPU使用率 和 内核态CPU使用率，如果用户态CPU使用率很低，而内核态CPU使用率很高，可以基本判断是Java程序线程上下文切换导致的性能问题。
+
+
 
 
 

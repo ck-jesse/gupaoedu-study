@@ -22,8 +22,7 @@ public class HeapOOMTest {
     }
 
     /**
-     * 设置堆内存大小： -Xmx10M -Xms10M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+UseConcMarkSweepGC
-     * -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof
+     * 设置堆内存大小： -Xmx10M -Xms10M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof
      * <p>
      * 垃圾收集器参数配置
      * -XX:+UseParallelGC
@@ -31,8 +30,8 @@ public class HeapOOMTest {
      * -XX:+UseG1GC
      * <p>
      * 异常：
-     * java.lang.OutOfMemoryError: GC overhead limit exceeded
-     * java.lang.OutOfMemoryError: Java heap space
+     * java.lang.OutOfMemoryError: Java heap space 堆溢出
+     * java.lang.OutOfMemoryError: GC overhead limit exceeded 达到GC的开销限制，也就是说JVM在执行GC时花费了太多时间
      */
     public static void main(String[] args) throws InterruptedException {
         HeapOOMTest test = new HeapOOMTest();
