@@ -46,6 +46,19 @@ public class ZxingUtil {
      */
     private static MatrixToImageConfig defaultMatrixToImageConfig = new MatrixToImageConfig(0xFF000001, 0xFFFFFFFF);
 
+    private static Hashtable<EncodeHintType, Object> defaultEncodeHints = new Hashtable<>();
+
+    private static Hashtable<DecodeHintType, Object> defaultDecodeHints = new Hashtable<>();
+
+    static {
+        defaultEncodeHints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);// 指定纠错等级
+        defaultEncodeHints.put(EncodeHintType.CHARACTER_SET, "UTF-8");// 指定编码格式
+        defaultEncodeHints.put(EncodeHintType.MARGIN, 1);// 设置空白边距的宽度
+
+        defaultDecodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+        defaultDecodeHints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);// 复杂模式，开启PURE_BARCODE模式
+    }
+
     // --------- 生成二维码
 
     /**
@@ -108,7 +121,7 @@ public class ZxingUtil {
      */
     public static boolean encode(String contents, BarcodeFormat format, int width, int height, File qrcodeFile, File logoFile) {
         try {
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(contents, format, width, height, getDefaultEncodeHints());
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(contents, format, width, height, defaultEncodeHints);
 
             // logo不存在时直接生成
             if (null == logoFile || !logoFile.exists()) {
@@ -134,7 +147,7 @@ public class ZxingUtil {
 
     public static boolean encodeWords(String contents, BarcodeFormat format, int width, int height, File qrcodeFile) {
         try {
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(contents, format, width, height, getDefaultEncodeHints());
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(contents, format, width, height, defaultEncodeHints);
 
             // 用于设置配色，解决logo变为黑白的问题
             BufferedImage matrixImage = MatrixToImageWriter.toBufferedImage(bitMatrix, defaultMatrixToImageConfig);
@@ -176,7 +189,7 @@ public class ZxingUtil {
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-            Result result = new MultiFormatReader().decode(bitmap, getDefaultDecodeHints());
+            Result result = new MultiFormatReader().decode(bitmap, defaultDecodeHints);
 
             return result.getText();
         } catch (Exception e) {

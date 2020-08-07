@@ -16,6 +16,7 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.font.FontDesignMetrics;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -49,6 +50,25 @@ public class ZxingConfigUtil {
      * 默认字体
      */
     private static Font defaultFont = new Font("宋体", Font.PLAIN, 13);
+
+    /**
+     * 默认的 EncodeHints
+     */
+    private static Hashtable<EncodeHintType, Object> defaultEncodeHints = new Hashtable<>();
+
+    /**
+     * 获取默认的 DecodeHints
+     */
+    private static Hashtable<DecodeHintType, Object> defaultDecodeHints = new Hashtable<>();
+
+    static {
+        defaultEncodeHints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);// 指定纠错等级
+        defaultEncodeHints.put(EncodeHintType.CHARACTER_SET, "UTF-8");// 指定编码格式
+        defaultEncodeHints.put(EncodeHintType.MARGIN, 1);// 设置空白边距的宽度
+
+        defaultDecodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+        defaultDecodeHints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);// 复杂模式，开启PURE_BARCODE模式
+    }
 
     // --------- 生成二维码
 
@@ -124,7 +144,7 @@ public class ZxingConfigUtil {
     public static boolean encode(ZxingConfig config) {
         try {
             BitMatrix bitMatrix = new MultiFormatWriter().encode(config.getContents(), config.getFormat(), config.getWidth(), config.getHeight(),
-                    getDefaultEncodeHints());
+                    defaultEncodeHints);
 
             // 不显示logo 和 文字时，直接输出图片
             if (!config.isShowLogo() && !config.isShowWords()) {
@@ -142,19 +162,19 @@ public class ZxingConfigUtil {
                 drawLogo(matrixImage, logoImage);
             }
 
-//            if (config.isShowWords() && null != config.getWords()) {
-//                FontDesignMetrics metrics = FontDesignMetrics.getMetrics(defaultFont);
-//                int strWidth = metrics.stringWidth(config.getWords());
-//                int strHeight = metrics.getHeight();
-//                BufferedImage wordsImage = new BufferedImage(config.getWidth(), config.getHeight() + strHeight + 5, BufferedImage.TYPE_INT_ARGB);
-//
-//                // 绘制文字
-//                drawWords(matrixImage, wordsImage, config, strWidth, strHeight);
-//
-//                wordsImage.flush();
-//                ImageIO.write(wordsImage, FORMAT_NAME, config.getQrcodeFile());
-//                return true;
-//            }
+            if (config.isShowWords() && null != config.getWords()) {
+                FontDesignMetrics metrics = FontDesignMetrics.getMetrics(defaultFont);
+                int strWidth = metrics.stringWidth(config.getWords());
+                int strHeight = metrics.getHeight();
+                BufferedImage wordsImage = new BufferedImage(config.getWidth(), config.getHeight() + strHeight + 5, BufferedImage.TYPE_INT_ARGB);
+
+                // 绘制文字
+                drawWords(matrixImage, wordsImage, config, strWidth, strHeight);
+
+                wordsImage.flush();
+                ImageIO.write(wordsImage, FORMAT_NAME, config.getQrcodeFile());
+                return true;
+            }
 
             // 生成图片
             matrixImage.flush();
@@ -193,7 +213,7 @@ public class ZxingConfigUtil {
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-            Result result = new MultiFormatReader().decode(bitmap, getDefaultDecodeHints());
+            Result result = new MultiFormatReader().decode(bitmap, defaultDecodeHints);
 
             return result.getText();
         } catch (Exception e) {
@@ -202,6 +222,8 @@ public class ZxingConfigUtil {
         return null;
     }
 
+
+    // --------- 绘制图层相关方法，如logo，文字等
 
     /**
      * 绘制logo
@@ -259,24 +281,4 @@ public class ZxingConfigUtil {
         wordsg2.dispose();
     }
 
-    /**
-     * 获取默认的 EncodeHints
-     */
-    private static Hashtable<EncodeHintType, Object> getDefaultEncodeHints() {
-        Hashtable<EncodeHintType, Object> hints = new Hashtable<>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);// 指定纠错等级
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");// 指定编码格式
-        hints.put(EncodeHintType.MARGIN, 1);// 设置空白边距的宽度
-        return hints;
-    }
-
-    /**
-     * 获取默认的 DecodeHints
-     */
-    private static Hashtable<DecodeHintType, Object> getDefaultDecodeHints() {
-        Hashtable<DecodeHintType, Object> hints = new Hashtable<>();
-        hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
-        hints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);// 复杂模式，开启PURE_BARCODE模式
-        return hints;
-    }
 }

@@ -76,9 +76,15 @@ public class ZxingConfigTest {
     /**
      * 批量生成二维码
      * 结果：生成1000个，总耗时 11107 ms，也就是说 11s，1s种生成100个
+     * <p>
+     * 不添加logo，生成一个二维码耗时 3ms以内；
+     * 添加logo，生成一个二维码耗时 25ms左右；
+     * <p>
+     * -Xmx10M -Xms10M -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:zxign_gc.log
      */
     @Test
-    public void batchCreateQRCodeLogo() {
+    public void batchCreateQRCodeLogo() throws InterruptedException {
+        //Thread.sleep(15 * 1000);
         String imgPath = "E:/temp/qrcode1/qrcode";
         String name = "";
         ZxingConfig config = new ZxingConfig();
@@ -92,8 +98,9 @@ public class ZxingConfigTest {
             config.setWidth(width);
             config.setHeight(height);
             config.setQrcodePath(name);
-            config.setLogoPath(logoPath);
+            //config.setLogoPath(logoPath);
             ZxingConfigUtil.encode(config);
+
             long end = System.currentTimeMillis();
             System.out.println(i + " " + name + " " + (end - start) + " ms");
         }
@@ -193,4 +200,5 @@ public class ZxingConfigTest {
         long end = System.currentTimeMillis();
         System.out.println("总耗时 " + (end - initstart) + " ms");
     }
+
 }
