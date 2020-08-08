@@ -73,9 +73,9 @@
 
 
         <dependency>
-            <groupId>com</groupId>
+            <groupId>com.tn.log</groupId>
             <artifactId>log-access</artifactId>
-            <version>0.0.4</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
