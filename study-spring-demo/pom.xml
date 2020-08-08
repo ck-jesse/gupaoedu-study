@@ -73,7 +73,7 @@
 
 
         <dependency>
-            <groupId>com.hs.platform</groupId>
+            <groupId>com</groupId>
             <artifactId>log-access</artifactId>
             <version>0.0.4</version>
         </dependency>
