@@ -2,6 +2,7 @@ package com.coy.gupaoedu.study.code.gen;
 
 import com.coy.gupaoedu.study.code.gen.service.GenTableService;
 import com.coy.gupaoedu.study.code.gen.util.StringUtils;
+import com.coy.gupaoedu.study.code.gen.util.VelocityUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,14 @@ public class GenTest {
      */
     @Test
     public void generatorCode() {
+
+        VelocityUtils.addTemplate("vm/weeget/controller.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/entity.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/mapper.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/mapper.xml.vm");
+        VelocityUtils.addTemplate("vm/weeget/service.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/serviceImpl.java.vm");
+
         String zipName = "code.zip";
         String outZipPath = GenTest.class.getResource("/").getPath() + zipName;
         System.out.println("代码生成路径： " + outZipPath);

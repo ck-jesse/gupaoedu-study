@@ -1,0 +1,38 @@
+package ${packageName}.feign.dto;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * ${functionName} 入参
+ *
+ * @author ${author}
+ * @gen ${date}
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
+@ApiModel(description="${functionName} 入参")
+public class ${entity} implements Serializable {
+
+    private static final long serialVersionUID=1L;
+#foreach ($column in $columns)
+    ##单行注释
+    ##if(!$table.isSuperColumn($column.javaField))
+#if("$!column.columnComment" != "")
+@ApiModelProperty(value = "${column.columnComment}")
+#else
+/**
+ * ${field.comment}
+ */
+#end
+private $column.javaType $column.javaField;
+    ##end
+#end
+}

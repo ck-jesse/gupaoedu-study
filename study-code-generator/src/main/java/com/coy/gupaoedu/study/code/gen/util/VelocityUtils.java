@@ -30,6 +30,11 @@ public class VelocityUtils {
     private static final String PROTO_PATH = "main/resources/proto";
 
     /**
+     * 模板列表
+     */
+    private static List<String> templates = new ArrayList<String>();
+
+    /**
      * 设置模板变量信息
      *
      * @return 模板列表
@@ -92,16 +97,26 @@ public class VelocityUtils {
      * @return 模板列表
      */
     public static List<String> getTemplateList(String tplCategory) {
-        List<String> templates = new ArrayList<String>();
-        templates.add("vm/proto/proto.proto.vm");
-        templates.add("vm/java/entity.java.vm");
-        templates.add("vm/java/mapper.java.vm");
-        templates.add("vm/xml/mapper.xml.vm");
-        templates.add("vm/java/service.java.vm");
-        templates.add("vm/java/serviceImpl.java.vm");
-        templates.add("vm/java/controller.java.vm");
-        templates.add("vm/java/controllerTest.java.vm");
-        return templates;
+        if(templates.size() > 0){
+            return templates;
+        }
+        List<String> templateList = new ArrayList<String>();
+        templateList.add("vm/hsrj/proto.proto.vm");
+        templateList.add("vm/hsrj/entity.java.vm");
+        templateList.add("vm/hsrj/mapper.java.vm");
+        templateList.add("vm/hsrj/mapper.xml.vm");
+        templateList.add("vm/hsrj/service.java.vm");
+        templateList.add("vm/hsrj/serviceImpl.java.vm");
+        templateList.add("vm/hsrj/controller.java.vm");
+        templateList.add("vm/hsrj/controllerTest.java.vm");
+        return templateList;
+    }
+
+    /**
+     * 添加模板
+     */
+    public static void addTemplate(String template) {
+        templates.add(template);
     }
 
     /**
