@@ -35,7 +35,7 @@ public class GenTest {
 //            "t_sync_order",
 //            "after_sale_apply_main_record",
 //            "t_biz_auth",
-            "hx_poster_config",
+            "stock_change_flow",
     };
 
     /**
@@ -53,7 +53,10 @@ public class GenTest {
     public void generatorCode() {
 
         VelocityUtils.addTemplate("vm/weeget/controller.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/controllerTest.java.vm");
         VelocityUtils.addTemplate("vm/weeget/entity.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/entityDTO.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/entityQueryDTO.java.vm");
         VelocityUtils.addTemplate("vm/weeget/mapper.java.vm");
         VelocityUtils.addTemplate("vm/weeget/mapper.xml.vm");
         VelocityUtils.addTemplate("vm/weeget/service.java.vm");
@@ -76,6 +79,10 @@ public class GenTest {
             }
             Map<String, String> dataMap = genTableService.previewCode(tableName);
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("get" + StringUtils.upperCamelCase("id"));
     }
 
 }

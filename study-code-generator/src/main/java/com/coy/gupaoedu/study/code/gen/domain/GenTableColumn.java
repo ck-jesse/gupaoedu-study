@@ -1,8 +1,8 @@
 package com.coy.gupaoedu.study.code.gen.domain;
 
 
+import com.coy.gupaoedu.study.code.gen.util.StringUtils;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 
@@ -106,6 +106,16 @@ public class GenTableColumn extends BaseEntity {
      * 排序
      */
     private Integer sort;
+
+    /**
+     * get方法名，如：getId
+     */
+    private String getterMethodName;
+
+    /**
+     * set方法名，如：setId
+     */
+    private String setterMethodName;
 
     public boolean isPk() {
         return judge(this.isPk);

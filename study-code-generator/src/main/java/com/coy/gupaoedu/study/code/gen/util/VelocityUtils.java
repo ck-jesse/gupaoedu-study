@@ -23,7 +23,7 @@ public class VelocityUtils {
     /**
      * mybatis空间路径
      */
-    private static final String MYBATIS_PATH = "main/resources/mybatis";
+    private static final String MYBATIS_PATH = "main/resources/mapper";
     /**
      * proto文件路径
      */
@@ -142,11 +142,15 @@ public class VelocityUtils {
         String vuePath = "vue";
 
         if (template.contains("entity.java.vm")) {
-            fileName = String.format("%s/dao/entity/%s.java", javaPath, className);
+            fileName = String.format("%s/entity/%s.java", javaPath, className);
+        } else if (template.contains("entityDTO.java.vm")) {
+            fileName = String.format("%s/feign/dto/%sDTO.java", javaPath, className);
+        } else if (template.contains("entityQueryDTO.java.vm")) {
+            fileName = String.format("%s/feign/dto/Query%sDTO.java", javaPath, className);
         } else if (template.contains("mapper.java.vm")) {
-            fileName = String.format("%s/dao/mapper/%sMapper.java", javaPath, className);
+            fileName = String.format("%s/dao/%sMapper.java", javaPath, className);
         } else if (template.contains("service.java.vm")) {
-            fileName = String.format("%s/service/%sService.java", javaPath, className);
+            fileName = String.format("%s/service/I%sService.java", javaPath, className);
         } else if (template.contains("serviceImpl.java.vm")) {
             fileName = String.format("%s/service/impl/%sServiceImpl.java", javaPath, className);
         } else if (template.contains("controller.java.vm")) {
@@ -190,7 +194,8 @@ public class VelocityUtils {
     public static HashSet<String> getImportList(List<GenTableColumn> columns) {
         HashSet<String> importList = new HashSet<String>();
         for (GenTableColumn column : columns) {
-            if (!column.isSuperColumn() && GenConstants.TYPE_DATE.equals(column.getJavaType())) {
+//            if (!column.isSuperColumn() && GenConstants.TYPE_DATE.equals(column.getJavaType())) {
+            if (GenConstants.TYPE_DATE.equals(column.getJavaType())) {
                 importList.add("java.util.Date");
             } else if (!column.isSuperColumn() && GenConstants.TYPE_BIGDECIMAL.equals(column.getJavaType())) {
                 importList.add("java.math.BigDecimal");

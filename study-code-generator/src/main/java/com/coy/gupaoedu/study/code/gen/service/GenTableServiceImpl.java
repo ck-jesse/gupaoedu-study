@@ -230,6 +230,8 @@ public class GenTableServiceImpl implements GenTableService {
      */
     public void setPkColumn(GenTable table, List<GenTableColumn> columns) {
         for (GenTableColumn column : columns) {
+            column.setGetterMethodName("get" + StringUtils.upperCamelCase(column.getJavaField() + "()"));
+            column.setSetterMethodName("set" + StringUtils.upperCamelCase(column.getJavaField() + "()"));
             if (column.isPk()) {
                 table.setPkColumn(column);
                 break;

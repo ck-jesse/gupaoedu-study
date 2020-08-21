@@ -3,32 +3,32 @@ package ${packageName}.feign.dto;
 #foreach($importPkg in $importList)
 import ${importPkg};
 #end
+import ${packageName}.feign.common.PageInput;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-
 /**
- * ${functionName}
- * 注：入参/出参业务对象
+ * ${functionName} 入参
  *
  * @author ${author}
  * @gen ${datetime}
  */
 @Data
 @Accessors(chain = true)
-@ApiModel("${functionName} DTO")
-public class ${ClassName}DTO implements Serializable {
+@ApiModel("${functionName} 查询入参")
+public class Query${ClassName}DTO extends PageInput {
 
     private static final long serialVersionUID = 1L;
 
 #foreach ($column in $columns)
+#if($column.query)
 #if("$!column.columnComment" != "")
     @ApiModelProperty(value = "${column.columnComment}")
 #end
     private $column.javaType $column.javaField;
 
+#end
 #end
 }

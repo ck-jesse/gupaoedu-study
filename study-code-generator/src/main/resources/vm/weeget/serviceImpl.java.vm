@@ -1,6 +1,6 @@
 package ${packageName}.service.impl;
 
-import ${packageName}.feign.bo.${ClassName}BO;
+import ${packageName}.feign.dto.${ClassName}DTO;
 import ${packageName}.feign.common.PageResult;
 import ${packageName}.feign.dto.Query${ClassName}DTO;
 import ${packageName}.dao.${ClassName}Mapper;
@@ -19,13 +19,13 @@ import java.util.List;
  * ${functionName} 服务实现类
  *
  * @author ${author}
- * @gen ${date}
+ * @gen ${datetime}
  */
 @Service
 public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${ClassName}> implements I${ClassName}Service {
 
     @Override
-    PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO param) {
+    public PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO param) {
         // 分页查询设置
         Page page = PageHelper.startPage(param.getPageNum().intValue(), param.getPageSize().intValue());
         page.setCount(param.getPageNum() <= 1);
@@ -33,7 +33,7 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
         List<${ClassName}> list = this.baseMapper.queryList(param);
         List<${ClassName}DTO> dtoList = new ArrayList<>();
         list.forEach(entity -> {
-                ${ClassName}DTO entityDTO = new ${ClassName}BO();
+            ${ClassName}DTO entityDTO = new ${ClassName}DTO();
             BeanUtils.copyProperties(entity, entityDTO);
             dtoList.add(entityDTO);
         });

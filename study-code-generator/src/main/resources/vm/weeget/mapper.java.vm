@@ -3,8 +3,6 @@ package ${packageName}.dao;
 import ${packageName}.feign.dto.Query${ClassName}DTO;
 import ${packageName}.entity.${ClassName};
 
-
-import ${packageName}.dao.${ClassName};
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import java.util.List;
@@ -23,4 +21,3 @@ public interface ${ClassName}Mapper extends BaseMapper<${ClassName}> {
      */
     List<${ClassName}> queryList(Query${ClassName}DTO param);
 }
-#end

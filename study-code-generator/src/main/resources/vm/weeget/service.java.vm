@@ -1,6 +1,6 @@
 package ${packageName}.service;
 
-import ${packageName}.feign.bo.${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}DTO;
 import ${packageName}.feign.common.PageResult;
 import ${packageName}.feign.dto.Query${ClassName}DTO;
 import ${packageName}.entity.${ClassName};
@@ -10,12 +10,14 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * ${functionName} 服务类
  *
  * @author ${author}
- * @gen ${date}
+ * @gen ${datetime}
  */
 public interface I${ClassName}Service extends IService<${ClassName}> {
 
     /**
      * 查询列表
+     *
+     * @gen ${datetime}
      */
     PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO param);
 }

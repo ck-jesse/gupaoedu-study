@@ -10,15 +10,15 @@ gen:
   # 作者
   author: chenck
   # 服务名
-  serviceName: hx-card-service
+  serviceName: weeget-bullet-goods-service
   # 服务端口
   servicePort: 8080
   # 默认生成包路径 system 需改成自己的模块名称 如 system monitor tool
-  packageName: com.hx.card.service
+  packageName: cn.weeget.goods.service
   # 自动去除表前缀，默认是true
   autoRemovePre: true
   # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
-  tablePrefix: hx_
+  tablePrefix:
 
 # 日志配置
 logging:
@@ -45,9 +45,9 @@ pagehelper:
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.107.181.147:6001/testdb?autoReconnect=true&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: dev
-    password: deV@0327
+    url: jdbc:mysql://mysql.yunhuoyouxuan.cn:60636/gen_code?autoReconnect=true&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: JD8Z)CtnjL*Xroqz
     initialSize: 5
     minIdle: 5
     maxActive: 50
