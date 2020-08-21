@@ -35,6 +35,7 @@ public class GenTest {
 //            "t_sync_order",
 //            "after_sale_apply_main_record",
 //            "t_biz_auth",
+            "goods",
             "stock_change_flow",
     };
 
