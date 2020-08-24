@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,8 +61,8 @@ public class ${ClassName}Controller {
         return JsonResult.ok();
     }
 
-    @PostMapping("/deleteById")
-    @ApiOperation(value = "根据ID删除${functionName}信息", httpMethod = "POST")
+    @GetMapping("/deleteById")
+    @ApiOperation(value = "根据ID删除${functionName}信息", httpMethod = "GET")
     public JsonResult deleteById($pkColumn.javaType $pkColumn.javaField) {
         if (null == $pkColumn.javaField) {
             return JsonResult.build(CodeEnums.SYS_INPUT_ERROR.getCode(), "请传入$pkColumn.javaField");
@@ -73,8 +74,8 @@ public class ${ClassName}Controller {
         return JsonResult.ok();
     }
 
-    @PostMapping("/getById")
-    @ApiOperation(value = "根据ID查询${functionName}信息", httpMethod = "POST")
+    @GetMapping("/getById")
+    @ApiOperation(value = "根据ID查询${functionName}信息", httpMethod = "GET")
     public JsonResult<${ClassName}DTO> getById($pkColumn.javaType $pkColumn.javaField) {
         if (null == $pkColumn.javaField) {
             return JsonResult.build(CodeEnums.SYS_INPUT_ERROR.getCode(), "请传入$pkColumn.javaField");

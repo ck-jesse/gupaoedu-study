@@ -169,6 +169,10 @@ public class VelocityUtils {
             fileName = String.format("%s/%sProto.proto", PROTO_PATH, className);
         } else if (template.contains("controllerTest.java.vm")) {
             fileName = String.format("%s/%sControllerTest.java", javaTestPath, className);
+        } else if (template.contains("feignClient.java.vm")) {
+            fileName = String.format("%s/feign/client/%sFeignClient.java", javaPath, className);
+        } else if (template.contains("feignClientHystrix.java.vm")) {
+            fileName = String.format("%s/feign/hystrix/%sFeignClientHystrix.java", javaPath, className);
         }
         return fileName;
     }

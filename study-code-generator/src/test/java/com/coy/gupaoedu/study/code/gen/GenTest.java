@@ -62,6 +62,8 @@ public class GenTest {
         VelocityUtils.addTemplate("vm/weeget/mapper.xml.vm");
         VelocityUtils.addTemplate("vm/weeget/service.java.vm");
         VelocityUtils.addTemplate("vm/weeget/serviceImpl.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/feignClient.java.vm");
+        VelocityUtils.addTemplate("vm/weeget/feignClientHystrix.java.vm");
 
         String zipName = "code.zip";
         String outZipPath = GenTest.class.getResource("/").getPath() + zipName;
