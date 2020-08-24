@@ -40,7 +40,8 @@ public class ${ClassName}Controller {
         ${ClassName} ${className} = new ${ClassName}();
         BeanUtils.copyProperties(input, ${className});
         ${className}Service.save(${className});
-        return JsonResult.ok(${className}.$pkColumn.getterMethodName);
+#set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
+        return JsonResult.ok(${className}.get$AttrName());
     }
 
     @PostMapping("/updateById")
