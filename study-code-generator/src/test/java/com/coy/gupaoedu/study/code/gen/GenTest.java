@@ -23,20 +23,14 @@ public class GenTest {
     GenTableService genTableService;
 
     String[] tableNames = {
-//            "hx_banner_config",
-//            "hx_card_catalog",
-//            "hx_card_equity",
-//            "hx_card_supplier",
-//            "t_operate_log",
-//            "t_sync_order_err_log",
-//            "t_sync_order_detail",
-//            "t_sync_order_delivery_address",
-//            "t_sync_order_all_commission_detail",
-//            "t_sync_order",
-//            "after_sale_apply_main_record",
-//            "t_biz_auth",
-            "goods",
-            "stock_change_flow",
+//            "goods",
+//            "stock_change_flow",
+//            "warehouse_spec",
+            "goods_spec",
+            "goods_group",
+            "group",
+            "brand",
+            "purchase_would",
     };
 
     /**

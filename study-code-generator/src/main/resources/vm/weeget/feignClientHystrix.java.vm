@@ -2,7 +2,8 @@ package ${packageName}.feign.hystrix;
 
 import ${packageName}.feign.common.PageResult;
 import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.feign.client.${ClassName}FeignClient;
 import cn.weeget.util.common.result.CodeEnums;
 import cn.weeget.util.common.result.JsonResult;
 import com.alibaba.fastjson.JSON;
@@ -44,7 +45,7 @@ public class ${ClassName}FeignClientHystrix implements ${ClassName}FeignClient {
     }
 
     @Override
-    public PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO input) {
+    public PageResult<${ClassName}DTO> queryList(${ClassName}QueryDTO input) {
         log.error("/${className}/queryList 触发熔断，params={}", JSON.toJSONString(input));
         return PageResult.error(CodeEnums.RPC_SERVICE_DOWN.getCode(), CodeEnums.RPC_SERVICE_DOWN.getMsg());
     }

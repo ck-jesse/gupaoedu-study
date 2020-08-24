@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @ApiModel("${functionName} 查询入参")
-public class Query${ClassName}DTO extends PageInput {
+public class ${ClassName}QueryDTO extends PageInput {
 
     private static final long serialVersionUID = 1L;
 

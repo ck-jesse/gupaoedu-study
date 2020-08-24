@@ -2,7 +2,7 @@ package ${packageName}.service.impl;
 
 import ${packageName}.feign.dto.${ClassName}DTO;
 import ${packageName}.feign.common.PageResult;
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.dao.${ClassName}Mapper;
 import ${packageName}.entity.${ClassName};
 import ${packageName}.service.I${ClassName}Service;
@@ -25,7 +25,7 @@ import java.util.List;
 public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${ClassName}> implements I${ClassName}Service {
 
     @Override
-    public PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO param) {
+    public PageResult<${ClassName}DTO> queryList(${ClassName}QueryDTO param) {
         // 分页查询设置
         Page page = PageHelper.startPage(param.getPageNum().intValue(), param.getPageSize().intValue());
         page.setCount(param.getPageNum() <= 1);

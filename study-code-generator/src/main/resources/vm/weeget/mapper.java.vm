@@ -1,6 +1,6 @@
 package ${packageName}.dao;
 
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.entity.${ClassName};
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -19,5 +19,5 @@ public interface ${ClassName}Mapper extends BaseMapper<${ClassName}> {
      * 查询列表
      * @gen ${datetime}
      */
-    List<${ClassName}> queryList(Query${ClassName}DTO param);
+    List<${ClassName}> queryList(${ClassName}QueryDTO param);
 }

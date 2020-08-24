@@ -2,7 +2,7 @@ package ${packageName}.service;
 
 import ${packageName}.feign.dto.${ClassName}DTO;
 import ${packageName}.feign.common.PageResult;
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.entity.${ClassName};
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -19,5 +19,5 @@ public interface I${ClassName}Service extends IService<${ClassName}> {
      *
      * @gen ${datetime}
      */
-    PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO param);
+    PageResult<${ClassName}DTO> queryList(${ClassName}QueryDTO param);
 }

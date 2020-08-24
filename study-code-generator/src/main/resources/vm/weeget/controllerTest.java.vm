@@ -1,7 +1,7 @@
 package ${packageName};
 
 import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.feign.common.PageResult;
 import cn.weeget.util.common.result.JsonResult;
 
@@ -89,7 +89,7 @@ public class ${ClassName}ControllerTest {
     @Test
     public void queryListTest() {
         String url = HOST + "/${className}/queryList";
-        Query${ClassName}DTO input = new Query${ClassName}DTO();
+        ${ClassName}QueryDTO input = new ${ClassName}QueryDTO();
 #foreach($column in $columns)
 #if($column.query)
 #set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})

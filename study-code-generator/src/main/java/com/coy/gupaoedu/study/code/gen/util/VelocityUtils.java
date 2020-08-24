@@ -146,7 +146,7 @@ public class VelocityUtils {
         } else if (template.contains("entityDTO.java.vm")) {
             fileName = String.format("%s/feign/dto/%sDTO.java", javaPath, className);
         } else if (template.contains("entityQueryDTO.java.vm")) {
-            fileName = String.format("%s/feign/dto/Query%sDTO.java", javaPath, className);
+            fileName = String.format("%s/feign/dto/%sQueryDTO.java", javaPath, className);
         } else if (template.contains("mapper.java.vm")) {
             fileName = String.format("%s/dao/%sMapper.java", javaPath, className);
         } else if (template.contains("service.java.vm")) {

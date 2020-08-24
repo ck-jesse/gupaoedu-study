@@ -2,7 +2,8 @@ package ${packageName}.feign.client;
 
 import ${packageName}.feign.common.PageResult;
 import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.feign.hystrix.${ClassName}FeignClientHystrix;
 import cn.weeget.util.common.result.JsonResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,5 +48,5 @@ public interface ${ClassName}FeignClient {
      * 查询${functionName}列表
      */
     @PostMapping("/${className}/queryList")
-    PageResult<${ClassName}DTO> queryList(Query${ClassName}DTO input);
+    PageResult<${ClassName}DTO> queryList(${ClassName}QueryDTO input);
 }

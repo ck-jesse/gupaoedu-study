@@ -2,7 +2,7 @@ package ${packageName}.controller;
 
 import ${packageName}.entity.${ClassName};
 import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.dto.Query${ClassName}DTO;
+import ${packageName}.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.service.I${ClassName}Service;
 import ${packageName}.feign.common.PageResult;
 import cn.weeget.util.common.result.CodeEnums;
@@ -91,7 +91,7 @@ public class ${ClassName}Controller {
 
     @PostMapping("/queryList")
     @ApiOperation(value = "查询${functionName}列表", httpMethod = "POST")
-    public PageResult<${ClassName}DTO> queryList(@Valid @RequestBody Query${ClassName}DTO input) {
+    public PageResult<${ClassName}DTO> queryList(@Valid @RequestBody ${ClassName}QueryDTO input) {
         return ${className}Service.queryList(input);
     }
 }
