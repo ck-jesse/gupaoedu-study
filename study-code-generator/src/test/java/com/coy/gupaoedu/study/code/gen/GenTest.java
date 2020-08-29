@@ -31,8 +31,10 @@ public class GenTest {
 //            "group",
 //            "brand",
 //            "purchase_would",
-            "purchase_would_goods",
-            "goods_group_relation",
+//            "purchase_would_goods",
+//            "goods_group_relation",
+//            "goods_price_revision",
+            "warehouse",
     };
 
     /**
@@ -61,7 +63,7 @@ public class GenTest {
         VelocityUtils.addTemplate("vm/weeget/feignClient.java.vm");
         VelocityUtils.addTemplate("vm/weeget/feignClientHystrix.java.vm");
 
-        String zipName = "code.zip" ;
+        String zipName = "code.zip";
         String outZipPath = GenTest.class.getResource("/").getPath() + zipName;
         System.out.println("代码生成路径： " + outZipPath);
         genTableService.generatorCode(tableNames, outZipPath);

@@ -72,7 +72,7 @@ public class ${ClassName}ControllerTest {
     public void deleteByIdTest() {
         String url = HOST + "/${className}/deleteById?$pkColumn.javaField=1";
 
-        JsonResult result = restTemplate.postForObject(url, null, JsonResult.class);
+        JsonResult result = restTemplate.getForObject(url, JsonResult.class);
         System.out.println(JSON.toJSONString(result));
     }
 
@@ -81,7 +81,7 @@ public class ${ClassName}ControllerTest {
     public void getByIdTest() {
         String url = HOST + "/${className}/getById?$pkColumn.javaField=1";
 
-        JsonResult result = restTemplate.postForObject(url, null, JsonResult.class);
+        JsonResult result = restTemplate.getForObject(url, JsonResult.class);
         System.out.println(JSON.toJSONString(result));
     }
 
