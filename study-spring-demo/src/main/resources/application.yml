@@ -46,3 +46,6 @@ spring:
       redis:
         topic: cache:caffeine:redis:topic
 
+redisson:
+  yml:
+    config: redisson.yaml
