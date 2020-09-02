@@ -35,7 +35,8 @@ public class GenTest {
 //            "goods_group_relation",
 //            "goods_price_revision",
 //            "warehouse",
-            "stock_update",
+//            "stock_update",
+            "act_limit_markup",
     };
 
     /**

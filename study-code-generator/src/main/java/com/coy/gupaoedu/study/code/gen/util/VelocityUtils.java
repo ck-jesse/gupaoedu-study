@@ -172,7 +172,7 @@ public class VelocityUtils {
         } else if (template.contains("feignClient.java.vm")) {
             fileName = String.format("%s/feign/client/%sFeignClient.java", javaPath, className);
         } else if (template.contains("feignClientHystrix.java.vm")) {
-            fileName = String.format("%s/feign/hystrix/%sFeignClientHystrix.java", javaPath, className);
+            fileName = String.format("%s/feign/client/impl/%sFeignClientHystrix.java", javaPath, className);
         }
         return fileName;
     }
