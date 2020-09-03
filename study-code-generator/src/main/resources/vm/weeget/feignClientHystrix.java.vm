@@ -1,4 +1,4 @@
-package ${packageName}.feign.hystrix;
+package ${packageName}.feign.client.impl;
 
 import ${packageName}.feign.common.PageResult;
 import ${packageName}.feign.dto.${ClassName}DTO;
