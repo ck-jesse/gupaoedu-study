@@ -17,24 +17,17 @@ public class MDCTaskDecorator implements TaskDecorator {
     public Runnable decorate(Runnable runnable) {
         Map<String, String> contextMap = MDC.getCopyOfContextMap();
         // 对Runnable进行装饰，将主线程的MDC内容设置到子线程的MDC中
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
+        return () -> {
+            try {
+                if (null != contextMap) {
                     MDC.setContextMap(contextMap);
-                    runnable.run();
-                } finally {
+                }
+                runnable.run();
+            } finally {
+                if (null != contextMap) {
                     MDC.clear();
                 }
             }
         };
-        /*return () -> {
-            try {
-                MDC.setContextMap(contextMap);
-                runnable.run();
-            } finally {
-                MDC.clear();
-            }
-        };*/
     }
 }
