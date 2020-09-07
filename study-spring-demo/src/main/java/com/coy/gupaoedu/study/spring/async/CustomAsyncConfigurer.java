@@ -25,7 +25,7 @@ public class CustomAsyncConfigurer implements AsyncConfigurer {
     /**
      * 核心线程数
      */
-    @Value("${thread.pool.corePoolSize:10}")
+    @Value("${thread.pool.corePoolSize:15}")
     private Integer corePoolSize;
 
     /**
@@ -33,13 +33,13 @@ public class CustomAsyncConfigurer implements AsyncConfigurer {
      * 注：因该线程池主要用于异步将订单结算信息入库，此操作属IO密集型，所以最大线程数可以适当大一些；
      * 假设每个任务执行50ms，则一个线程1s可执行20个任务，100个线程1s可执行2000个任务
      */
-    @Value("${thread.pool.maxPoolSize:100}")
+    @Value("${thread.pool.maxPoolSize:30}")
     private Integer maxPoolSize;
 
     /**
      * 队列容量
      */
-    @Value("${thread.pool.queueCapacity:15000}")
+    @Value("${thread.pool.queueCapacity:10000}")
     private Integer queueCapacity;
 
     @Override
