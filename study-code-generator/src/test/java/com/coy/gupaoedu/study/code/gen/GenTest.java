@@ -37,7 +37,11 @@ public class GenTest {
 //            "warehouse",
 //            "stock_update",
 //            "act_limit_markup",
-            "goods_restriction",
+//            "act_discount",
+//            "act_more_promotion",
+//            "image",
+//            "purchase_would_goods_user",
+            "purchase_would_user",
     };
 
     /**

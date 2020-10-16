@@ -1,6 +1,6 @@
 package ${packageName}.dao;
 
-import ${packageName}.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.zax.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.entity.${ClassName};
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

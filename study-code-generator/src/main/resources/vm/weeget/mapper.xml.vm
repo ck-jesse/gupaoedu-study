@@ -24,7 +24,7 @@
         from ${tableName}
     </sql>
 
-    <select id="queryList" parameterType="${packageName}.feign.dto.${ClassName}QueryDTO" resultMap="BaseResultMap">
+    <select id="queryList" parameterType="${packageName}.zax.feign.dto.${ClassName}QueryDTO" resultMap="BaseResultMap">
         <include refid="Base_SQL"/>
         <where>
 #foreach($column in $columns)

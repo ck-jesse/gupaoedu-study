@@ -1,8 +1,8 @@
 package ${packageName}.service.impl;
 
-import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.common.PageResult;
-import ${packageName}.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.zax.feign.dto.${ClassName}DTO;
+import ${packageName}.zax.feign.common.PageResult;
+import ${packageName}.zax.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.dao.${ClassName}Mapper;
 import ${packageName}.entity.${ClassName};
 import ${packageName}.service.I${ClassName}Service;

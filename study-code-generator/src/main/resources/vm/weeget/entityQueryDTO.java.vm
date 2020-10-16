@@ -1,9 +1,9 @@
-package ${packageName}.feign.dto;
+package ${packageName}.zax.feign.dto;
 
 #foreach($importPkg in $importList)
 import ${importPkg};
 #end
-import ${packageName}.feign.common.PageInput;
+import ${packageName}.zax.feign.common.PageInput;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

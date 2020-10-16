@@ -1,8 +1,8 @@
 package ${packageName}.service;
 
-import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.common.PageResult;
-import ${packageName}.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.zax.feign.dto.${ClassName}DTO;
+import ${packageName}.zax.feign.common.PageResult;
+import ${packageName}.zax.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.entity.${ClassName};
 import com.baomidou.mybatisplus.extension.service.IService;
 

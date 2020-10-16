@@ -1,10 +1,10 @@
 package ${packageName}.controller;
 
 import ${packageName}.entity.${ClassName};
-import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.dto.${ClassName}QueryDTO;
 import ${packageName}.service.I${ClassName}Service;
-import ${packageName}.feign.common.PageResult;
+import ${packageName}.zax.feign.dto.${ClassName}DTO;
+import ${packageName}.zax.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.zax.feign.common.PageResult;
 import cn.weeget.util.common.result.CodeEnums;
 import cn.weeget.util.common.result.JsonResult;
 import io.swagger.annotations.Api;

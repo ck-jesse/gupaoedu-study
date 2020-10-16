@@ -1,8 +1,8 @@
 package ${packageName};
 
-import ${packageName}.feign.dto.${ClassName}DTO;
-import ${packageName}.feign.dto.${ClassName}QueryDTO;
-import ${packageName}.feign.common.PageResult;
+import ${packageName}.zax.feign.dto.${ClassName}DTO;
+import ${packageName}.zax.feign.dto.${ClassName}QueryDTO;
+import ${packageName}.zax.feign.common.PageResult;
 import cn.weeget.util.common.result.JsonResult;
 
 import com.alibaba.fastjson.JSON;
