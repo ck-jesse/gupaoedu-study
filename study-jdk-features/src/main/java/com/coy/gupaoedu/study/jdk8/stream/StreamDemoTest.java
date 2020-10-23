@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,11 +34,15 @@ public class StreamDemoTest {
     @Before
     public void init() {
         Student s1 = new Student(1L, "肖战", 15, "浙江");
+        Student s11 = new Student(1L, "肖战2", 15, "浙江");
         Student s2 = new Student(2L, "王一博", 15, "湖北");
+        Student s22 = new Student(2L, "王一博2", 15, "湖北");
         Student s3 = new Student(3L, "杨紫", 17, "北京");
         Student s4 = new Student(4L, "李现", 17, "浙江");
         students.add(s1);
+        students.add(s11);
         students.add(s2);
+        students.add(s22);
         students.add(s3);
         students.add(s4);
         students.add(s4);
@@ -71,6 +76,14 @@ public class StreamDemoTest {
         // forEach 为终止方法操作
         list.forEach(System.out::println);
         System.out.println();
+
+        // 分组 重复key 替换
+        Map<Long, Student> map = students.stream().collect(Collectors.toMap(Student::getId, Function.identity(), (student, student2) -> student2));
+        System.out.println(map);
+
+        // 分组
+        Map<Long, List<Student>> map1 = students.stream().collect(Collectors.groupingBy(Student::getId));
+        System.out.println(map1);
     }
 
     @Test
