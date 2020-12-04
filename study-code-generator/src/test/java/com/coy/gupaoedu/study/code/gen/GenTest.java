@@ -41,7 +41,10 @@ public class GenTest {
 //            "act_more_promotion",
 //            "image",
 //            "purchase_would_goods_user",
-            "purchase_would_user",
+//            "purchase_would_user",
+            "organization",
+            "organization_upgrade_audit",
+            "organization_upgrade_receiving_info",
     };
 
     /**

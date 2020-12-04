@@ -295,10 +295,10 @@ public class AliyunOSSClientUtil {
     //测试文件上传
     public static void main(String[] args) throws FileNotFoundException {
         //上传图片
-        String imgFile = "C:\\Users\\Administrator\\Pictures\\小云优选1.png";
+        String imgFile = "C:\\Users\\Administrator\\Pictures\\userDefaultAvatar.png";
         File file = new File(imgFile);
         String fileName = System.currentTimeMillis() + imgFile.substring(imgFile.lastIndexOf("."));
-        String result = AliyunOSSClientUtil.uploadFile2OSS(file, "logo/");
+        String result = AliyunOSSClientUtil.uploadFile2OSS(file, "avatar/");
         System.out.println(result);
 
     }

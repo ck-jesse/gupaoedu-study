@@ -15,7 +15,7 @@ public class GoodsCacheTest {
      */
     @Test
     public void getStock01() {
-        String fileName = "F:/temp/库存检查.xlsx";
+        String fileName = "F:/temp/库存检查1128.xlsx";
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
         EasyExcel.read(fileName, WarehouseSpecData.class, new ReloadStockCacheListener()).sheet().doRead();
     }

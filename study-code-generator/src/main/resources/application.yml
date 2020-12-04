@@ -45,9 +45,9 @@ pagehelper:
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql.yunhuoyouxuan.cn:60636/gen_code?autoReconnect=true&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: root
-    password: JD8Z)CtnjL*Xroqz
+    url: jdbc:mysql://47.107.181.147:6001/testdb?autoReconnect=true&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: dev
+    password: deV@0327
     initialSize: 5
     minIdle: 5
     maxActive: 50
