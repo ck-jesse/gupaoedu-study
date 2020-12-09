@@ -66,10 +66,10 @@ public class ReloadStockCacheListener extends AnalysisEventListener<WarehouseSpe
             } else {
                 if (redisStock > availableStock) {
                     LOGGER.info("total={} refesh={} 库存不一致 超卖 goodsSpecId={}, availableStock={}, redisStock={}, url={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), availableStock, redisStock, url);
-//                    refreshStock(data, availableStock, redisStock, "超卖");
+                    refreshStock(data, availableStock, redisStock, "超卖");
                 } else {
                     LOGGER.info("total={} refesh={} 库存不一致 少卖 goodsSpecId={}, availableStock={}, redisStock={}, url={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), availableStock, redisStock, url);
-//                    refreshStock(data, availableStock, redisStock, "少卖");
+                    refreshStock(data, availableStock, redisStock, "少卖");
                 }
             }
         } catch (Exception e) {
