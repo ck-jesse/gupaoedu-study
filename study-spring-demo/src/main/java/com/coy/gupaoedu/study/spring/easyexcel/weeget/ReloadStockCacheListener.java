@@ -55,19 +55,21 @@ public class ReloadStockCacheListener extends AnalysisEventListener<WarehouseSpe
     private void getStock(WarehouseSpecData data) {
         String url = HOST + "/stock/cache/getStock?goodsSpecId=" + data.getGoods_spec_id();
         int dbAvailableStock = data.getStock() - data.getLocking_stock();
+        int availableStock = data.getAvailableStock();// 盘点库存
         try {
             LOGGER.info("total={} refesh={} url={}, data={}", totalCount.get(), refreshCount.get(), url, JSON.toJSONString(data));
             JsonResult result = restTemplate.getForObject(url, JsonResult.class);
             int redisStock = (Integer) result.getResultData();
-            if (redisStock == dbAvailableStock) {
-                LOGGER.info("total={} refesh={} 库存一致 goodsSpecId={}, dbAvailableStock={}, redisStock={}, url={}, result={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), dbAvailableStock, redisStock, url, JSON.toJSONString(result));
+            // 盘点库存数量和redis中库存数量比较
+            if (redisStock == availableStock) {
+                LOGGER.info("total={} refesh={} 库存一致 goodsSpecId={}, availableStock={}, redisStock={}, url={}, result={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), availableStock, redisStock, url, JSON.toJSONString(result));
             } else {
-                if (redisStock > dbAvailableStock) {
-                    LOGGER.info("total={} refesh={} 库存不一致 超卖 goodsSpecId={}, dbAvailableStock={}, redisStock={}, url={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), dbAvailableStock, redisStock, url);
-                    refreshStock(data, dbAvailableStock, redisStock, "超卖");
+                if (redisStock > availableStock) {
+                    LOGGER.info("total={} refesh={} 库存不一致 超卖 goodsSpecId={}, availableStock={}, redisStock={}, url={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), availableStock, redisStock, url);
+//                    refreshStock(data, availableStock, redisStock, "超卖");
                 } else {
-                    LOGGER.info("total={} refesh={} 库存不一致 少卖 goodsSpecId={}, dbAvailableStock={}, redisStock={}, url={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), dbAvailableStock, redisStock, url);
-                    refreshStock(data, dbAvailableStock, redisStock, "少卖");
+                    LOGGER.info("total={} refesh={} 库存不一致 少卖 goodsSpecId={}, availableStock={}, redisStock={}, url={}", totalCount.get(), refreshCount.get(), data.getGoods_spec_id(), availableStock, redisStock, url);
+//                    refreshStock(data, availableStock, redisStock, "少卖");
                 }
             }
         } catch (Exception e) {
@@ -75,13 +77,13 @@ public class ReloadStockCacheListener extends AnalysisEventListener<WarehouseSpe
         }
     }
 
-    private void refreshStock(WarehouseSpecData data, int dbAvailableStock, int redisStockBefore, String remark) {
+    private void refreshStock(WarehouseSpecData data, int availableStock, int redisStockBefore, String remark) {
         String url = HOST + "/stock/cache/refreshStock?goodsSpecId=" + data.getGoods_spec_id();
         try {
             refreshCount.incrementAndGet();
-            LOGGER.info("total={} refesh={} refreshStock {} goodsSpecId={}, dbAvailableStock={}, url={}", totalCount.get(), refreshCount.get(), remark, data.getGoods_spec_id(), dbAvailableStock, url);
+            LOGGER.info("total={} refesh={} refreshStock {} goodsSpecId={}, availableStock={}, url={}", totalCount.get(), refreshCount.get(), remark, data.getGoods_spec_id(), availableStock, url);
             JsonResult result = restTemplate.getForObject(url, JsonResult.class);
-            LOGGER.info("total={} refesh={} refreshStockSucc {} goodsSpecId={}, dbAvailableStock={}, redisStockBefore={}, redisStockAfter={}, url={}, result={}", totalCount.get(), refreshCount.get(), remark, data.getGoods_spec_id(), dbAvailableStock, redisStockBefore, result.getResultData(), url, JSON.toJSONString(result));
+            LOGGER.info("total={} refesh={} refreshStockSucc {} goodsSpecId={}, availableStock={}, redisStockBefore={}, redisStockAfter={}, url={}, result={}", totalCount.get(), refreshCount.get(), remark, data.getGoods_spec_id(), availableStock, redisStockBefore, result.getResultData(), url, JSON.toJSONString(result));
         } catch (Exception e) {
             LOGGER.error("total={} refesh={} refreshStockError url={}, error={}", totalCount.get(), refreshCount.get(), url, e.getMessage());
         }

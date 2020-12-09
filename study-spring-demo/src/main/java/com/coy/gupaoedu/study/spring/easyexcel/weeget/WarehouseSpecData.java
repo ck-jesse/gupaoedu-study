@@ -19,18 +19,30 @@ public class WarehouseSpecData {
     @ColumnWidth(10)
     @ExcelProperty("warehouse_spec_id")
     private Integer warehouse_spec_id;
+
     @ColumnWidth(10)
     @ExcelProperty("goods_spec_id")
     private Integer goods_spec_id;
+
+    // 库存
     @ColumnWidth(10)
     @ExcelProperty("stock")
     private Integer stock;
+
+    // 锁定库存
     @ColumnWidth(10)
     @ExcelProperty("locking_stock")
     private Integer locking_stock;
+
+    // 盘点库存
+    @ColumnWidth(10)
+    @ExcelProperty("available_stock")
+    private Integer availableStock;
+
     @ColumnWidth(10)
     @ExcelProperty("warehouse_id")
     private Integer warehouse_id;
+
     @ColumnWidth(10)
     @ExcelProperty("state")
     private Integer state;
