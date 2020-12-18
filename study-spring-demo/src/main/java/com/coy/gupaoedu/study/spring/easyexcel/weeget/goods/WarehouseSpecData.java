@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.spring.easyexcel.weeget;
+package com.coy.gupaoedu.study.spring.easyexcel.weeget.goods;
 
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
