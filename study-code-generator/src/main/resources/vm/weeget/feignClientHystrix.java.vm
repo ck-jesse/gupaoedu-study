@@ -53,7 +53,7 @@ public class ${ClassName}FeignClientHystrix extends CommonExceptionFallbackFacto
                 log.error("/${className}/queryList 触发熔断，params={}", JSON.toJSONString(input));
                 return PageResult.error(CodeEnums.RPC_SERVICE_DOWN.getCode(), CodeEnums.RPC_SERVICE_DOWN.getMsg());
             }
-        }
+        };
     }
 
 }

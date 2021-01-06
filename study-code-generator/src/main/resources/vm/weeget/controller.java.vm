@@ -38,7 +38,7 @@ public class ${ClassName}Controller {
 
     @PostMapping("/add")
     @ApiOperation(value = "添加${functionName}信息", httpMethod = "POST")
-    public JsonResult<$pkColumn.javaType> add(@Valid @RequestBody ${ClassName}DTO input) {
+    public JsonResult<$pkColumn.javaType> add(@RequestBody @Valid ${ClassName}DTO input) {
         ${ClassName} ${className} = new ${ClassName}();
         BeanUtils.copyProperties(input, ${className});
         ${className}Service.save(${className});
@@ -48,7 +48,7 @@ public class ${ClassName}Controller {
 
     @PostMapping("/updateById")
     @ApiOperation(value = "根据ID修改${functionName}信息", httpMethod = "POST")
-    public JsonResult updateById(@Valid @RequestBody ${ClassName}DTO input) {
+    public JsonResult updateById(@RequestBody @Valid ${ClassName}DTO input) {
 #set($AttrName=$pkColumn.javaField.substring(0,1).toUpperCase() + ${pkColumn.javaField.substring(1)})
         if (null == input.get$AttrName()) {
             return JsonResult.build(CodeEnums.SYS_INPUT_ERROR.getCode(), "请传入$pkColumn.javaField");
@@ -92,7 +92,7 @@ public class ${ClassName}Controller {
 
     @PostMapping("/queryList")
     @ApiOperation(value = "查询${functionName}列表", httpMethod = "POST")
-    public PageResult<${ClassName}DTO> queryList(@Valid @RequestBody ${ClassName}QueryDTO input) {
+    public PageResult<${ClassName}DTO> queryList(@RequestBody @Valid ${ClassName}QueryDTO input) {
         return ${className}Service.queryList(input);
     }
 }
