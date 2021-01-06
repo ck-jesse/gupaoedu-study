@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author ${author}
  * @gen ${datetime}
  */
-@FeignClient(value = "${serviceName}", contextId = "${className}", fallback = ${ClassName}FeignClientHystrix.class)
+@FeignClient(value = "${serviceName}", contextId = "${className}", fallbackFactory = ${ClassName}FeignClientHystrix.class)
 public interface ${ClassName}FeignClient {
 
     /**
