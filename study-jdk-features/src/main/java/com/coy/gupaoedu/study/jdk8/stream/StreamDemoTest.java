@@ -63,6 +63,12 @@ public class StreamDemoTest {
         list = students.stream().filter(student -> "浙江".equals(student.getAddress())).collect(Collectors.toList());
         // forEach 为终止方法操作
         list.forEach(a -> System.out.println(a));
+        System.out.println();
+
+        list = students.stream().filter(student -> student.getId() == 4).collect(Collectors.toList());
+        list.forEach(a -> System.out.println(a));
+        System.out.println();
+
     }
 
 
