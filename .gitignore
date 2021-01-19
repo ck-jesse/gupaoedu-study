@@ -1,23 +1,30 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+build
 build/
+out
 out/
 
 *.class
 
+.gradle
 .gradle/
 */.gradle/
 
+.git
 .git/
 */.git/
 
+.idea
 .idea/
 */.idea/
 
+.settings
 .settings/
 */.settings/
 
+target
 target/
 */target/
 
@@ -31,6 +38,7 @@ target/
 
 *.iml
 */*.iml
+/*.iml
 
 # Log file
 *.log
