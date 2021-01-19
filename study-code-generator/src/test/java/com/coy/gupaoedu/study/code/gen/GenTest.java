@@ -23,29 +23,7 @@ public class GenTest {
     GenTableService genTableService;
 
     String[] tableNames = {
-//            "goods",
-//            "stock_change_flow",
-//            "warehouse_spec",
-//            "goods_spec",
-//            "goods_group",
-//            "group",
-//            "brand",
-//            "purchase_would",
-//            "purchase_would_goods",
-//            "goods_group_relation",
-//            "goods_price_revision",
-//            "warehouse",
-//            "stock_update",
-//            "act_limit_markup",
-//            "act_discount",
-//            "act_more_promotion",
-//            "image",
-//            "purchase_would_goods_user",
-//            "purchase_would_user",
-//            "organization",
-//            "organization_upgrade_audit",
-//            "organization_upgrade_receiving_info",
-            "order_payment",
+            "yx_coupon_center",
     };
 
     /**

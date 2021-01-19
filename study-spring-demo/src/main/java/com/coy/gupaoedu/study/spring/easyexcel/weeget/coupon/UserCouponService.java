@@ -34,10 +34,10 @@ public class UserCouponService {
     public void reloadUserCouponCache(UserCouponData data) {
         try {
             dealCount.incrementAndGet();
-            boolean check = checkUserCouponCache(data);
-            if (!check) {
-                return;
-            }
+//            boolean check = checkUserCouponCache(data);
+//            if (!check) {
+//                return;
+//            }
             refreshStock(data);
         } catch (Exception e) {
             LOGGER.error("total={} deal={} refesh={} userId={}, error={}", totalCount.get(), dealCount.get(), refreshCount.get(), data.getWeixin_user_id(), e.getMessage());
