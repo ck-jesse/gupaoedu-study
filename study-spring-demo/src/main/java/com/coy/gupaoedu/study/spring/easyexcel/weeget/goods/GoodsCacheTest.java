@@ -15,7 +15,7 @@ public class GoodsCacheTest {
      */
     @Test
     public void getStock01() throws InterruptedException {
-        String fileName = "E:\\temp\\goods\\H2000[苏州寻问服饰有限公司]盘点库存表.xlsx";
+        String fileName = "E:\\temp\\goods\\【20210311】H2000更新库存数据.xlsx";
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
         EasyExcel.read(fileName, WarehouseSpecData.class, new ReloadStockCacheListener()).sheet().doRead();
 

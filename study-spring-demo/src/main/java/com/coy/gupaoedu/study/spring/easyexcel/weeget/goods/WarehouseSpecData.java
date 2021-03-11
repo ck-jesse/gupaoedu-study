@@ -16,9 +16,9 @@ import java.util.Date;
 @Data
 public class WarehouseSpecData {
 
-    @ColumnWidth(10)
-    @ExcelProperty("warehouse_spec_id")
-    private Integer warehouse_spec_id;
+//    @ColumnWidth(10)
+//    @ExcelProperty("warehouse_spec_id")
+//    private Integer warehouse_spec_id;
 
     @ColumnWidth(10)
     @ExcelProperty("goods_spec_id")
@@ -34,10 +34,15 @@ public class WarehouseSpecData {
     @ExcelProperty("locking_stock")
     private Integer locking_stock;
 
-    // 盘点库存
+    // 剩余库存
     @ColumnWidth(10)
     @ExcelProperty("available_stock")
     private Integer availableStock;
+
+    // 盘点库存
+    @ColumnWidth(10)
+    @ExcelProperty("check_stock")
+    private Integer checkStock;
 
     @ColumnWidth(10)
     @ExcelProperty("warehouse_id")
