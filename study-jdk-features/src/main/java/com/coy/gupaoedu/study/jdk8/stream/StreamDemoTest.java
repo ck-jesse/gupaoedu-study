@@ -83,9 +83,13 @@ public class StreamDemoTest {
         list.forEach(System.out::println);
         System.out.println();
 
-        // 分组 重复key 替换
+        // 分组(含去重)(list -> map)
         Map<Long, Student> map = students.stream().collect(Collectors.toMap(Student::getId, Function.identity(), (student, student2) -> student2));
         System.out.println(map);
+
+        // (map -> list)
+        List<Student> listTemp = map.entrySet().stream().map(entry -> entry.getValue()).collect(Collectors.toList());
+        System.out.println(listTemp);
 
         // 分组
         Map<Long, List<Student>> map1 = students.stream().collect(Collectors.groupingBy(Student::getId));
