@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -94,6 +95,33 @@ public class StreamDemoTest {
         // 分组
         Map<Long, List<Student>> map1 = students.stream().collect(Collectors.groupingBy(Student::getId));
         System.out.println(map1);
+    }
+
+    @Test
+    public void testToMap() {
+        Map<String, String> l1KeyMap = new HashMap<>();
+        l1KeyMap.put("key1", "key1");
+        l1KeyMap.put("key2", "key2");
+        l1KeyMap.put("key3", "key3");
+        l1KeyMap.put("key4", "key4");
+
+        Map<String, Object> l2HitMap = new HashMap<>();
+        l2HitMap.put("key1", 1);
+        l2HitMap.put("key2", 2);
+        l2HitMap.put("key3", null);
+        l2HitMap.put("key4", null);// 模拟value为null
+
+        // 使用collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator, BiConsumer<R, R> combiner) 来构建，此时可允许null值的出现
+        Map<String, Object> l2HitMapTemp1 = l2HitMap.entrySet().stream()
+                .filter(entry -> l1KeyMap.containsKey(entry.getKey()))
+                .collect(HashMap::new, (map, entry) -> map.put(l1KeyMap.get(entry.getKey()), entry.getValue()), HashMap::putAll);
+        System.out.println(l2HitMapTemp1);
+
+        // 由于 Collectors.toMap(key,value)中的value为null时，会报 java.util.HashMap.merge NullPointerException，所以建议使用上面的方式。
+        Map<String, Object> l2HitMapTemp2 = l2HitMap.entrySet().stream()
+                .filter(entry -> l1KeyMap.containsKey(entry.getKey()))
+                .collect(Collectors.toMap(entry -> l1KeyMap.get(entry.getKey()), entry -> entry.getValue()));
+        System.out.println(l2HitMapTemp1);
     }
 
     @Test
