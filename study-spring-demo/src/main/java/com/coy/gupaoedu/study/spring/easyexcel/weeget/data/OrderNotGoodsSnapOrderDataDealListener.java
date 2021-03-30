@@ -2,7 +2,6 @@ package com.coy.gupaoedu.study.spring.easyexcel.weeget.data;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,18 +10,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class OrderNotGoodsSnapPrice0DataDealListener extends AnalysisEventListener<Price0Data> {
+public class OrderNotGoodsSnapOrderDataDealListener extends AnalysisEventListener<Price0Data> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderNotGoodsSnapPrice0DataDealListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderNotGoodsSnapOrderDataDealListener.class);
 
     private AtomicLong totalCount = new AtomicLong();// 总数
     private AtomicLong dealCount = new AtomicLong();// 处理数量
     private AtomicLong refreshCount = new AtomicLong();// 刷新数量
 
 
-//    private Integer minGoodsSpecId = 64896000;// 修复数据的起始规格id
-//    private Integer minGoodsSpecId = 64902100;// 修复数据的起始规格id 上次使用到了 64902083
-    private Integer minGoodsSpecId = 64903000;// 修复数据的起始规格id 上次使用到了 64902217
+    private Integer minGoodsSpecId = 64896000;// 修复数据的起始规格id
     private Integer maxGoodsSpecId = 64910000;// 修复数据的结束规格id
 
     private static final List<String> sqlList = new ArrayList<>();

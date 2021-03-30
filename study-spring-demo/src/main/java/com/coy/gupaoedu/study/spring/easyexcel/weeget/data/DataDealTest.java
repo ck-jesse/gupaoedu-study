@@ -64,6 +64,52 @@ public class DataDealTest {
         }
     }
 
+    /**
+     * 驳回导致商品价格为0的历史数据处理
+     * 等同于是订单未关联快照的历史数据
+     */
+    @Test
+    public void orderNotGoodsSnap0Price1() throws InterruptedException, IOException {
+
+        // 拿到规格信息
+        String fileName = "F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210325\\20210325异常商品规格价格0元-规格信息.xlsx";
+        EasyExcel.read(fileName, GoodsSpec.class, new GoodsSpecListener()).sheet().doRead();
+
+        // 大数据提供的原始数据，取其中的供货价和最低销售价
+        fileName = "F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210325\\20210325异常商品规格价格0元.xlsx";
+        EasyExcel.read(fileName, Price0Data.class, new OrderNotGoodsSnapPrice0DataDealListener()).sheet().doRead();
+
+        List<String> sqlList = OrderNotGoodsSnapPrice0DataDealListener.getSqlList();
+        Files.write(Paths.get("F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210325\\20210325异常商品规格价格0元-sqlList.txt"), sqlList);
+
+        List<String> rollbackSqlList = OrderNotGoodsSnapPrice0DataDealListener.getRollbackSqlList();
+        Files.write(Paths.get("F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210325\\20210325异常商品规格价格0元-rollbackSqlList.txt"), rollbackSqlList);
+
+    }
+
+    /**
+     * 驳回导致商品价格为0的历史数据处理
+     * 等同于是订单未关联快照的历史数据
+     */
+    @Test
+    public void orderNotGoodsSnap0Price2() throws InterruptedException, IOException {
+
+        // 拿到规格信息
+        String fileName = "F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210330\\最后一次商品数据修复0元0330规格信息.xlsx";
+        EasyExcel.read(fileName, GoodsSpec.class, new GoodsSpecListener()).sheet().doRead();
+
+        // 大数据提供的原始数据，取其中的供货价和最低销售价
+        fileName = "F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210330\\最后一次商品数据修复0元0330.xlsx";
+        EasyExcel.read(fileName, Price0Data.class, new OrderNotGoodsSnapPrice0DataDealListener()).sheet().doRead();
+
+        List<String> sqlList = OrderNotGoodsSnapPrice0DataDealListener.getSqlList();
+        Files.write(Paths.get("F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210330\\最后一次商品数据修复0元0330-sqlList.txt"), sqlList);
+
+        List<String> rollbackSqlList = OrderNotGoodsSnapPrice0DataDealListener.getRollbackSqlList();
+        Files.write(Paths.get("F:\\03weeget\\07问题排查记录\\20210322 快照bug\\20210330\\最后一次商品数据修复0元0330-rollbackSqlList.txt"), rollbackSqlList);
+
+    }
+
 
     /**
      * 已关联快照 的订单的历史数据处理
