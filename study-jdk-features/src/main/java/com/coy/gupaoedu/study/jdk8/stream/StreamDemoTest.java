@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +36,10 @@ public class StreamDemoTest {
     @Before
     public void init() {
         Student s1 = new Student(1L, "肖战", 15, "浙江");
-        Student s11 = new Student(1L, "肖战2", 15, "浙江");
+        Student s11 = new Student(1L, "肖战2", 16, "浙江");
         Student s2 = new Student(2L, "王一博", 15, "湖北");
-        Student s22 = new Student(2L, "王一博2", 15, "湖北");
-        Student s3 = new Student(3L, "杨紫", 17, "北京");
+        Student s22 = new Student(2L, "王一博2", 16, "湖北");
+        Student s3 = new Student(3L, "杨紫", 18, "北京");
         Student s4 = new Student(4L, "李现", 17, "浙江");
         students.add(s1);
         students.add(s11);
@@ -170,9 +171,30 @@ public class StreamDemoTest {
     @Test
     public void testSort2() {
         // 先按照学生的id进行降序排序，再按照年龄进行降序排序
+        System.out.println("先按照学生的id进行降序排序，再按照年龄进行降序排序");
         students.stream()
                 .sorted((stu1, stu2) -> Long.compare(stu2.getId(), stu1.getId()))
                 .sorted((stu1, stu2) -> Integer.compare(stu2.getAge(), stu1.getAge()))
+                .forEach(System.out::println);
+
+        System.out.println("按年龄升序");
+        students.stream()
+                .sorted(Comparator.comparing(Student::getAge))// 按年龄升序
+                .forEach(System.out::println);
+
+        System.out.println("按年龄降序");
+        students.stream()
+                .sorted(Comparator.comparing(Student::getAge).reversed())// 按年龄降序
+                .forEach(System.out::println);
+
+        System.out.println("先按年龄降序,再按id升序");
+        students.stream()
+                .sorted(Comparator.comparing(Student::getAge).reversed().thenComparing(Student::getId))// 先按年龄降序,再按id升序
+                .forEach(System.out::println);
+
+        System.out.println("先按年龄降序,再按id降序");
+        students.stream()
+                .sorted(Comparator.comparing(Student::getAge).reversed().thenComparing((stu1, stu2) -> Long.compare(stu2.getId(), stu1.getId())))// 先按年龄降序,再按id降序
                 .forEach(System.out::println);
     }
 
