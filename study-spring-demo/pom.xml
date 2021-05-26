@@ -94,6 +94,13 @@
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>3.1.0</version>
         </dependency>
+
+        <!-- 反射框架 -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+        </dependency>
     </dependencies>
 
     <build>
