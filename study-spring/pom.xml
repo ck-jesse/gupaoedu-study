@@ -202,6 +202,7 @@
                     </webResources>
                 </configuration>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.zeroturnaround</groupId>
                 <artifactId>javarebel-maven-plugin</artifactId>
@@ -216,6 +217,7 @@
                 </executions>
                 <version>1.0.12</version>
             </plugin>
+            -->
 
         </plugins>
         <pluginManagement>
