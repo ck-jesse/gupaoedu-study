@@ -35,10 +35,9 @@ public class HeapOOMTest {
      */
     public static void main(String[] args) throws InterruptedException {
         HeapOOMTest test = new HeapOOMTest();
-//        while (true) {
-//            test.add(new User("heapoomtestssssssssssssssssssssssssssssssss"));
-////            Thread.sleep(1);
-//        }
-        System.out.println(java.util.UUID.randomUUID().toString().replaceAll("-", ""));
+        while (true) {
+            test.add(new User("heapoomtestssssssssssssssssssssssssssssssss"));
+            Thread.sleep(1);
+        }
     }
 }

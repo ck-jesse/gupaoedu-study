@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.sentinel.flow;
+package com.coy.gupaoedu.study.sentinel.demo.flow;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;

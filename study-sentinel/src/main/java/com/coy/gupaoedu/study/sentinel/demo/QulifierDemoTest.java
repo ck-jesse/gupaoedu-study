@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.sentinel;
+package com.coy.gupaoedu.study.sentinel.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

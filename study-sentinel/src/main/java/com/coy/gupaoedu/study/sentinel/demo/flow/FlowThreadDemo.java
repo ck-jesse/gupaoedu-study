@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.coy.gupaoedu.study.sentinel.flow;
+package com.coy.gupaoedu.study.sentinel.demo.flow;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
@@ -25,57 +25,76 @@ import com.alibaba.csp.sentinel.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author jialiang.linjl
  */
-public class FlowQpsDemo {
-
-    private static final String KEY = "abc";
+public class FlowThreadDemo {
 
     private static AtomicInteger pass = new AtomicInteger();
     private static AtomicInteger block = new AtomicInteger();
     private static AtomicInteger total = new AtomicInteger();
+    private static AtomicInteger activeThread = new AtomicInteger();
 
     private static volatile boolean stop = false;
-
-    private static final int threadCount = 32;
+    private static final int threadCount = 100;
 
     private static int seconds = 60 + 40;
+    private static volatile int methodBRunningTime = 2000;
 
     public static void main(String[] args) throws Exception {
-        initFlowQpsRule();
-
+        System.out.println(
+            "MethodA will call methodB. After running for a while, methodB becomes fast, "
+                + "which make methodA also become fast ");
         tick();
-        // first make the system run on a very low condition
-        simulateTraffic();
+        initFlowRule();
 
-        System.out.println("===== begin to do flow control");
-        System.out.println("only 20 requests per second can pass");
-
+        for (int i = 0; i < threadCount; i++) {
+            Thread entryThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        Entry methodA = null;
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(5);
+                            methodA = SphU.entry("methodA");
+                            activeThread.incrementAndGet();
+                            Entry methodB = SphU.entry("methodB");
+                            TimeUnit.MILLISECONDS.sleep(methodBRunningTime);
+                            methodB.exit();
+                            pass.addAndGet(1);
+                        } catch (BlockException e1) {
+                            block.incrementAndGet();
+                        } catch (Exception e2) {
+                            // biz exception
+                        } finally {
+                            total.incrementAndGet();
+                            if (methodA != null) {
+                                methodA.exit();
+                                activeThread.decrementAndGet();
+                            }
+                        }
+                    }
+                }
+            });
+            entryThread.setName("working thread");
+            entryThread.start();
+        }
     }
 
-    private static void initFlowQpsRule() {
+    private static void initFlowRule() {
         List<FlowRule> rules = new ArrayList<FlowRule>();
         FlowRule rule1 = new FlowRule();
-        rule1.setResource(KEY);
-        // set limit qps to 20
+        rule1.setResource("methodA");
+        // set limit concurrent thread for 'methodA' to 20
         rule1.setCount(20);
-        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule1.setGrade(RuleConstant.FLOW_GRADE_THREAD);
         rule1.setLimitApp("default");
+
         rules.add(rule1);
         FlowRuleManager.loadRules(rules);
-    }
-
-    private static void simulateTraffic() {
-        for (int i = 0; i < threadCount; i++) {
-            Thread t = new Thread(new RunTask());
-            t.setName("simulate-traffic-Task");
-            t.start();
-        }
     }
 
     private static void tick() {
@@ -94,6 +113,7 @@ public class FlowQpsDemo {
             long oldTotal = 0;
             long oldPass = 0;
             long oldBlock = 0;
+
             while (!stop) {
                 try {
                     TimeUnit.SECONDS.sleep(1);
@@ -111,13 +131,17 @@ public class FlowQpsDemo {
                 long oneSecondBlock = globalBlock - oldBlock;
                 oldBlock = globalBlock;
 
-                System.out.println(seconds + " send qps is: " + oneSecondTotal);
+                System.out.println(seconds + " total qps is: " + oneSecondTotal);
                 System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
                     + ", pass:" + oneSecondPass
-                    + ", block:" + oneSecondBlock);
-
+                    + ", block:" + oneSecondBlock
+                    + " activeThread:" + activeThread.get());
                 if (seconds-- <= 0) {
                     stop = true;
+                }
+                if (seconds == 40) {
+                    System.out.println("method B is running much faster; more requests are allowed to pass");
+                    methodBRunningTime = 20;
                 }
             }
 
@@ -126,37 +150,6 @@ public class FlowQpsDemo {
             System.out.println("total:" + total.get() + ", pass:" + pass.get()
                 + ", block:" + block.get());
             System.exit(0);
-        }
-    }
-
-    static class RunTask implements Runnable {
-        @Override
-        public void run() {
-            while (!stop) {
-                Entry entry = null;
-
-                try {
-                    entry = SphU.entry(KEY);
-                    // token acquired, means pass
-                    pass.addAndGet(1);
-                } catch (BlockException e1) {
-                    block.incrementAndGet();
-                } catch (Exception e2) {
-                    // biz exception
-                } finally {
-                    total.incrementAndGet();
-                    if (entry != null) {
-                        entry.exit();
-                    }
-                }
-
-                Random random2 = new Random();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
         }
     }
 }
