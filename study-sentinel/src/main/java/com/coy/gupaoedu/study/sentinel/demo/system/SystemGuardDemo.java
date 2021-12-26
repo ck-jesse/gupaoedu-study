@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.coy.gupaoedu.study.sentinel.system;
+package com.coy.gupaoedu.study.sentinel.demo.system;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.EntryType;
