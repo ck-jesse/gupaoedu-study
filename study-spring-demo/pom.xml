@@ -101,6 +101,12 @@
             <artifactId>reflections</artifactId>
             <version>0.9.11</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.ck.platform</groupId>
+            <artifactId>common-util</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
