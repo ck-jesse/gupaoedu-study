@@ -7,6 +7,7 @@ import com.ck.platform.common.util.httpclient.HttpResultDto;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
+import org.junit.Test;
 
 /**
  * @author chenck
@@ -21,10 +22,22 @@ public class CoinMarketCapAPI {
     private static String proxyHost = "127.0.0.1";
     private static int proxyPort = 4780;
 
-    public static void main(String[] args) {
-        String uri = "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest?convert=USD";
 
-        HttpClientParam reqParam = HttpClientParam.of(uri)
+    @Test
+    public void globalLatest() {
+        String url = "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest?convert=USD";
+        getData(url);
+    }
+
+    @Test
+    public void cryptocurrencyLatest() {
+        String url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest";
+        getData(url);
+    }
+
+
+    public static void getData(String url) {
+        HttpClientParam reqParam = HttpClientParam.of(url)
                 .setMethod(HttpMethod.GET.name());
         reqParam.setHeader("X-CMC_PRO_API_KEY", apiKey);
 
