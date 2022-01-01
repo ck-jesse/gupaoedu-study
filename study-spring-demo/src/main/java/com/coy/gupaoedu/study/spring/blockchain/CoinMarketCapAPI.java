@@ -32,6 +32,15 @@ public class CoinMarketCapAPI {
     @Test
     public void cryptocurrencyLatest() {
         String url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest";
+        // 方式1：通过id获取（id取自）
+        // url = url + "?id=1027&convert=USD";
+
+        // 方式2：通过slug获取
+        // url = url + "&slug=bitcoin";
+
+        // 方式2：通过symbol获取(免费版本一次只能获取一个币种数据)
+        //  url = url + "?symbol=BTC&convert=CNY";
+        url = url + "?symbol=BNB&convert=CNY&aux=max_supply,circulating_supply,total_supply,market_cap_by_total_supply,volume_24h_reported,volume_7d,volume_7d_reported,volume_30d,volume_30d_reported";
         getData(url);
     }
 
