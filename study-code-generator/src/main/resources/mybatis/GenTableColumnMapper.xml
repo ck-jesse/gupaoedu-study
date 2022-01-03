@@ -10,7 +10,7 @@
         <result property="columnName" column="column_name"/>
         <result property="columnComment" column="column_comment"/>
         <result property="columnType" column="column_type"/>
-        <result property="protoType" column="proto_type"/>
+<!--        <result property="protoType" column="proto_type"/>-->
         <result property="javaType" column="java_type"/>
         <result property="javaField" column="java_field"/>
         <result property="isPk" column="is_pk"/>
@@ -57,7 +57,7 @@
         <if test="columnName != null and columnName != ''">column_name,</if>
         <if test="columnComment != null and columnComment != ''">column_comment,</if>
         <if test="columnType != null and columnType != ''">column_type,</if>
-        <if test="protoType != null and protoType != ''">proto_type,</if>
+<!--        <if test="protoType != null and protoType != ''">proto_type,</if>-->
         <if test="javaType != null and javaType != ''">java_type,</if>
         <if test="javaField != null  and javaField != ''">java_field,</if>
         <if test="isPk != null and isPk != ''">is_pk,</if>
@@ -78,7 +78,7 @@
         <if test="columnName != null and columnName != ''">#{columnName},</if>
         <if test="columnComment != null and columnComment != ''">#{columnComment},</if>
         <if test="columnType != null and columnType != ''">#{columnType},</if>
-        <if test="protoType != null and protoType != ''">#{protoType},</if>
+<!--        <if test="protoType != null and protoType != ''">#{protoType},</if>-->
         <if test="javaType != null and javaType != ''">#{javaType},</if>
         <if test="javaField != null and javaField != ''">#{javaField},</if>
         <if test="isPk != null and isPk != ''">#{isPk},</if>
@@ -101,7 +101,7 @@
         update gen_table_column
         <set>
             column_comment = #{columnComment},
-            proto_type = #{protoType},
+--             proto_type = #{protoType},
             java_type = #{javaType},
             java_field = #{javaField},
             is_insert = #{isInsert},

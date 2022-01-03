@@ -23,7 +23,7 @@ public class GenTest {
     GenTableService genTableService;
 
     String[] tableNames = {
-            "yx_coupon_center",
+            "cap_banner",
     };
 
     /**

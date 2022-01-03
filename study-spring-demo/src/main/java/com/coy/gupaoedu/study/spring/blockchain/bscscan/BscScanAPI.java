@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.spring.blockchain;
+package com.coy.gupaoedu.study.spring.blockchain.bscscan;
 
 import com.ck.platform.common.util.httpclient.HttpClientUtil;
 import com.ck.platform.common.util.httpclient.HttpResultDto;
