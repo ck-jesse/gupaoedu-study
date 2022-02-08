@@ -89,13 +89,16 @@ public class StreamDemoTest {
         Map<Long, Student> map = students.stream().collect(Collectors.toMap(Student::getId, Function.identity(), (student, student2) -> student2));
         System.out.println(map);
 
+        Map<Long, Student> map1 = students.stream().collect(Collectors.toMap(key -> key.getId(), value -> value));
+        System.out.println(map1);
+
         // (map -> list)
         List<Student> listTemp = map.entrySet().stream().map(entry -> entry.getValue()).collect(Collectors.toList());
         System.out.println(listTemp);
 
         // 分组
-        Map<Long, List<Student>> map1 = students.stream().collect(Collectors.groupingBy(Student::getId));
-        System.out.println(map1);
+        Map<Long, List<Student>> map2 = students.stream().collect(Collectors.groupingBy(Student::getId));
+        System.out.println(map2);
     }
 
     @Test
