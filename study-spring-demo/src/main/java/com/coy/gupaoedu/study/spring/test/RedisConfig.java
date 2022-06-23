@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.spring.test;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -51,6 +52,7 @@ public class RedisConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public RedisTemplate redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(connectionFactory);
