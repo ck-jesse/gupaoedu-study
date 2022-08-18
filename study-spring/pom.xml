@@ -17,6 +17,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>io.github.ck-jesse</groupId>
+            <artifactId>l2cache-spring-boot-starter</artifactId>
+            <version>1.0.35</version>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
