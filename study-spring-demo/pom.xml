@@ -107,6 +107,15 @@
             <artifactId>common-util</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+        <!-- 引入本地jar：抖店开放平台SDK -->
+        <dependency>
+            <groupId>com.jinritemai</groupId>
+            <artifactId>sdk-java</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <systemPath>${basedir}/src/main/resources/lib/doudian-sdk-java-1.1.0-20221010145809.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>
