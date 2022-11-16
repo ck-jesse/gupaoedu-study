@@ -7,6 +7,13 @@ import com.doudian.open.api.alliance_materialsProductCategory.param.AllianceMate
 import com.doudian.open.api.alliance_materialsProductsSearch.AllianceMaterialsProductsSearchRequest;
 import com.doudian.open.api.alliance_materialsProductsSearch.AllianceMaterialsProductsSearchResponse;
 import com.doudian.open.api.alliance_materialsProductsSearch.param.AllianceMaterialsProductsSearchParam;
+import com.doudian.open.api.buyin_instituteLiveShare.BuyinInstituteLiveShareRequest;
+import com.doudian.open.api.buyin_instituteLiveShare.BuyinInstituteLiveShareResponse;
+import com.doudian.open.api.buyin_instituteLiveShare.param.BuyinInstituteLiveShareParam;
+import com.doudian.open.api.buyin_instituteLiveShare.param.PidInfo;
+import com.doudian.open.api.buyin_liveShareMaterial.BuyinLiveShareMaterialRequest;
+import com.doudian.open.api.buyin_liveShareMaterial.BuyinLiveShareMaterialResponse;
+import com.doudian.open.api.buyin_liveShareMaterial.param.BuyinLiveShareMaterialParam;
 import com.doudian.open.api.token.AccessTokenParam;
 import com.doudian.open.api.token.AccessTokenRequest;
 import com.doudian.open.api.token.AccessTokenResponse;
@@ -34,11 +41,16 @@ public class TokenTest {
     @Before
     public void accessToken() {
         //设置appKey和appSecret，全局设置一次
-        GlobalConfig.initAppKey("7152772693517927936");
-        GlobalConfig.initAppSecret("c713e060-2ddb-42e7-8bfb-cfa9105b3984");
+        // 生活有鱼
+//        GlobalConfig.initAppKey("7152772693517927936");
+//        GlobalConfig.initAppSecret("c713e060-2ddb-42e7-8bfb-cfa9105b3984");
+
+        // 生活U鱼
+        GlobalConfig.initAppKey("7152420904331445791");
+        GlobalConfig.initAppSecret("8fad50d0-c62b-42e3-93cd-e86bb0629a8d");
 
         //入参为code（有效期为10分钟）
-        accessToken = AccessTokenBuilder.build("54689fe4-bc60-493c-ba83-57918e40a7ac");
+        accessToken = AccessTokenBuilder.build("88812c67-e77a-443c-af37-027670c26a4b");
         System.out.println(JSON.toJSONString(accessToken));
     }
 
@@ -72,6 +84,43 @@ public class TokenTest {
         param.setPageSize(10L);
         param.setShareStatus(1);
         AllianceMaterialsProductsSearchResponse response = request.execute(accessToken);
+        System.out.println(response.toString());
+    }
+
+    // 直播间分销物料查询
+    @Test
+    public void liveShareMaterial() {
+        BuyinLiveShareMaterialRequest request = new BuyinLiveShareMaterialRequest();
+        BuyinLiveShareMaterialParam param = request.getParam();
+        param.setAuthorType(1);
+//        param.setAuthorLevels(1);
+//        param.setFristCids(23);
+//        param.setAuthorInfo("我的昵称");
+        param.setPage(1L);
+        param.setPageSize(10L);
+        param.setSortBy(1);
+        param.setSortType(0);
+        param.setLiveStatus(1L);
+        BuyinLiveShareMaterialResponse response = request.execute(accessToken);
+        System.out.println(response.toString());
+    }
+
+
+    @Test
+    public void test(){
+        PidInfo pidInfo = new PidInfo();
+        pidInfo.setPid("6971296859097088287");
+//        pidInfo.setExternalInfo("");
+
+        BuyinInstituteLiveShareRequest request = new BuyinInstituteLiveShareRequest();
+        BuyinInstituteLiveShareParam param = request.getParam();
+        param.setPidInfo(pidInfo);
+//        param.setOpenId("废弃字段，将下线");
+        param.setBuyinId("6945996461834371365");
+        param.setNeedQrCode(false);
+//        param.setDyCode("6.9 gO:/【ceshi直播间】4.8:/ ÊÊn53CIbpa1SFr8ΨΨ，按长復製此消[转圈]夕条，哒揩ϓƗӢԂƠʮ[咖啡]搜缩，看TA直播##n53CIparSFr8##");
+//        param.setProductId(3501844227627868700L);
+        BuyinInstituteLiveShareResponse response = request.execute(accessToken);
         System.out.println(response.toString());
     }
 }

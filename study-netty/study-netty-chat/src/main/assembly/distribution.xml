@@ -3,7 +3,7 @@
 	<formats>
 		<format>zip</format>
 	</formats>
-	<finalName>${artifactId}</finalName>
+	<finalName>${project.artifactId}</finalName>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>	
 		<fileSet>

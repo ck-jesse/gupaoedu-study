@@ -113,7 +113,8 @@
             <groupId>com.jinritemai</groupId>
             <artifactId>sdk-java</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <systemPath>${basedir}/src/main/resources/lib/doudian-sdk-java-1.1.0-20221010145809.jar</systemPath>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/doudian-sdk-java-1.1.0-20221103183419.jar</systemPath>
         </dependency>
 
     </dependencies>
