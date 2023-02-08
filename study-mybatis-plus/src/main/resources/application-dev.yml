@@ -1,7 +1,7 @@
 # mybatis-plus 配置
 mybatis-plus:
   typeAliasesPackage: com.coy.gupaoedu.study.mybatisplus
-  mapper-locations: classpath*:com.coy.gupaoedu.study.mybatisplus/dao/**/*Mapper.xml
+  mapper-locations: classpath:./mybatis/*Mapper.xml
   global-config:
     db-config:
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
@@ -16,10 +16,15 @@ spring:
       primary: master #设置默认的数据源或者数据源组,默认值即为master
       datasource:
         master:
-          username: dev
-          password: deV@0327
+          username: root
+          password: Weeget@2022
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://47.107.181.147:6001/testdb?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+          url: jdbc:mysql://8.129.128.19:3306/jsh_erp?useUnicode=true&characterEncoding=utf8&useCursorFetch=true&defaultFetchSize=500&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false
+
+          #username: dev
+          #password: deV@0327
+          #driver-class-name: com.mysql.cj.jdbc.Driver
+          #url: jdbc:mysql://47.107.181.147:6001/testdb?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
         #slave_1:
         #  username: root
         #  password: 12345678

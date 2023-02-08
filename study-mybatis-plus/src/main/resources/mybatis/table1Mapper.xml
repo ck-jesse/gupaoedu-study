@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coy.gupaoedu.study.mybatisplus.dao.mapper.Table1Mapper">
+
+    <resultMap id="BaseResultMap" type="com.coy.gupaoedu.study.mybatisplus.dao.entity.Table1Entity">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="group_name" jdbcType="VARCHAR" property="group_name"/>
+        <result column="group_id" jdbcType="VARCHAR" property="group_id"/>
+        <result column="group_org_name" jdbcType="VARCHAR" property="group_org_name"/>
+        <result column="father_group_name" jdbcType="VARCHAR" property="father_group_name"/>
+        <result column="father_group_id" jdbcType="VARCHAR" property="father_group_id"/>
+        <result column="root" jdbcType="INTEGER" property="root"/>
+        <result column="lvl" jdbcType="INTEGER" property="lvl"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, group_name, group_id, group_org_name, father_group_name, father_group_id, root, lvl
+    </sql>
+
+    <!-- MySql递归查询最顶层的上级 -->
+    <select id="findRootNode" parameterType="java.lang.String" resultType="com.coy.gupaoedu.study.mybatisplus.dto.Table1Data">
+        <![CDATA[
+            SELECT @r AS groupId,
+              (SELECT id FROM table1 WHERE group_id = groupId) AS id,
+              (SELECT @r := father_group_id FROM table1 WHERE group_id = groupId) AS fatherGroupId,
+              @l := @l + 1 AS lvl
+            FROM
+              (SELECT @r := #{groupId}, @l := 0) vars,
+              table1 h
+            WHERE @r <> 0
+            order by lvl desc
+            limit 1;
+        ]]>
+    </select>
+
+    <!-- 查询本级及下级，仅查询下级 if(t1.id= 1,0,-1) 修改为 -1 -->
+    <select id="findChildNode" parameterType="java.lang.String" resultType="java.util.Map">
+        <![CDATA[
+        SELECT group_id, ischild, LENGTH(ischild)-LENGTH(REPLACE(ischild,",","")) AS sort
+        FROM (
+                 SELECT t1.group_id,
+                        IF (
+                                find_in_set( father_group_id, @ids ) > 0,
+                                @ids := concat( @ids, ',', group_id ),
+                                IF ( t1.group_id = #{groupId}, 0,- 1 )
+                            ) AS ischild
+                 FROM
+                     ( SELECT group_id, father_group_id FROM table1 ORDER BY father_group_id, group_id ) t1,
+                     ( SELECT @ids := #{groupId} ) t2
+             ) t3
+        WHERE ischild != - 1 ORDER BY	sort
+        ]]>
+    </select>
+
+    <update id="updateRootFlag" parameterType="java.lang.Integer" >
+        UPDATE table1 SET root = 1 WHERE id = #{id};
+    </update>
+</mapper>
