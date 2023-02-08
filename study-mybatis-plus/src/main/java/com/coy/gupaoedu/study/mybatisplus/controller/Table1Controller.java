@@ -18,6 +18,8 @@ public class Table1Controller {
 
     /**
      * 查询店铺图片
+     * <p>
+     * http://localhost:8080/table1/find_root
      */
     @GetMapping(value = "/table1/find_root")
     public DataResponse findRoot() {
