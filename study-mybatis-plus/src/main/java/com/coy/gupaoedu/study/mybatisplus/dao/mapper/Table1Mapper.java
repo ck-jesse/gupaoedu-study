@@ -15,7 +15,7 @@ public interface Table1Mapper extends BaseMapper<Table1Entity> {
 
     public Table1Data findRootNode(String groupId);
 
-    public List<Map> findChildNode(String groupId);
+    public List<String> findChildNode(String groupId);
 
     public int updateRootFlag(Integer id);
 }

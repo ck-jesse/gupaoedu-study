@@ -38,7 +38,7 @@ public class Table1ServiceImpl {
         System.out.println("根节点标记更新 " + rslt);
 
         // 查询叶子节点
-        List<Map> list = table1Service.getBaseMapper().findChildNode("9A06B5F73FBC178203183EF7C564C0F5");
+        List<String> list = table1Service.getBaseMapper().findChildNode("A4B7B61D21544E943FFA548011DBF270");
         System.out.println("叶子节点 " + list);
 
 

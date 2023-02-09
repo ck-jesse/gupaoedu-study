@@ -19,6 +19,7 @@
     </sql>
 
     <!-- MySql递归查询最顶层的上级 -->
+    <!-- 注意：仅支持严格的树状结构的数据，若一个节点被关联到多个节点下，则会中断往上查找 -->
     <select id="findRootNode" parameterType="java.lang.String" resultType="com.coy.gupaoedu.study.mybatisplus.dto.Table1Data">
         <![CDATA[
             SELECT @r AS groupId,
@@ -35,9 +36,10 @@
     </select>
 
     <!-- 查询本级及下级，仅查询下级 if(t1.id= 1,0,-1) 修改为 -1 -->
-    <select id="findChildNode" parameterType="java.lang.String" resultType="java.util.Map">
+    <!-- 注意：ischild 中的值是所有的值，所以不能用作层级关系 -->
+    <select id="findChildNode" parameterType="java.lang.String" resultType="java.lang.String">
         <![CDATA[
-        SELECT group_id, ischild, LENGTH(ischild)-LENGTH(REPLACE(ischild,",","")) AS sort
+        SELECT DISTINCT group_id
         FROM (
                  SELECT t1.group_id,
                         IF (
@@ -49,7 +51,7 @@
                      ( SELECT group_id, father_group_id FROM table1 ORDER BY father_group_id, group_id ) t1,
                      ( SELECT @ids := #{groupId} ) t2
              ) t3
-        WHERE ischild != - 1 ORDER BY	sort
+        WHERE ischild != - 1
         ]]>
     </select>
 
