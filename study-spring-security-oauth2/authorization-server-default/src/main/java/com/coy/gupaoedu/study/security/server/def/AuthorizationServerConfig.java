@@ -1,9 +1,5 @@
-package com.coy.gupaoedu.study.security.server;
+package com.coy.gupaoedu.study.security.server.def;
 
-/**
- * @author chenck
- * @date 2023/3/29 14:49
- */
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -16,115 +12,111 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
-@EnableWebSecurity
-@Configuration
-public class SecurityConfig {
+/**
+ * 创建授权服务器
+ *
+ * @author Joe Grandja
+ * @since 0.0.1
+ */
+@Configuration(proxyBeanMethods = false)
+//@Import(OAuth2AuthorizationServerConfiguration.class)
+public class AuthorizationServerConfig {
 
     /**
+     * 这是个Spring security 的过滤器链，实现最小配置的默认配置形式
+     * <p>
      * Protocol Endpoints的 Spring Security 过滤器链。
+     *
+     * <p>
+     * OAuth2 Authorization endpoint
+     * <p>
+     * OAuth2 Token endpoint
+     * <p>
+     * OAuth2 Token Introspection endpoint
+     * <p>
+     * OAuth2 Token Revocation endpoint
+     * <p>
+     * OAuth2 Authorization Server Metadata endpoint
+     * <p>
+     * JWK Set endpoint
+     * <p>
+     * OpenID Connect 1.0 Provider Configuration endpoint
+     * <p>
+     * OpenID Connect 1.0 UserInfo endpoint
+     * 这些协议端点，只有配置了他才能够访问的到接口地址（类似mvc的controller）。
+     * <p>
      * https://docs.spring.io/spring-authorization-server/docs/current/reference/html/protocol-endpoints.html
      */
     @Bean
-    @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
-            throws Exception {
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+        // 授权服务器配置
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .oidc(Customizer.withDefaults());    // Enable OpenID Connect 1.0
+
+        // @formatter:off
         http
-                // Redirect to the login page when not authenticated from the
-                // authorization endpoint
-                .exceptionHandling((exceptions) -> exceptions
-                        .authenticationEntryPoint(
-                                new LoginUrlAuthenticationEntryPoint("/login"))
+                .exceptionHandling(exceptions ->
+                        exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 )
-                // Accept access tokens for User Info and/or Client Registration
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
-
+        // @formatter:on
         return http.build();
     }
 
     /**
-     * 身份验证的 Spring Security 过滤器链
-     * https://docs.spring.io/spring-security/reference/servlet/authentication/index.html
-     */
-    @Bean
-    @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
-            throws Exception {
-        http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().authenticated()
-                )
-                // Form login handles the redirect to the login page from the
-                // authorization server filter chain
-                .formLogin(Customizer.withDefaults());
-
-        return http.build();
-    }
-
-    /**
-     * 用于检索用户进行身份验证的实例
-     *
-     * @return
-     */
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails userDetails = User.withDefaultPasswordEncoder()
-                .username("user")
-                .password("password")
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(userDetails);
-    }
-
-    /**
-     * 用于管理客户端的实例
-     *
-     * @return
+     * 创建客户端信息，可以保存在内存和数据库，此处保存在数据库中
+     * oauth2 用于第三方认证，RegisteredClientRepository 主要用于管理第三方（每个第三方就是一个客户端）
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+                // 客户端id 需要唯一
                 .clientId("messaging-client")
+                // 客户端密码
                 .clientSecret("{noop}secret")
+                // 可以基于 basic 的方式和授权服务器进行认证
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // 授权码
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                // 刷新token
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                // 客户端模式
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
+                // 重定向url
+                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")// 重定向url
                 .redirectUri("http://127.0.0.1:8080/authorized")
+                // 客户端申请的作用域，也可以理解这个客户端申请访问用户的哪些信息，比如：获取用户信息，获取用户照片等
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
                 .scope("message.read")
                 .scope("message.write")
+                // 是否需要用户确认一下客户端需要获取用户的哪些权限
+                // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
 
@@ -132,7 +124,9 @@ public class SecurityConfig {
     }
 
     /**
-     * 用于签署访问令牌的实例
+     * 对JWT进行签名的 加解密密钥
+     * <p>
+     * 用于给access_token签名使用。
      *
      * @return
      */
@@ -150,6 +144,7 @@ public class SecurityConfig {
     }
 
     /**
+     * 生成秘钥对，为jwkSource提供服务。
      * 启动时生成的带有密钥的实例java.security.KeyPair用于创建JWKSource上述内容
      *
      * @return
@@ -167,7 +162,7 @@ public class SecurityConfig {
     }
 
     /**
-     * 用于解码签名访问令牌的实例
+     * jwt解码
      *
      * @param jwkSource
      * @return
@@ -188,4 +183,3 @@ public class SecurityConfig {
     }
 
 }
-
