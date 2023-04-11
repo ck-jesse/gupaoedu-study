@@ -23,7 +23,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>authorization-server-default</module>
+        <module>authorization-server</module>
+        <module>authorization-client</module>
+        <module>authorization-resource</module>
     </modules>
 
     <properties>
