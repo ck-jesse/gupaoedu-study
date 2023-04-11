@@ -120,7 +120,34 @@ public class AuthorizationServerConfig {
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        // 模拟多个client账号
+        RegisteredClient registeredClient2 = RegisteredClient.withId(UUID.randomUUID().toString())
+                // 客户端id 需要唯一
+                .clientId("messaging-client2")
+                // 客户端密码
+                .clientSecret("{noop}secret2")
+                // 可以基于 basic 的方式和授权服务器进行认证
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // 授权码
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                // 刷新token
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                // 客户端模式
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                // 重定向url
+                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")// 重定向url
+                .redirectUri("http://127.0.0.1:8080/authorized")
+                // 客户端申请的作用域，也可以理解这个客户端申请访问用户的哪些信息，比如：获取用户信息，获取用户照片等
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .scope("message.read")
+                .scope("message.write")
+                // 是否需要用户确认一下客户端需要获取用户的哪些权限
+                // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                .build();
+
+        return new InMemoryRegisteredClientRepository(registeredClient, registeredClient2);
     }
 
     /**
