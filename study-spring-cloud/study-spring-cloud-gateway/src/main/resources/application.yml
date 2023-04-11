@@ -24,6 +24,7 @@ logging:
 # GatewayAutoConfiguration 中定义 GatewayControllerEndpoint 来暴露了一些网关的查询功能（filter/route等）
 # http://localhost:8081/actuator/gateway/routes  返回网关的路由信息
 # 注意：如果需要动态添加网关路由roure，则可以参考GatewayControllerEndpoint自定义Controller来实现动态添加网关路由的功能，可参考 https://my.oschina.net/tongyufu/blog/1844573
+# 特别注意：在生产环境中，不要暴露该端点，否则存在安全风险，可能被攻击而导致系统异常
 management:
   endpoints:
     web:
