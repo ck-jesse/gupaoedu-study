@@ -29,5 +29,13 @@ spring:
 #            jwk-set-uri: http://oauth2server:8080/oauth2/jwks
 #            user-info-uri: http://oauth2server:8080/userinfo
 #            user-name-attribute: sub
-            #单独配置如下一个也是可以的，底层会自动寻址，如果自定义过url，需要使用上面方式配置(修改oauthserve里上面那些url后，使用如下配置能否有效未测试)
+            #授权服务器的URI（颁发者URI）
+            #单独配置如下一个也是可以的，底层会自动寻址，如果自定义过url，需要使用上面方式配置(修改oauthserver里上面那些url后，使用如下配置能否有效未测试)
             issuer-uri: http://oauth2server:9000
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG

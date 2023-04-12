@@ -5,6 +5,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.UUID;
 
 import com.nimbusds.jose.jwk.JWKSet;
@@ -32,6 +33,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
@@ -118,6 +120,8 @@ public class AuthorizationServerConfig {
                 // 是否需要用户确认一下客户端需要获取用户的哪些权限
                 // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                // access_token默认为5分钟，refresh_token默认为60分钟
+                .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofHours(12)).refreshTokenTimeToLive(Duration.ofHours(24)).build())
                 .build();
 
         // 模拟多个client账号
@@ -145,6 +149,8 @@ public class AuthorizationServerConfig {
                 // 是否需要用户确认一下客户端需要获取用户的哪些权限
                 // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                // access_token默认为5分钟，refresh_token默认为60分钟
+                .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofHours(12)).refreshTokenTimeToLive(Duration.ofHours(24)).build())
                 .build();
 
         return new InMemoryRegisteredClientRepository(registeredClient, registeredClient2);

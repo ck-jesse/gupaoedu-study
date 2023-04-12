@@ -5,4 +5,13 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://oauth2server:9000
+          #授权服务器的URI（颁发者URI）
+          #issuer-uri: http://oauth2server:9000
+          issuer-uri: http://127.0.0.1:9000
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG

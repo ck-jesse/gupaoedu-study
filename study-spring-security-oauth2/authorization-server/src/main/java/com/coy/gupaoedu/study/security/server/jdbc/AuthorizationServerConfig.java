@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
@@ -54,6 +55,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -136,7 +138,10 @@ public class AuthorizationServerConfig {
                 .scope("client.create")
                 // 是否需要用户确认一下客户端需要获取用户的哪些权限
                 // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build()).build();
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                // access_token默认为5分钟，refresh_token默认为60分钟
+                .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofHours(12)).refreshTokenTimeToLive(Duration.ofHours(24)).build())
+                .build();
         registeredClientRepository.save(registeredClient);
 
         return registeredClientRepository;
@@ -250,6 +255,14 @@ public class AuthorizationServerConfig {
 
     /**
      * 配置 Spring 授权服务器的实例
+     * 暴露一系列的endpoint
+     * /oauth2/authorize
+     * /oauth2/token
+     * /oauth2/jwks
+     * /oauth2/revoke
+     * /oauth2/introspect
+     * /connect/register
+     * /userinfo
      *
      * @return
      */

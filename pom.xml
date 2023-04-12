@@ -46,6 +46,7 @@
         <module>study-demo</module>
         <module>study-code-generator</module>
         <module>study-spring-security-oauth2</module>
+        <module>study-reactor</module>
     </modules>
 
     <properties>
