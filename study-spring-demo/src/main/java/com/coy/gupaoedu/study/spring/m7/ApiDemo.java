@@ -17,6 +17,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * https://developer.7moor.com/dc/#/callCenter/webcall
+ *
+ * https://developer.7moor.com/dc/#/other/data
+ *
  * @author chenck
  * @date 2023/3/16 20:11
  */

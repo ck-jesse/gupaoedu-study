@@ -47,6 +47,7 @@
         <module>study-code-generator</module>
         <module>study-spring-security-oauth2</module>
         <module>study-reactor</module>
+        <module>study-openai</module>
     </modules>
 
     <properties>
