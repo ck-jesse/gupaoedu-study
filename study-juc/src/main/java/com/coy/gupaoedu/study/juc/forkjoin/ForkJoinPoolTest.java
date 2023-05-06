@@ -81,7 +81,7 @@ public class ForkJoinPoolTest {
 }
 
 /**
- * 自定义ForkJoinPool
+ * 自定义ForkJoinPool 汇总Task
  *
  * @author chenck
  * @date 2022/6/10 22:46
