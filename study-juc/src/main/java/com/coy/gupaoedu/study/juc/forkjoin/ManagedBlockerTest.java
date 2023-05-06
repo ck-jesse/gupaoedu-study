@@ -15,12 +15,11 @@ import java.util.stream.Stream;
 /**
  * http://www.codexy.cn/manual/javaapi9/java/util/concurrent/ForkJoinPool.html
  * <p>
- * 静态commonPool()可用，适用于大多数应用。 公共池被任何未显式提交到指定池的ForkJoinTask使用。 使用公共池通常会减少资源使用（其线程在不使用期间缓慢回收，并在后续使用时恢复）。
- * <p>
- * 对于需要单独或自定义池的应用程序，可以使用给定的目标并行级别构建一个ForkJoinPool ; 默认情况下，等于可用处理器的数量。
- * 池尝试通过动态添加，挂起或恢复内部工作线程来维护足够的活动（或可用）线程，即使某些任务停止等待加入其他线程。
- * 但是，面对阻塞的I/O或其他非托管同步，不能保证这样的调整。 嵌套的ForkJoinPool.ManagedBlocker接口可以扩展所容纳的同步类型。
- * 可以使用具有与类ThreadPoolExecutor中记录的参数对应的参数的构造函数来覆盖默认策略。
+ * 静态公共池commonPool()可适用于大多数应用，任何未显式提交到指定ForkJoinPool的ForkJoinTask均使用公共池。
+ * 对于部分应用程序，可以使用指定的并行数构建一个自定义ForkJoinPool，默认情况下，线程数等于可用处理器的数量。
+ * 该自定义ForkJoinPool会尝试通过动态添加，挂起或恢复内部工作线程来维护足够的活动（或可用）线程。
+ * 但是，当面对IO阻塞型任务时，若出现阻塞，则不能保证这样的调整会有足够的可用线程。
+ * 此时，可通过ForkJoinPool.ManagedBlocker接口来扩展足够的可用线程，来保证并行性。
  *
  * @author chenck
  * @date 2023/5/5 18:44
@@ -57,14 +56,7 @@ public class ManagedBlockerTest {
                         });
 
 
-                        // 运行指定的阻塞任务。当ForkJoinTask 在 ForkJoinPool 中运行时，此方法可能会安排在必要时激活备用线程，以确保当前线程在 ManagedBlockerblock.block() 中阻塞时有足够的并行性。
-                        // 对IO阻塞型任务提供一个ManagedBlocker让线程池知道当前任务即将阻塞，因此需要创建新的补偿工作线程来执行新的提交任务
-                        // 问题：如何控制新创建的最大补偿线程数？
-                        // 分析：ForkJoinPool.common.commonMaxSpares tryCompensate 中备用线程构造的限制，默认为256
-                        // 缺陷：只能针对commonPool进行限制，并且tryCompensate方法不一定能会命中该限制，若未命中该限制，则可能无限制的创建补偿线程来避免阻塞，最终可能出现oom
-                        // 实现注意事项 ：此实现将最大正在运行的线程数限制为32767.尝试创建大于最大数目的池导致IllegalArgumentException
-                        // 只有当池被关闭或内部资源耗尽时，此实现才会拒绝提交的任务（即通过抛出RejectedExecutionException ）。
-                        // 方案：在管理阻塞时，通过自定义ForkJoinWorkerThreadFactory来限制最大可创建的线程数，避免无限制的创建线程
+                        // 运行指定的阻塞任务。当ForkJoinTask 在 ForkJoinPool 中运行时，此方法可能会在必要时创建备用线程，以确保当前线程在 ManagedBlockerblock.block() 中阻塞时有足够的并行性。
                         ForkJoinPool.managedBlock(myManagedBlocker);
 
                         System.out.println(threadDateTimeInfo() + ", 休眠2s, result=" + myManagedBlocker.getResult() + ", ActiveThreadCount=" + pool.getActiveThreadCount() + ", PoolSize=" + pool.getPoolSize());
