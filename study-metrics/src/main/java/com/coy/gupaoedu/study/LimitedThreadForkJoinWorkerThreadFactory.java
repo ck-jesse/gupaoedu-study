@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.juc.forkjoin;
+package com.coy.gupaoedu.study;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

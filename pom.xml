@@ -48,6 +48,7 @@
         <module>study-spring-security-oauth2</module>
         <module>study-reactor</module>
         <module>study-openai</module>
+        <module>study-metrics</module>
     </modules>
 
     <properties>

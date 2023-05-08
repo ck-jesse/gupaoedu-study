@@ -35,7 +35,7 @@ public class ManagedBlockerTest {
         // 创建自定义的ForkJoinPool
         // 在管理阻塞时，通过自定义ForkJoinWorkerThreadFactory来限制最大可创建的线程数，避免无限制的创建线程
         // 适用于面对IO阻塞型任务时，通过扩展线程池中的线程数，来提高执行效率的场景
-        ForkJoinPool pool = new ForkJoinPool(parallelism, new LimitedThreadForkJoinWorkerThreadFactory(maxThreads), null, false);
+        ForkJoinPool pool = new ForkJoinPool(parallelism, new LimitedThreadForkJoinWorkerThreadFactory(maxThreads, "forkjoin-managedBlocker-test"), null, false);
 
         String key = "key";
         for (int i = 0; i < 100; i++) {

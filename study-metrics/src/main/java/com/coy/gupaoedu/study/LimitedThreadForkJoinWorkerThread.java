@@ -1,4 +1,4 @@
-package com.coy.gupaoedu.study.juc.forkjoin;
+package com.coy.gupaoedu.study;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;

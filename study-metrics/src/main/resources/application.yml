@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: info
+    # 日志级别指定到包或类
+    com.coy.gupaoedu.study.spring: debug
+
+spring:
+  application:
+    name: study-metrics
+
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  server:
+    port: 29999 # 可选配置，如果不配置该 port，直接使用 ${server.port}
+  endpoints:
+    web:
+      exposure:
+        include: '*' # 测试使用，开启了所有端点，生产环境不建议 *
