@@ -107,6 +107,9 @@ public class ForkJoinPoolMetrics implements MeterBinder {
                         "is not quiescent")
                 .register(registry);
 
+        // 也可以通过 Metrics 进行便捷的添加
+//        Metrics.gauge("forkjoinpool.queuedTaskCount", fj, ForkJoinPool::getQueuedTaskCount);
+
         Gauge.builder("forkjoinpool.queuedTaskCount", fj, ForkJoinPool::getQueuedTaskCount)
                 .tags(tags)
                 .description("An estimate of the total number of tasks currently held in queues by worker threads (but not including tasks submitted to the pool that have not begun executing)")

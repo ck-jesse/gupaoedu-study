@@ -16,6 +16,8 @@ management:
     export:
       prometheus:
         enabled: true
+    tags:
+      application: ${spring.application.name} # 暴露的数据中添加application label
   server:
     port: 29999 # 可选配置，如果不配置该 port，直接使用 ${server.port}
   endpoints:
