@@ -8,8 +8,18 @@ import java.util.concurrent.CompletableFuture;
 
 
 /**
+ * Future模式的高阶版本—— CompletableFuture
+ * Future模式虽然好用，但也有一个问题，那就是将任务提交给线程后，调用线程并不知道这个任务什么时候执行完，如果执行调用get()方法或者isDone()方法判断，可能会进行不必要的等待，那么系统的吞吐量很难提高。
+ * 为了解决这个问题，JDK对Future模式又进行了加强，创建了一个CompletableFuture，它可以理解为Future模式的升级版本，
+ * 它最大的作用是提供了一个回调机制，可以在任务完成后，自动回调一些后续的处理，这样，整个程序可以把“结果等待”完全给移除了。
+ * <p>
  * 使用Future获得异步执行结果时，要么调用阻塞方法get()，要么轮询看isDone()是否为true，这两种方法都不是很好，因为主线程也会被迫等待。
  * 从Java 8开始引入了CompletableFuture，它针对Future做了改进，可以传入回调对象，当异步任务完成或者发生异常时，自动调用回调对象的回调方法。
+ * <p>
+ * CompletableFuture比一般的Future更具有实用性，因为它可以在Future执行成功后，自动回调进行下一步的操作，因此整个程序不会有任何阻塞的地方
+ * （也就是说你不用去到处等待Future的执行，而是让Future执行成功后，自动来告诉你）。
+ *
+ * 理解：CompletableFuture模式本质上是消费者模式的一种实际应用。
  *
  * @author chenck
  * @date 2021/3/17 15:06
