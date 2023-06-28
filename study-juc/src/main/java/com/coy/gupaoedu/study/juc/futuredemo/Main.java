@@ -19,6 +19,7 @@ public class Main {
             //在处理这些业务逻辑的过程中，RealData被创建，从而充分利用了等待时间
             Thread.sleep(2000);
         } catch (InterruptedException e) {
+            System.out.printf(e.toString());
         }
         //使用真实的数据，如果到这里数据还没有准备好，getResult()会等待数据准备完，再返回
         System.out.println("数据 = " + data.getResult());
