@@ -13,9 +13,9 @@ public class OSSClientConstants {
     //阿里云API的外网域名
     public static final String ENDPOINT = "oss-cn-shenzhen.aliyuncs.com";
     //阿里云API的密钥Access Key ID
-    public static final String ACCESS_KEY_ID = "LTAI4GGQPMcy2ZAUbQZTfH1y";
+    public static final String ACCESS_KEY_ID = "xx";
     //阿里云API的密钥Access Key Secret
-    public static final String ACCESS_KEY_SECRET = "IX8hSRGeWbNFeIz9Zo7dViQmpXpKfw";
+    public static final String ACCESS_KEY_SECRET = "xx";
     //阿里云API的bucket名称
     public static final String BACKET_NAME = "birdie";
     //阿里云API公共图片文件夹名称
@@ -36,11 +36,11 @@ public class OSSClientConstants {
     /**
      * 阿里去视频点播AccessKey与密钥
      */
-    public static final String VIDEO_ACCESS_KEY_ID = "LTAIm72oGhWOMXcn";
+    public static final String VIDEO_ACCESS_KEY_ID = "xx";
     /**
      * 视频点播密钥
      */
-    public static final String VIDEO_ACCESS_KEY_SECRET = "souYglpEtBNoQp6VUHSr0z4u70J7NG";
+    public static final String VIDEO_ACCESS_KEY_SECRET = "xx";
     /**
      * 视频点播区域
      */
@@ -67,10 +67,10 @@ public class OSSClientConstants {
     /**
      * 视频服务KEY
      */
-    public static final String VIDEO_SERVICE_KEY = "52a72116-b56f-480d-97f3-7006dc941bc8";
+    public static final String VIDEO_SERVICE_KEY = "xx";
 
     /**
      * 播放域名
      */
-    public static final String VIDEO_PLAY_DOMAIN = "https://video.huasheng100.com";
+    public static final String VIDEO_PLAY_DOMAIN = "xx";
 }
