@@ -3,6 +3,7 @@ package com.coy.gupaoedu.study.spring.image;
 import com.ck.platform.common.util.RandomUtil;
 import org.imgscalr.Scalr;
 import org.junit.Test;
+import org.springframework.util.StopWatch;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -16,7 +17,7 @@ import java.io.IOException;
 public class ImgscalrTest {
 
     public static final String path = "E:/tmp/img/avatar.jpg";
-    public static final String outPath = "E:/tmp/img/avatar" + RandomUtil.genRandomNumber(3) + ".jpg";
+    public static final String outPath = "E:/tmp/img/";
 
     /**
      * 缩放
@@ -25,6 +26,10 @@ public class ImgscalrTest {
     public void resizeTest() throws IOException {
         int targetWidth = 150;
         int targetHeight = 150;
+
+        // 秒表
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         // 源图片
         BufferedImage img = ImageIO.read(new File(path));
@@ -37,6 +42,8 @@ public class ImgscalrTest {
 
         writeImg(img, newImage, outPath);
 
+        stopWatch.stop();
+        System.out.println("执行时间=" + stopWatch.getTotalTimeSeconds() + "s");
     }
 
     /**
@@ -65,10 +72,11 @@ public class ImgscalrTest {
      * 输出图片
      */
     public void writeImg(BufferedImage img, BufferedImage newImage, String outPath) throws IOException {
-        File thumbnailFile = new File(outPath);
+        String fileName = "avatar" + RandomUtil.genRandomNumber(3) + ".jpg";
+        File thumbnailFile = new File(outPath + fileName);
 
         boolean write = ImageIO.write(newImage, "jpg", thumbnailFile);
-        System.out.println(write);
+        System.out.println("输出图片=" + write + ", 文件名=" + fileName);
 
         img.flush();
         newImage.flush();
