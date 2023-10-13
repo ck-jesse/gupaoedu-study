@@ -117,6 +117,21 @@
             <systemPath>${project.basedir}/src/main/resources/lib/doudian-sdk-java-1.1.0-20221103183419.jar</systemPath>
         </dependency>
 
+        <!-- imgscalr 高性能的 Java 图像处理库，用于对图像进行缩放、裁剪、旋转和调整大小。它的性能较好，适用于处理大量图片。 -->
+        <dependency>
+            <groupId>org.imgscalr</groupId>
+            <artifactId>imgscalr-lib</artifactId>
+            <version>4.2</version>
+        </dependency>
+
+        <!-- Thumbnailator 是Google开源的优秀图片处理的第三方Java类库。-->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
