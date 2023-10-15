@@ -2,6 +2,8 @@ package com.coy.gupaoedu.study.spring.image;
 
 import com.ck.platform.common.util.RandomUtil;
 import org.imgscalr.Scalr;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.util.StopWatch;
 
@@ -14,37 +16,38 @@ import java.io.IOException;
  * @author chenck
  * @date 2023/10/13 18:29
  */
-public class ImgscalrTest {
+public class ImgscalrTest extends BaseTest {
 
     public static final String path = "E:/tmp/img/avatar.jpg";
-    public static final String outPath = "E:/tmp/img/";
+    public static final String outPath = "E:/tmp/img/output1/";
+
 
     /**
      * 缩放
      */
     @Test
     public void resizeTest() throws IOException {
-        int targetWidth = 150;
-        int targetHeight = 150;
-
-        // 秒表
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
         // 源图片
         BufferedImage img = ImageIO.read(new File(path));
 
-        // 新图片，缩放到指定长宽
-        BufferedImage newImage = Scalr.resize(img, Scalr.Method.SPEED, targetWidth, targetHeight);
+        int targetWidth = 150;
+        int targetHeight = 150;
 
-        // 新图片，按比例缩放为长, 宽都不超过150的图片
-        // BufferedImage thumbnail = Scalr.resize(img, 150);
+        // 模拟：基于一张图片生成多张图片
+        // 生成10张，耗时0.8s左右
+        // 生成15张，耗时3.3s左右
+        for (int i = 0; i < 20; i++) {
+            targetWidth = targetWidth + i * 50;
+            targetHeight = targetHeight + i * 50;
+            // 新图片，缩放到指定长宽
+            BufferedImage newImage = Scalr.resize(img, Scalr.Method.SPEED, targetWidth, targetHeight);
+            writeImg(newImage, outPath);
+        }
 
-        writeImg(img, newImage, outPath);
+        img.flush();
 
-        stopWatch.stop();
-        System.out.println("执行时间=" + stopWatch.getTotalTimeSeconds() + "s");
     }
+
 
     /**
      * 旋转
@@ -54,7 +57,9 @@ public class ImgscalrTest {
         BufferedImage img = ImageIO.read(new File(path));
         BufferedImage newImage = Scalr.rotate(img, Scalr.Rotation.CW_90);
 
-        writeImg(img, newImage, outPath);
+        writeImg(newImage, outPath);
+
+        img.flush();
     }
 
     /**
@@ -63,22 +68,23 @@ public class ImgscalrTest {
     @Test
     public void cropTest() throws IOException {
         BufferedImage img = ImageIO.read(new File(path));
-        BufferedImage newImage = Scalr.crop(img, 50, 50, 400, 500);
+        BufferedImage newImage = Scalr.crop(img, 50, 50, 250, 245);
 
-        writeImg(img, newImage, outPath);
+        writeImg(newImage, outPath);
+
+        img.flush();
     }
 
     /**
      * 输出图片
      */
-    public void writeImg(BufferedImage img, BufferedImage newImage, String outPath) throws IOException {
+    public void writeImg(BufferedImage newImage, String outPath) throws IOException {
         String fileName = "avatar" + RandomUtil.genRandomNumber(3) + ".jpg";
         File thumbnailFile = new File(outPath + fileName);
 
         boolean write = ImageIO.write(newImage, "jpg", thumbnailFile);
-        System.out.println("输出图片=" + write + ", 文件名=" + fileName);
+        System.out.println("输出图片=" + write + ", 文件名=" + fileName + ", 线程名=" + Thread.currentThread().getName());
 
-        img.flush();
         newImage.flush();
     }
 }
