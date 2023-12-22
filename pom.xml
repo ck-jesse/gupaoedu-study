@@ -49,6 +49,7 @@
         <module>study-reactor</module>
         <module>study-openai</module>
         <module>study-metrics</module>
+        <module>study-kubernetes</module>
     </modules>
 
     <properties>
